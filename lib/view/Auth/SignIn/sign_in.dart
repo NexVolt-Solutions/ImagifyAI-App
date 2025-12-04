@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/CustomWidget/align_text.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Model/utils/Routes/routes_name.dart';
+import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SignIn extends StatefulWidget {
@@ -21,145 +22,126 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: double.infinity.h,
-        width: double.infinity.w,
-        color: Colors.black,
-        child: Stack(
-          children: [
-            Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
+      backgroundColor: AppColors.blackColor,
+      body: Scaffold(
+        backgroundColor: AppColors.blackColor,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(64),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
                 child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
               ),
-            ),
-            Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
-                child: Image.asset(
-                  AppAssets.genWallsLogo,
-                  height: 20.h,
-                  width: 120.w,
-                  fit: BoxFit.cover,
-                ),
+              Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+            ],
+          ),
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+            children: [
+              SizedBox(height: context.h(25)),
+              NormalText(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                titleText: "Sign In",
+                titleSize: context.text(20),
+                titleWeight: FontWeight.w600,
+                titleColor: AppColors.primeryColor,
+                titleAlign: TextAlign.center,
               ),
-            ),
-            Positioned.fill(
-              top: 70.h,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Text(
-                      'Sign In',
-                      style: GoogleFonts.poppins(
-                        color: AppColors.appMainColor,
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-
-                    SizedBox(height: 10.h),
-                    AlignText(
-                      text: 'Email',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16.sp,
-                    ),
-                    SizedBox(height: 10.h),
-                    CustomTextField(
-                      validatorType: "email",
-                      hintText: 'Enter your email',
-                      icon: Icon(Icons.email, color: Colors.grey),
-                    ),
-                    SizedBox(height: 10.h),
-                    AlignText(
-                      text: 'Create Password',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 16.sp,
-                    ),
-                    SizedBox(height: 10.h),
-                    CustomTextField(
-                      validatorType: "password",
-                      hintText: 'Create your password',
-                      icon: Icon(Icons.lock, color: Colors.grey),
-                    ),
-                    SizedBox(height: 10.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w),
-                      child: Row(
-                        children: [
-                          Checkbox(
-                            value: isChecked,
-
-                            checkColor: Colors.green,
-
-                            side: BorderSide(color: Colors.white, width: 1),
-
-                            fillColor: WidgetStateProperty.resolveWith<Color>((
-                              states,
-                            ) {
-                              return Colors.black;
-                            }),
-
-                            onChanged: (value) {
-                              setState(() {
-                                isChecked = value;
-                              });
-                            },
-                          ),
-                          Text(
-                            'Remember me',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(width: 52.w),
-                          InkWell(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                RoutesName.ForgotScreen,
-                              );
-                            },
-                            child: Text(
-                              'Forgot Password?',
-                              style: GoogleFonts.poppins(
-                                color: AppColors.appMainColor,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 300.h),
-                    Center(
-                      child: CustomButton(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            RoutesName.BottomNavScreen,
-                          );
+              SizedBox(height: context.h(11)),
+              CustomTextField(
+                prefixIcon: Icon(Icons.email),
+                validatorType: "email",
+                hintText: 'Enter your email',
+                hintStyle: TextStyle(
+                  color: AppColors.textFieldSubTitleColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: context.text(12),
+                ),
+                label: "Email",
+                enabledBorderColor: AppColors.textFieldIconColor,
+              ),
+              SizedBox(height: context.h(16)),
+              CustomTextField(
+                prefixIcon: Icon(Icons.lock),
+                validatorType: "password",
+                hintText: 'create your password',
+                hintStyle: TextStyle(
+                  color: AppColors.textFieldSubTitleColor,
+                  fontWeight: FontWeight.w500,
+                  fontSize: context.text(12),
+                ),
+                label: "Password",
+                enabledBorderColor: AppColors.textFieldIconColor,
+              ),
+              SizedBox(height: context.h(24)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: isChecked,
+                        checkColor: AppColors.greenColor,
+                        side: BorderSide(color: AppColors.whiteColor),
+                        fillColor: WidgetStateProperty.resolveWith<Color>((
+                          states,
+                        ) {
+                          return AppColors.blackColor;
+                        }),
+                        onChanged: (value) {
+                          setState(() {
+                            isChecked = value;
+                          });
                         },
-                        height: 48.h,
-                        width: 350.w,
-                        text: 'Login',
-                        icon: null,
+                      ),
+                      Text(
+                        'Remember me',
+                        style: GoogleFonts.poppins(
+                          color: Colors.white,
+                          fontSize: context.text(14),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        RoutesName.ConfirmEmailScreen,
+                      );
+                    },
+                    child: Text(
+                      'Forgot Password?',
+                      style: GoogleFonts.poppins(
+                        color: AppColors.primeryColor,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    SizedBox(height: 20.h),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
+
+              SizedBox(height: context.h(333)),
+              CustomButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, RoutesName.BottomNavScreen);
+                },
+                height: context.h(48),
+                width: context.w(350),
+                gradient: AppColors.gradient,
+
+                text: 'Register',
+                iconWidth: null,
+                iconHeight: null,
+                icon: null,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -8,14 +8,15 @@ import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 
-class Verification extends StatefulWidget {
-  const Verification({super.key});
+class ForgotVerificationScreen extends StatefulWidget {
+  const ForgotVerificationScreen({super.key});
 
   @override
-  State<Verification> createState() => _VerificationState();
+  State<ForgotVerificationScreen> createState() =>
+      _ForgotVerificationScreenState();
 }
 
-class _VerificationState extends State<Verification> {
+class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     final defaultPinTheme = PinTheme(
@@ -53,7 +54,7 @@ class _VerificationState extends State<Verification> {
             SizedBox(height: context.h(60)),
             NormalText(
               crossAxisAlignment: CrossAxisAlignment.center,
-              titleText: "Verification",
+              titleText: "for Verification",
               titleSize: context.text(20),
               titleWeight: FontWeight.w600,
               titleColor: AppColors.primeryColor,
@@ -122,11 +123,10 @@ class _VerificationState extends State<Verification> {
             SizedBox(height: context.h(257)),
             CustomButton(
               onPressed: () {
-                Navigator.pushNamed(context, RoutesName.SignInScreen);
+                Navigator.pushNamed(context, RoutesName.AccountCreatedScreen);
               },
               height: context.h(48),
               width: context.w(350),
-
               gradient: AppColors.gradient,
               text: 'Verify',
               iconWidth: null,

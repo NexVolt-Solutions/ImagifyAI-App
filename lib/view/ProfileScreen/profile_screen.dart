@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/custom_row.dart';
-import 'package:genwalls/Model/utils/Routes/routes_name.dart';
-import 'package:genwalls/view/ProfileScreen/widget/contact_us.dart';
-import 'package:genwalls/view/ProfileScreen/widget/privacy_policy.dart';
-import 'package:genwalls/view/ProfileScreen/widget/term_of_use.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/CustomWidget/profile_image.dart';
+import 'package:genwalls/viewModel/profile_screen_view_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,153 +15,119 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final profileScreenViewModel = ProfileScreenViewModel();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: double.infinity.h,
-        width: double.infinity.w,
-        color: Colors.black,
+      backgroundColor: AppColors.blackColor,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(64),
         child: Stack(
+          alignment: Alignment.center,
           children: [
             Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
-                child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+              child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+            ),
+            Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+          children: [
+            SizedBox(height: context.h(20)),
+            Center(
+              child: ProfileImage(
+                imagePath: AppAssets.conIcon,
+                height: context.h(100),
+                width: context.h(100),
+                fit: BoxFit.cover,
               ),
             ),
-            Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
-                child: Image.asset(
-                  AppAssets.genWallsLogo,
-                  height: 20.h,
-                  width: 120.w,
-                  fit: BoxFit.cover,
-                ),
-              ),
+            SizedBox(height: context.h(12)),
+            NormalText(
+              titleText: "M.Shehzad",
+              titleSize: context.text(16),
+              titleWeight: FontWeight.w500,
+              titleColor: AppColors.primeryColor,
+              titleAlign: TextAlign.center,
+              subText: "Khan@gmail.com",
+              subSize: context.text(12),
+              subColor: AppColors.whiteColor,
+              subWeight: FontWeight.w500,
+              subAlign: TextAlign.center,
             ),
-            Positioned.fill(
-              top: 70.h,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircleAvatar(radius: 50.r, backgroundColor: Colors.white),
-                    SizedBox(height: 10.h),
-                    Text(
-                      'John Aley',
-                      style: GoogleFonts.poppins(
-                        color: Colors.purple,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
+            SizedBox(height: context.h(20)),
+            ListView.builder(
+              itemCount: profileScreenViewModel.profileData.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final item = profileScreenViewModel.profileData[index];
+                return ListTile(
+                  onTap: () => profileScreenViewModel.onTapFun(context, index),
+                  contentPadding: EdgeInsets.zero,
+                  leading: item['leading'] != null
+                      ? Image.asset(
+                          item['leading'],
+                          height: 26,
+                          width: 26,
+                          fit: BoxFit.contain,
+                        )
+                      : const SizedBox.shrink(),
+                  title: Text(
+                    item['title'] ?? '',
+                    style: TextStyle(
+                      color: AppColors.whiteColor,
+                      fontSize: context.text(14),
+                      fontWeight: FontWeight.w500,
                     ),
-                    SizedBox(height: 5.h),
-
-                    Text(
-                      'Khan@gmail.com',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  ),
+                  subtitle: Text(
+                    item['subtitle'] ?? '',
+                    style: TextStyle(
+                      color: AppColors.subTitleColor,
+                      fontSize: context.text(13),
+                      fontWeight: FontWeight.w400,
                     ),
-                    SizedBox(height: 10.h),
-                    CustomRow(
-                      text1: 'Theme',
-                      text2: 'Light Dark',
-                      iconImag1: AppAssets.themeIcon,
-                      showSwitch: true,
-                      rightIcon: false,
-                    ),
-                    SizedBox(height: 10.h),
-                    CustomRow(
-                      text1: 'Notifcation',
-                      text2: 'Push Notifcation enabled',
-                      iconImag1: AppAssets.shieldIcon,
-                      showSwitch: true,
-                      rightIcon: false,
-                    ),
-                    SizedBox(height: 10.h),
-                    CustomRow(
-                      OnPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PrivacyPolicy(),
-                          ),
-                        );
-                      },
-                      text1: 'Privacy Policy',
-                      text2: 'Read how we collect and protect your data',
-                      iconImag1: AppAssets.bellIcon,
-                      showSwitch: false,
-                      rightIcon: true,
-                    ),
-                    SizedBox(height: 10.h),
-                    CustomRow(
-                      OnPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => TermOfUse()),
-                        );
-                      },
-                      text1: 'Terms of Service',
-                      text2: 'Read our terms of services',
-                      iconImag1: AppAssets.termIcon,
-                      showSwitch: false,
-                      rightIcon: true,
-                    ),
-                    SizedBox(height: 10.h),
-                    CustomRow(
-                      OnPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ContactUs(),
-                          ),
-                        );
-                      },
-                      text1: 'Contact Us',
-                      text2: 'Contact us from your phone',
-                      iconImag1: AppAssets.contactIcon,
-                      showSwitch: false,
-                      rightIcon: true,
-                    ),
-                    SizedBox(height: 20.h),
-                    Center(
-                      child: CustomButton(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            RoutesName.BottomNavScreen,
-                          );
-                        },
-                        height: 48.h,
-                        width: 350.w,
-                        text: 'Sign Out',
-                        icon: null,
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                  ],
-                ),
-              ),
+                  ),
+                  trailing: item['trailingType'] == 'switch'
+                      ? Switch(
+                          inactiveThumbColor: AppColors.textFieldIconColor,
+                          activeTrackColor: AppColors.whiteColor,
+                          activeThumbColor: AppColors.primeryColor,
+                          value: item['switchValue'] ?? false,
+                          onChanged: (val) {
+                            setState(() {
+                              item['switchValue'] = val;
+                            });
+                          },
+                          activeColor: Colors.white,
+                        )
+                      : const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                );
+              },
             ),
-            Positioned(
-              top: 30.h,
-              left: 20.w,
-              child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Icon(Icons.arrow_back_ios, color: Colors.white),
-              ),
+            SizedBox(height: context.h(20)),
+            CustomButton(
+              onPressed: () {
+                // Navigator.pushNamed(
+                //   context,
+                //   RoutesName.,
+                // );
+              },
+              height: context.h(48),
+              width: context.w(350),
+              text: 'Sign out',
+              iconWidth: null,
+              iconHeight: null,
+              icon: null,
             ),
           ],
         ),

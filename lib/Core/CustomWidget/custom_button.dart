@@ -1,49 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomButton extends StatelessWidget {
-  final double height;
-  final double width;
-  final String text;
+  final double? height;
+  final double? width;
+  final double? iconHeight;
+  final double? iconWidth;
+  final String? text;
   final VoidCallback? onPressed;
   final String? icon;
+
+  final Color? borderColor;
+  final Gradient? gradient;
+
   const CustomButton({
     super.key,
-    required this.height,
-    required this.width,
-    required this.text,
+    this.height,
+    this.width,
+    this.text,
     this.onPressed,
-    required this.icon,
+    this.icon,
+    this.borderColor,
+    this.gradient,
+    this.iconHeight,
+    this.iconWidth,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPressed,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Container(
-          height: height,
-          width: width,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF9F56FE), Color(0xFFD5B4FF)],
-              begin: Alignment.topLeft,
-              end: Alignment.topRight,
-            ),
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-          child: Center(
-            child: Text(
-              text,
+      child: Container(
+        height: height,
+        width: width,
+        decoration: BoxDecoration(
+          gradient: gradient,
+          border: Border.all(color: borderColor ?? AppColors.blackColor),
+          borderRadius: BorderRadius.circular(context.radius(8)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Image.asset(
+                icon!,
+                height: iconHeight ?? context.h(20),
+                width: iconWidth ?? context.w(20),
+                color: AppColors.whiteColor,
+                fit: BoxFit.cover,
+              ),
+              SizedBox(width: context.w(5)),
+            ],
+            Text(
+              text ?? "",
               style: GoogleFonts.poppins(
                 color: Colors.white,
-                fontSize: 16.sp,
+                fontSize: context.text(16),
                 fontWeight: FontWeight.w500,
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PasswordText extends StatelessWidget {
@@ -17,16 +18,19 @@ class PasswordText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.0.w, vertical: 3.h),
+      padding: EdgeInsets.symmetric(
+        horizontal: context.h(20),
+        vertical: context.w(4),
+      ),
       child: Row(
         children: [
-          Icon(icon, color: iconColor, size: 18.sp),
-          SizedBox(width: 10.w),
+          Icon(icon, color: iconColor, size: context.text(18)),
+          SizedBox(width: context.w(8)),
           Text(
             text,
             style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 10.sp,
+              color: AppColors.whiteColor,
+              fontSize: context.text(10),
               fontWeight: FontWeight.w400,
             ),
           ),

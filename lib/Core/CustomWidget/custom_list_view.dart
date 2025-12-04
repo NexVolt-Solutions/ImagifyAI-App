@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 
 class CustomListView extends StatelessWidget {
   final image;
@@ -8,25 +9,24 @@ class CustomListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.w),
+      padding: EdgeInsets.symmetric(horizontal: context.h(10)),
       child: SizedBox(
-        height: 130.h,
+        height: context.h(131),
         child: ListView.builder(
-          padding: EdgeInsets.zero,
           scrollDirection: Axis.horizontal,
           itemCount: 9,
           itemBuilder: (context, index) {
             return Container(
-              height: 130.h,
-              width: 110.w,
-              margin: EdgeInsets.symmetric(horizontal: 10.w),
+              height: context.h(131),
+              width: context.w(100),
+              margin: context.padSym(h: 10),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: Colors.white, width: 2),
+                borderRadius: BorderRadius.circular(context.radius(8)),
+                border: Border.all(color: AppColors.whiteColor),
               ),
               clipBehavior: Clip.hardEdge,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(context.radius(8)),
                 child: Image.asset(image, fit: BoxFit.contain),
               ),
             );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart'; // path sahi laga lena
 
@@ -33,14 +34,14 @@ class SizeContiner extends StatelessWidget {
         height: height1,
         width: width1,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.r),
+          borderRadius: BorderRadius.circular(context.radius(8)),
           border: Border.all(
-            color: isSelected ? AppColors.appMainColor : Colors.white,
-            width: 1.5,
+            color: isSelected ? AppColors.primeryColor : AppColors.whiteColor,
+            width: context.w(1.5),
           ),
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          padding: context.padSym(h: 12),
           child: Center(
             child: Row(
               children: [
@@ -49,7 +50,9 @@ class SizeContiner extends StatelessWidget {
                   width: width2,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: isSelected ? AppColors.appMainColor : Colors.white,
+                      color: isSelected
+                          ? AppColors.primeryColor
+                          : AppColors.whiteColor,
                       width: 1.5,
                     ),
                   ),
@@ -57,19 +60,19 @@ class SizeContiner extends StatelessWidget {
                     child: Text(
                       text1,
                       style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 10.sp,
+                        color: AppColors.whiteColor,
+                        fontSize: context.text(10),
                         fontWeight: FontWeight.w400,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: context.w(8)),
                 Text(
                   text2,
                   style: GoogleFonts.poppins(
                     color: Colors.white,
-                    fontSize: 12.sp,
+                    fontSize: context.text(12),
                     fontWeight: FontWeight.w500,
                   ),
                 ),

@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Model/utils/Routes/routes_name.dart';
+import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 
 class HomeViewModel extends ChangeNotifier {
   int selectedIndex = 0;
@@ -8,7 +8,7 @@ class HomeViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> bottomData = [
     {'name': 'Home', 'image': AppAssets.homeIcon},
     {'name': 'Create Image', 'image': AppAssets.imageIcon},
-    {'name': 'My Profile', 'image': AppAssets.profileIcon},
+    {'name': 'My Profile', 'image': AppAssets.bottomProfileIcon},
   ];
 
   void onTapFun(BuildContext context, int index) {

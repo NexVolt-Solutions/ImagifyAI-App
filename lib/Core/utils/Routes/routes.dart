@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Model/utils/Routes/routes_name.dart';
+import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:genwalls/view/Auth/ForgotScreen/Widget/AccountCreated/accound_created.dart';
+import 'package:genwalls/view/Auth/ForgotScreen/Widget/ConfirmEmail/confirm_email.dart';
+import 'package:genwalls/view/Auth/ForgotScreen/Widget/Verification/forgot_verification_screen.dart';
 import 'package:genwalls/view/Auth/ForgotScreen/forgot_screen.dart';
 import 'package:genwalls/view/Auth/SignIn/sign_in.dart';
 import 'package:genwalls/view/Auth/SignUp/sign_up.dart';
@@ -7,9 +10,12 @@ import 'package:genwalls/view/BottomNavigation/bottom_nav_screen.dart';
 import 'package:genwalls/view/Home/home.dart';
 import 'package:genwalls/view/ImageCreated/image_created_screen.dart';
 import 'package:genwalls/view/ImageGenerate/image_generate_screen.dart';
-import 'package:genwalls/view/OnBoardingScreen/indicator_Screen.dart';
 import 'package:genwalls/view/OnBoardingScreen/on_boarding_screen.dart';
 import 'package:genwalls/view/ProfileScreen/profile_screen.dart';
+import 'package:genwalls/view/ProfileScreen/widget/contact_us.dart';
+import 'package:genwalls/view/ProfileScreen/widget/edit_profile.dart';
+import 'package:genwalls/view/ProfileScreen/widget/privacy_policy.dart';
+import 'package:genwalls/view/ProfileScreen/widget/term_of_use.dart';
 import 'package:genwalls/view/SplahScrren/splash_screen.dart';
 import 'package:genwalls/view/Verification/verification.dart';
 
@@ -20,11 +26,6 @@ class Routes {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => const SplashScreen(),
-        );
-      case RoutesName.IndicatorScreen:
-        return MaterialPageRoute(
-          settings: settings,
-          builder: (_) => const IndicatorScreen(),
         );
       case RoutesName.OnboardingScreen:
         return MaterialPageRoute(
@@ -62,12 +63,47 @@ class Routes {
           settings: settings,
           builder: (_) => ProfileScreen(),
         );
+
       case RoutesName.BottomNavScreen:
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => BottomNavScreen(),
         );
-
+      case RoutesName.EditScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => EditProfile(),
+        );
+      case RoutesName.ConfirmEmailScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ConfirmEmail(),
+        );
+      case RoutesName.PrivicyScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => PrivacyPolicy(),
+        );
+      case RoutesName.TermScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => TermOfUse(),
+        );
+      case RoutesName.ContactScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ContactUs(),
+        );
+      case RoutesName.ForgotVerificationScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => ForgotVerificationScreen(),
+        );
+      case RoutesName.AccountCreatedScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => AccoundCreated(),
+        );
       default:
         return MaterialPageRoute(
           settings: settings,

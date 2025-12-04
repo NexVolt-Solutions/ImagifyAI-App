@@ -1,11 +1,13 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_list_view.dart';
+import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
-import 'package:genwalls/Model/viewModel/bottom_nav_screen_view_model.dart';
+import 'package:genwalls/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -20,186 +22,163 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        height: double.infinity.h,
-        width: double.infinity.w,
-        color: Colors.black,
-        child: Stack(
-          children: [
-            Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
+      backgroundColor: AppColors.blackColor,
+      body: Scaffold(
+        backgroundColor: AppColors.blackColor,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(64),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Positioned(
                 child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
               ),
-            ),
-            Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
-                child: Image.asset(
-                  AppAssets.genWallsLogo,
-                  height: 20.h,
-                  width: 120.w,
-                  fit: BoxFit.cover,
+              Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+            ],
+          ),
+        ),
+        body: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+            children: [
+              SizedBox(height: context.h(24)),
+              ListTile(
+                leading: Container(
+                  height: context.h(50),
+                  width: context.h(50),
+                  decoration: const BoxDecoration(
+                    color: Colors.amber,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                title: Text(
+                  'Hello, Amna 👋',
+                  style: GoogleFonts.poppins(
+                    color: AppColors.whiteColor,
+                    fontSize: context.text(20),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  'Ready to build your perfect wallpaper?',
+                  style: GoogleFonts.poppins(
+                    color: AppColors.textFieldIconColor,
+                    fontSize: context.text(14),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
-            ),
-            Positioned.fill(
-              top: 70.h,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 30.w,
-                          vertical: 10.h,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Muhammad,Shehzad 👋',
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Text(
-                              'Ready to build your perfect wallpaper?',
-                              style: GoogleFonts.poppins(
-                                color: Color(0xFFA2A2A2),
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+              SizedBox(height: context.h(24)),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                child: CustomTextField(
+                  validatorType: "name",
+                  hintText: "Search Wallpapers... ",
+                  borderRadius: context.radius(40),
+                  prefixIcon: Icon(Icons.search),
+                  iconColor: AppColors.whiteColor,
+                ),
+              ),
+              SizedBox(height: context.h(19)),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                child: DottedBorder(
+                  options: RoundedRectDottedBorderOptions(
+                    dashPattern: [10, 5],
+                    strokeWidth: context.w(2),
+                    radius: Radius.circular(context.radius(12)),
+                    color: AppColors.whiteColor,
+                  ),
+                  child: Container(
+                    height: context.h(318),
+                    width: context.w(double.infinity),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(context.radius(12)),
                     ),
-                    SizedBox(height: 10.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.0.w),
-                      child: TextFormField(
-                        keyboardType: TextInputType.text,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.search, color: Colors.white54),
-                          hintText: 'Search Wallpapers...',
-                          filled: true,
-                          fillColor: Colors.black,
-                          hintStyle: const TextStyle(color: Colors.white54),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                              width: 2,
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                      children: [
+                        SizedBox(height: context.h(20)),
+                        Image.asset(
+                          AppAssets.dotConIcon,
+                          height: context.h(60),
+                          width: context.w(60),
+                          fit: BoxFit.contain,
+                        ),
+                        SizedBox(height: context.h(12)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.h(20),
+                          ),
+                          child: Text(
+                            'Create Your Perfect Wallpaper',
+                            style: GoogleFonts.poppins(
+                              color: AppColors.whiteColor,
+                              fontSize: context.text(20),
+                              fontWeight: FontWeight.w600,
                             ),
-                            borderRadius: BorderRadius.circular(40.r),
+                            textAlign: TextAlign.center,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                              width: 2,
+                        ),
+                        SizedBox(height: context.h(12)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.h(8),
+                          ),
+                          child: Text(
+                            'Use AI to generate stunning wallpapers tailored to your style. From abstract art to breathtaking landscapes.',
+                            style: GoogleFonts.poppins(
+                              color: AppColors.whiteColor,
+                              fontSize: context.text(14),
+                              fontWeight: FontWeight.w500,
                             ),
-                            borderRadius: BorderRadius.circular(40.r),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 20.h,
-                      ),
-                      child: DottedBorder(
-                        options: RoundedRectDottedBorderOptions(
-                          dashPattern: [10, 5],
-                          strokeWidth: 2,
-                          radius: Radius.circular(16),
-                          color: Colors.white,
-                        ),
-                        child: Container(
-                          height: 300.h,
-                          width: 350.w,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                AppAssets.dotConIcon,
-                                height: 60.h,
-                                width: 60.w,
-                                fit: BoxFit.contain,
-                              ),
-                              SizedBox(height: 10.h),
-                              Text(
-                                'Create Your Perfect\nWallpaper',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: 10.h),
-                              Text(
-                                'Use AI to generate stunning wallpapers tailored to your style. From abstract art to breathtaking landscapes.',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              SizedBox(height: 10.h),
-                              CustomButton(
-                                onPressed: () {
-                                  final bottomNavProvider =
-                                      Provider.of<BottomNavScreenViewModel>(
-                                        context,
-                                        listen: false,
-                                      );
+                        SizedBox(height: context.h(13)),
+                        Align(
+                          alignment: Alignment.center,
+                          child: CustomButton(
+                            onPressed: () {
+                              final bottomNavProvider =
+                                  Provider.of<BottomNavScreenViewModel>(
+                                    context,
+                                    listen: false,
+                                  );
 
-                                  bottomNavProvider.currentIndex = 1;
-                                },
-                                height: 47.h,
-                                width: 212.w,
-                                text: 'Generate wallpaper',
-                                icon: null,
-                              ),
-                            ],
+                              bottomNavProvider.currentIndex = 1;
+                            },
+                            height: context.h(47),
+                            width: context.w(212),
+                            iconWidth: null,
+                            iconHeight: null,
+                            icon: null,
+                            gradient: AppColors.gradient,
+                            text: 'Generate wallpaper',
                           ),
                         ),
-                      ),
+
+                        SizedBox(height: context.h(13)),
+                      ],
                     ),
-                    HomeAlign(text: 'Trending'),
-                    SizedBox(height: 10.h),
-                    CustomListView(image: AppAssets.conIcon),
-                    SizedBox(height: 10.h),
-                    HomeAlign(text: 'Nature'),
-                    SizedBox(height: 10.h),
-                    CustomListView(image: AppAssets.conIcon),
-                    SizedBox(height: 10.h),
-                    HomeAlign(text: '3D Render'),
-                    SizedBox(height: 10.h),
-                    CustomListView(image: AppAssets.conIcon),
-                    SizedBox(height: 100.h),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: context.h(20)),
+              HomeAlign(text: 'Trending'),
+              SizedBox(height: context.h(12)),
+              CustomListView(image: AppAssets.conIcon),
+              SizedBox(height: context.h(20)),
+              HomeAlign(text: 'Nature'),
+              SizedBox(height: context.h(12)),
+              CustomListView(image: AppAssets.conIcon),
+              SizedBox(height: context.h(20)),
+              HomeAlign(text: '3D Render'),
+              SizedBox(height: context.h(12)),
+              CustomListView(image: AppAssets.conIcon),
+              SizedBox(height: context.h(100)),
+            ],
+          ),
         ),
       ),
     );

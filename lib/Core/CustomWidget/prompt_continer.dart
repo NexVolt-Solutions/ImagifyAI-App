@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PromptContiner extends StatelessWidget {
@@ -17,31 +18,29 @@ class PromptContiner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.0.w, vertical: 4.h),
-        child: GestureDetector(
-          onTap: onTap,
-          child: Container(
-            height: 23.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: isSelected ? AppColors.appMainColor : Colors.white,
-                width: 1.5,
-              ),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: context.h(4)),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: context.h(23),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(context.radius(8)),
+            border: Border.all(
+              color: isSelected ? AppColors.primeryColor : AppColors.whiteColor,
+              width: 1.5,
             ),
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-            child: Text(
-              text,
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w400,
-              ),
-              textAlign: TextAlign.center,
+          ),
+          padding: context.padSym(h: 12, v: 4),
+
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              color: AppColors.whiteColor,
+              fontSize: context.text(10),
+              fontWeight: FontWeight.w400,
             ),
+            textAlign: TextAlign.center,
           ),
         ),
       ),

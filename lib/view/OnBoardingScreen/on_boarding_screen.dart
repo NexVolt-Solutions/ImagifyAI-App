@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Model/utils/Routes/routes_name.dart';
-import 'package:genwalls/Model/viewModel/on_boarding_screen_view_model.dart';
+import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:genwalls/viewModel/on_boarding_screen_view_model.dart';
 import 'package:provider/provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -16,107 +18,154 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
-    final onBoardingViewModel = Provider.of<OnBoardingScreenViewModel>(context);
-    final text = onBoardingViewModel.text[onBoardingViewModel.currentPage];
+    final viewModel = Provider.of<OnBoardingScreenViewModel>(context);
+
+    final currentData = viewModel.text[viewModel.currentPage];
 
     return Scaffold(
-      body: Container(
-        height: double.infinity.h,
-        width: double.infinity.w,
-        color: Colors.black,
+      backgroundColor: AppColors.blackColor,
+      bottomNavigationBar: Padding(
+        padding: EdgeInsets.only(
+          bottom: context.h(43),
+          left: context.w(20),
+          right: context.w(20),
+        ),
+        child: CustomButton(
+          height: context.h(45),
+          width: context.w(300),
+          gradient: AppColors.gradient,
+          text: currentData['buttonText'],
+          iconWidth: null,
+          iconHeight: null,
+          icon: null,
+          onPressed: () {
+            if (viewModel.currentPage < viewModel.text.length - 1) {
+              viewModel.mainController.nextPage(
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeInOut,
+              );
+            } else {
+              Navigator.pushReplacementNamed(context, RoutesName.SignUpScreen);
+            }
+          },
+        ),
+      ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(64),
         child: Stack(
+          alignment: Alignment.center,
           children: [
+            Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+            Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
             Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
-                child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
-              ),
-            ),
-            Positioned(
-              top: 30.h,
-              left: 0.w,
-              right: 0.w,
-              child: Center(
-                child: Image.asset(
-                  AppAssets.genWallsLogo,
-                  height: 20.h,
-                  width: 120.w,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 10.h,
-              right: 2.w,
-              child: InkWell(
+              right: 20,
+              top: 20,
+              child: GestureDetector(
                 onTap: () {
                   Navigator.pushReplacementNamed(
                     context,
                     RoutesName.SignUpScreen,
                   );
                 },
-                child: Padding(
-                  padding: EdgeInsets.only(right: 30.0.w, top: 20.0.h),
-                  child: Text(
-                    'Skip',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+                child: NormalText(
+                  titleText: "Skip",
+                  titleSize: context.text(16),
+                  titleWeight: FontWeight.w500,
+                  titleColor: AppColors.whiteColor,
                 ),
               ),
             ),
-            Positioned(
-              right: 0.w,
-              left: 0.w,
-              bottom: 170.h,
-              child: Center(
-                child: Text(
-                  text['title'],
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.sp,
-                    fontStyle: FontStyle.normal,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+          ],
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(
+              height: context.h(520),
+              child: PageView.builder(
+                controller: viewModel.mainController,
+                physics: const BouncingScrollPhysics(),
+                onPageChanged: (index) {
+                  viewModel.updatePage(index);
+                  if (viewModel.textController.hasClients) {
+                    viewModel.textController.jumpToPage(index);
+                  }
+                },
+
+                itemCount: viewModel.text.length,
+                itemBuilder: (context, index) {
+                  final data = viewModel.text[index];
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: context.w(20)),
+                    child: Image.asset(data['image'], fit: BoxFit.cover),
+                  );
+                },
               ),
             ),
-            Positioned(
-              right: 0.w,
-              left: 0.w,
-              bottom: 130.h,
-              child: Center(
-                child: Text(
-                  text['subtitle'],
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13.sp,
-                    fontStyle: FontStyle.normal,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0.w,
-              left: 0.w,
-              bottom: 50.h,
-              child: Center(
-                child: CustomButton(
-                  onPressed: () {
-                    onBoardingViewModel.onNextPressed(context);
-                  },
-                  height: 40.h,
-                  width: 300.w,
-                  text: text['buttonText'],
-                  icon: null,
-                ),
+            SizedBox(height: context.h(40)),
+            Expanded(
+              child: PageView.builder(
+                controller: viewModel.mainController,
+                physics: const BouncingScrollPhysics(),
+                onPageChanged: (index) {
+                  viewModel.updatePage(index);
+                  if (viewModel.textController.hasClients) {
+                    viewModel.textController.jumpToPage(index);
+                  }
+                },
+
+                itemCount: viewModel.text.length,
+                itemBuilder: (context, index) {
+                  final data = viewModel.text[index];
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['title'],
+                        style: TextStyle(
+                          color: AppColors.whiteColor,
+                          fontSize: context.text(22),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: context.h(10)),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.w(25),
+                        ),
+                        child: Text(
+                          data['subtitle'],
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: context.text(16),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(height: context.h(25)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(viewModel.text.length, (
+                          dotIndex,
+                        ) {
+                          return Container(
+                            margin: EdgeInsets.symmetric(horizontal: 4),
+                            width: viewModel.currentPage == dotIndex ? 12 : 8,
+                            height: viewModel.currentPage == dotIndex ? 12 : 8,
+                            decoration: BoxDecoration(
+                              color: viewModel.currentPage == dotIndex
+                                  ? AppColors.whiteColor
+                                  : Colors.white54,
+                              shape: BoxShape.circle,
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],

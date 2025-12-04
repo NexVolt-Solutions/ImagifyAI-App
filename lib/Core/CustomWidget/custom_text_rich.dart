@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Model/utils/Routes/routes_name.dart';
+import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomTextRich extends StatelessWidget {
@@ -38,7 +38,7 @@ class CustomTextRich extends StatelessWidget {
               TextSpan(
                 text: text2,
                 style: GoogleFonts.poppins(
-                  color: AppColors.appMainColor,
+                  color: AppColors.primeryColor,
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
                 ),

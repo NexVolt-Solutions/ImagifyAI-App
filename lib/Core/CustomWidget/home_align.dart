@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeAlign extends StatelessWidget {
@@ -8,26 +9,23 @@ class HomeAlign extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            text!,
-            style: GoogleFonts.poppins(
-              color: Colors.white,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w500,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          text!,
+          style: GoogleFonts.poppins(
+            color: AppColors.whiteColor,
+            fontSize: context.text(16),
+            fontWeight: FontWeight.w500,
           ),
-          Icon(
-            Icons.arrow_forward_ios_outlined,
-            color: Colors.white,
-            size: 20.sp,
-          ),
-        ],
-      ),
+        ),
+        Icon(
+          Icons.arrow_forward_ios_outlined,
+          color: AppColors.whiteColor,
+          size: context.h(15),
+        ),
+      ],
     );
   }
 }
