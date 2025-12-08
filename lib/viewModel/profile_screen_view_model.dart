@@ -12,6 +12,13 @@ class ProfileScreenViewModel extends ChangeNotifier {
       'switchValue': false,
     },
     {
+      'leading': AppAssets.profileIcon,
+      'title': 'Library',
+      'subtitle': 'Edit Profile',
+      'trailingType': 'arrow',
+      'switchValue': false,
+    },
+    {
       'leading': AppAssets.themeIcon,
       'title': 'Theme',
       'subtitle': 'Light Mode',
@@ -51,11 +58,13 @@ class ProfileScreenViewModel extends ChangeNotifier {
   void onTapFun(BuildContext context, int index) {
     if (index == 0) {
       Navigator.pushNamed(context, RoutesName.EditScreen);
-    } else if (index == 3) {
-      Navigator.pushNamed(context, RoutesName.PrivicyScreen);
+    } else if (index == 1) {
+      Navigator.pushNamed(context, RoutesName.LibraryScreen);
     } else if (index == 4) {
-      Navigator.pushNamed(context, RoutesName.TermScreen);
+      Navigator.pushNamed(context, RoutesName.PrivicyScreen);
     } else if (index == 5) {
+      Navigator.pushNamed(context, RoutesName.TermScreen);
+    } else if (index == 6) {
       Navigator.pushNamed(context, RoutesName.ContactScreen);
     }
   }

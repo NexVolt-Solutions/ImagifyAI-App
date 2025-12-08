@@ -8,6 +8,7 @@ class CustomButton extends StatelessWidget {
   final double? width;
   final double? iconHeight;
   final double? iconWidth;
+  final double? fontSize;
   final String? text;
   final VoidCallback? onPressed;
   final String? icon;
@@ -26,6 +27,7 @@ class CustomButton extends StatelessWidget {
     this.gradient,
     this.iconHeight,
     this.iconWidth,
+    this.fontSize,
   });
 
   @override
@@ -56,8 +58,8 @@ class CustomButton extends StatelessWidget {
             Text(
               text ?? "",
               style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: context.text(16),
+                color: AppColors.whiteColor,
+                fontSize: fontSize ?? context.text(16),
                 fontWeight: FontWeight.w500,
               ),
             ),

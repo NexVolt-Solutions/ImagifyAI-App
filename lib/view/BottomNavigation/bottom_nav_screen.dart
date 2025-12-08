@@ -17,22 +17,24 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     final bottomNavScreenViewModel = Provider.of<BottomNavScreenViewModel>(
       context,
     );
+
     return Scaffold(
       backgroundColor: AppColors.blackColor,
-      extendBody: true,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: bottomNavScreenViewModel
-                .screens[bottomNavScreenViewModel.currentIndex],
-          ),
-          Positioned(
-            bottom: context.h(47),
-            left: 0,
-            right: 0,
-            child: Center(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            /// MAIN SCREEN
+            bottomNavScreenViewModel.screens[bottomNavScreenViewModel
+                .currentIndex],
+
+            /// BOTTOM NAV BAR
+            Align(
+              alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.h(20),
+                  vertical: context.h(20),
+                ),
                 child: Container(
                   height: context.h(64),
                   width: context.w(350),
@@ -51,11 +53,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                       bottomNavScreenViewModel.bottomData.length,
                       (index) {
                         return InkWell(
-                          onTap: () {
-                            setState(() {
-                              bottomNavScreenViewModel.currentIndex = index;
-                            });
-                          },
+                          onTap: () =>
+                              bottomNavScreenViewModel.updateIndex(index),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -70,7 +69,6 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                                             .bottomData[index]['image'],
                                         height: context.h(18),
                                         width: context.w(18),
-                                        fit: BoxFit.cover,
                                       ),
                                     )
                                   : Image.asset(
@@ -78,38 +76,23 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                                           .bottomData[index]['image'],
                                       height: context.h(18),
                                       width: context.w(18),
-                                      fit: BoxFit.contain,
                                       color: AppColors.textFieldIconColor,
                                     ),
                               SizedBox(height: context.h(4)),
-                              bottomNavScreenViewModel.currentIndex == index
-                                  ? ShaderMask(
-                                      shaderCallback: (bounds) => AppColors
-                                          .gradient
-                                          .createShader(bounds),
-                                      blendMode: BlendMode.srcIn,
-                                      child: Text(
-                                        bottomNavScreenViewModel
-                                            .bottomData[index]['name'],
-                                        style: TextStyle(
-                                          fontFamily: 'Manrope',
-                                          color: Colors
-                                              .white, // important (masked)
-                                          fontSize: context.text(10),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    )
-                                  : Text(
-                                      bottomNavScreenViewModel
-                                          .bottomData[index]['name'],
-                                      style: TextStyle(
-                                        fontFamily: 'Manrope',
-                                        color: Colors.grey,
-                                        fontSize: context.text(10),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
+                              Text(
+                                bottomNavScreenViewModel
+                                    .bottomData[index]['name'],
+                                style: TextStyle(
+                                  fontFamily: 'Manrope',
+                                  color:
+                                      bottomNavScreenViewModel.currentIndex ==
+                                          index
+                                      ? Colors.white
+                                      : Colors.grey,
+                                  fontSize: context.text(10),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                         );
@@ -119,8 +102,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

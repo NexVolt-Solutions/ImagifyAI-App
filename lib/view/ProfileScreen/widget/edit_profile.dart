@@ -95,7 +95,7 @@ class _EditProfileState extends State<EditProfile> {
                       AppAssets.profileIcon,
                       height: context.h(38),
                       width: context.w(38),
-                      color: Colors.white,
+                      color: AppColors.whiteColor,
                     ),
                   ),
                   SizedBox(height: context.h(18)),
@@ -115,7 +115,7 @@ class _EditProfileState extends State<EditProfile> {
             SizedBox(height: context.h(20)),
             Container(
               padding: EdgeInsets.symmetric(vertical: context.w(20)),
-              height: 265,
+              height: context.h(265),
               decoration: BoxDecoration(
                 color: AppColors.containerColor,
                 borderRadius: BorderRadius.circular(context.radius(12)),

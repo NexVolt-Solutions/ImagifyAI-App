@@ -48,6 +48,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             SizedBox(height: context.h(12)),
             NormalText(
+              crossAxisAlignment: CrossAxisAlignment.center,
               titleText: "M.Shehzad",
               titleSize: context.text(16),
               titleWeight: FontWeight.w500,
@@ -72,8 +73,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   leading: item['leading'] != null
                       ? Image.asset(
                           item['leading'],
-                          height: 26,
-                          width: 26,
+                          height: context.h(26),
+                          width: context.w(26),
                           fit: BoxFit.contain,
                         )
                       : const SizedBox.shrink(),
@@ -124,6 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
               height: context.h(48),
               width: context.w(350),
+              gradient: AppColors.gradient,
               text: 'Sign out',
               iconWidth: null,
               iconHeight: null,

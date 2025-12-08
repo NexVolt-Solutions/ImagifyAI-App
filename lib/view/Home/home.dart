@@ -47,8 +47,12 @@ class _HomeState extends State<Home> {
                   height: context.h(50),
                   width: context.h(50),
                   decoration: const BoxDecoration(
-                    color: Colors.amber,
+                    color: AppColors.subTitleColor,
                     shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: AssetImage(AppAssets.conIcon),
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
                 title: Text(
@@ -146,13 +150,10 @@ class _HomeState extends State<Home> {
                                     listen: false,
                                   );
 
-                              bottomNavProvider.currentIndex = 1;
+                              bottomNavProvider.updateIndex(1);
                             },
                             height: context.h(47),
                             width: context.w(212),
-                            iconWidth: null,
-                            iconHeight: null,
-                            icon: null,
                             gradient: AppColors.gradient,
                             text: 'Generate wallpaper',
                           ),

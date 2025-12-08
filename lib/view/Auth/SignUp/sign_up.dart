@@ -104,10 +104,13 @@ class _SignUpState extends State<SignUp> {
               enabledBorderColor: AppColors.textFieldIconColor,
             ),
             SizedBox(height: context.h(20)),
-            AlignText(
-              text: 'Password must contain',
-              fontWeight: FontWeight.w500,
-              fontSize: context.text(16),
+            NormalText(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              titleText: "Password must contain",
+              titleSize: context.text(16),
+              titleWeight: FontWeight.w500,
+              titleColor: AppColors.whiteColor,
+              titleAlign: TextAlign.center,
             ),
             SizedBox(height: context.h(4)),
             Column(
@@ -140,13 +143,14 @@ class _SignUpState extends State<SignUp> {
                     endIndent: 10,
                   ),
                 ),
-                Text(
-                  'or Continue ',
-                  style: GoogleFonts.poppins(
-                    color: AppColors.primeryColor,
-                    fontSize: context.text(14),
-                    fontWeight: FontWeight.w500,
-                  ),
+
+                NormalText(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  titleText: "or Continue ",
+                  titleSize: context.text(14),
+                  titleWeight: FontWeight.w500,
+                  titleColor: AppColors.primeryColor,
+                  titleAlign: TextAlign.center,
                 ),
                 Expanded(
                   child: Divider(
@@ -178,7 +182,7 @@ class _SignUpState extends State<SignUp> {
                       height: context.h(23.94),
                       width: context.w(23.94),
                     ),
-                    SizedBox(width: context.w(0.8)),
+                    SizedBox(width: context.w(8)),
                     Text(
                       'Continue with Google',
                       style: GoogleFonts.poppins(

@@ -6,11 +6,10 @@ import 'package:genwalls/view/ProfileScreen/profile_screen.dart';
 
 class BottomNavScreenViewModel extends ChangeNotifier {
   int _currentIndex = 0;
-
   int get currentIndex => _currentIndex;
 
-  set currentIndex(int value) {
-    _currentIndex = value;
+  void updateIndex(int index) {
+    _currentIndex = index;
     notifyListeners();
   }
 

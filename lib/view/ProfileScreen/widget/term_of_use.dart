@@ -108,7 +108,7 @@ class TermOfUse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: NormalText(
                 titleText:
-                    'GENWALLS is an AI-powered wallpaper generator that allows users to create unique, high-quality digital images and wallpapers using text prompts, customization features, and style options. Users can:  ➤ Enter custom prompts to generate wallpapers  ➤ Explore AI-suggested prompts for inspiration  ➤ Select different image sizes and aspect ratios  ➤ Choose from multiple artistic styles and themes  ➤ Download wallpapers for personal use',
+                    'GENWALLS is an AI-powered wallpaper generator that allows users to create unique, high-quality digital images and wallpapers using text prompts, customization features, and style options. Users can: ➤ Enter custom prompts to generate wallpapers ➤ Explore AI-suggested prompts for inspiration ➤ Select different image sizes and aspect ratios ➤ Choose from multiple artistic styles and themes ➤ Download wallpapers for personal use',
                 titleSize: context.text(12),
                 titleWeight: FontWeight.w500,
                 titleColor: AppColors.whiteColor,
@@ -174,7 +174,7 @@ class TermOfUse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: NormalText(
                 titleText:
-                    'Any prompts, text, or images you create remain yours. However, by generating or uploading content through GENWALLS, you grant us permission to store, process, and use anonymized data to improve the Service.You are responsible for:  ➤ Ensuring your content does not violate laws or third-party rights  ➤ Not generating harmful, illegal, or offensive content  ➤ Avoiding false or misleading information',
+                    'Any prompts, text, or images you create remain yours. However, by generating or uploading content through GENWALLS, you grant us permission to store, process, and use anonymized data to improve the Service.You are responsible for: ➤ Ensuring your content does not violate laws or third-party rights ➤ Not generating harmful, illegal, or offensive content ➤ Avoiding false or misleading information',
                 titleSize: context.text(12),
                 titleWeight: FontWeight.w500,
                 titleColor: AppColors.whiteColor,
@@ -196,7 +196,7 @@ class TermOfUse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: NormalText(
                 titleText:
-                    'You agree not to:  ➤ Use the Service for illegal, harmful, or abusive purposes  ➤ Attempt to hack, disrupt, or overload the Service  ➤ Sell, resell, or sublicense access to the Service  ➤ Use automated bots, scrapers, or unauthorized scripts',
+                    'You agree not to: ➤ Use the Service for illegal, harmful, or abusive purposes ➤ Attempt to hack, disrupt, or overload the Service ➤ Sell, resell, or sublicense access to the Service ➤ Use automated bots, scrapers, or unauthorized scripts',
                 titleSize: context.text(12),
                 titleWeight: FontWeight.w500,
                 titleColor: AppColors.whiteColor,
@@ -218,7 +218,7 @@ class TermOfUse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: NormalText(
                 titleText:
-                    'We reserve the right to suspend or terminate your account if:  ➤ You violate these Terms  ➤ We suspect fraudulent or abusive behavior',
+                    'We reserve the right to suspend or terminate your account if: ➤ You violate these Terms ➤ We suspect fraudulent or abusive behavior',
                 titleSize: context.text(12),
                 titleWeight: FontWeight.w500,
                 titleColor: AppColors.whiteColor,
@@ -284,7 +284,7 @@ class TermOfUse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: NormalText(
                 titleText:
-                    'We are not liable for:  ➤ Loss of data or content  ➤ Service interruptions or downtime  ➤ Any damages resulting from your use or inability to use the Service',
+                    'We are not liable for: ➤ Loss of data or content ➤ Service interruptions or downtime ➤ Any damages resulting from your use or inability to use the Service',
                 titleSize: context.text(12),
                 titleWeight: FontWeight.w500,
                 titleColor: AppColors.whiteColor,
@@ -306,7 +306,7 @@ class TermOfUse extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: NormalText(
                 titleText:
-                    'If you have questions about these Terms, please contact us at:  📧 support@genwalls.com  📍 [Insert office address, if any]',
+                    'If you have questions about these Terms, please contact us at: 📧 support@genwalls.com 📍 [Insert office address, if any]',
                 titleSize: context.text(12),
                 titleWeight: FontWeight.w500,
                 titleColor: AppColors.whiteColor,

@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -21,7 +21,7 @@ class CustomTextRich extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: context.padSym(h: 10, v: 5),
       child: Align(
         alignment: Alignment.center,
         child: Text.rich(
@@ -31,7 +31,7 @@ class CustomTextRich extends StatelessWidget {
                 text: text1,
                 style: GoogleFonts.poppins(
                   color: Colors.grey,
-                  fontSize: 14.sp,
+                  fontSize: context.text(14),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -39,7 +39,7 @@ class CustomTextRich extends StatelessWidget {
                 text: text2,
                 style: GoogleFonts.poppins(
                   color: AppColors.primeryColor,
-                  fontSize: 14.sp,
+                  fontSize: context.text(14),
                   fontWeight: FontWeight.w500,
                 ),
                 recognizer: TapGestureRecognizer()

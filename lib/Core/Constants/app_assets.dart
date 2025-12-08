@@ -11,7 +11,7 @@ class AppAssets {
   static const String conIcon = "assets/icon/s.jpg";
   static const String magicStarIcon = "assets/icon/magicStar.png";
   static const String copyIcon = "assets/icon/copyIcon.png";
-  static const String refreshIcon = "assets/icon/refreshIcon.png";
+  static const String reCreateIcon = "assets/icon/refreshIcon.png";
   static const String downloadIcon = "assets/icon/downloadIcon.png";
   static const String phoneIcon = "assets/icon/phoneIcon.png";
   static const String emailIcon = "assets/icon/emailIcon.png";

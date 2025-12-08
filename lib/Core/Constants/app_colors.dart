@@ -15,6 +15,7 @@ class AppColors {
   static const Color textFieldIconColor = Color(0xFF6C7278);
   static const Color textFieldSubTitleColor = Color(0xFF6C7278);
   static const Color errorColor = Color(0xFFFF2C2C);
+  static const Color gridButtonColor = Color(0xFF1F75FE);
 
   static const gradient = LinearGradient(
     colors: [primeryColor, lightPurple],

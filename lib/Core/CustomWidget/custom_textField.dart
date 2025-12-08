@@ -1,78 +1,4 @@
-// import 'package:flutter/material.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:google_fonts/google_fonts.dart';
-
-// class CustomTextField extends StatelessWidget {
-//   final String validatorType;
-
-//   final String? hintText;
-//   final TextEditingController? controller;
-//   final String? keyboard;
-//   final icon;
-//   const CustomTextField({
-//     super.key,
-//     this.hintText,
-//     this.controller,
-//     this.keyboard,
-//     this.icon,
-//     required this.validatorType,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: EdgeInsets.symmetric(horizontal: 20.0.w),
-//       child: TextFormField(
-//         controller: controller,
-//         validator: (value) {
-//           if (value == null || value.trim().isEmpty) {
-//             return "This field is required";
-//           }
-//           if (validatorType == "name") {
-//             if (value.length < 3) {
-//               return "Enter a valid name";
-//             }
-//           }
-//           if (validatorType == "phone") {
-//             if (!RegExp(r'^[0-9]{10,13}$').hasMatch(value)) {
-//               return "Enter a valid phone number";
-//             }
-//           }
-//           if (validatorType == "email") {
-//             if (!RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$").hasMatch(value)) {
-//               return "Enter a valid email";
-//             }
-//           }
-
-//           return null;
-//         },
-//         style: GoogleFonts.poppins(
-//           color: Colors.white,
-//           fontSize: 14.sp,
-//           fontWeight: FontWeight.w500,
-//         ),
-//         keyboardType: TextInputType.text,
-//         decoration: InputDecoration(
-//           prefixIcon: icon,
-//           hintText: hintText,
-//           filled: true,
-//           fillColor: Colors.black,
-//           hintStyle: const TextStyle(color: Colors.white54),
-//           enabledBorder: OutlineInputBorder(
-//             borderSide: BorderSide(color: Colors.white, width: 2),
-//             borderRadius: BorderRadius.circular(8.0),
-//           ),
-//           focusedBorder: OutlineInputBorder(
-//             borderSide: BorderSide(color: Colors.white, width: 2),
-//             borderRadius: BorderRadius.circular(8.0),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -163,14 +89,14 @@ class CustomTextField extends StatelessWidget {
 
             style: GoogleFonts.poppins(
               color: AppColors.whiteColor,
-              fontSize: 14.sp,
+              fontSize: context.text(14),
               fontWeight: FontWeight.w500,
             ),
 
             decoration: InputDecoration(
               prefixIcon: prefixIcon != null
                   ? Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding: context.padAll(10),
                       child: IconTheme(
                         data: IconThemeData(
                           color: iconColor ?? AppColors.whiteColor,
@@ -182,7 +108,7 @@ class CustomTextField extends StatelessWidget {
 
               suffixIcon: suffixIcon != null
                   ? Padding(
-                      padding: const EdgeInsets.all(10.0),
+                      padding: context.padAll(10),
                       child: IconTheme(
                         data: IconThemeData(
                           color: iconColor ?? AppColors.textFieldIconColor,
@@ -197,7 +123,7 @@ class CustomTextField extends StatelessWidget {
                   hintStyle ??
                   TextStyle(
                     color: hintColor ?? AppColors.whiteColor,
-                    fontSize: 14.sp,
+                    fontSize: context.text(14),
                   ),
 
               filled: true,
@@ -206,17 +132,21 @@ class CustomTextField extends StatelessWidget {
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: enabledBorderColor ?? AppColors.whiteColor,
-                  width: borderWidth ?? 1.5,
+                  width: borderWidth ?? context.w(1.5),
                 ),
-                borderRadius: BorderRadius.circular(borderRadius ?? 8),
+                borderRadius: BorderRadius.circular(
+                  borderRadius ?? context.radius(8),
+                ),
               ),
 
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(
                   color: focusedBorderColor ?? AppColors.whiteColor,
-                  width: borderWidth ?? 1.5,
+                  width: borderWidth ?? context.radius(1.5),
                 ),
-                borderRadius: BorderRadius.circular(borderRadius ?? 8),
+                borderRadius: BorderRadius.circular(
+                  borderRadius ?? context.radius(8),
+                ),
               ),
             ),
           ),

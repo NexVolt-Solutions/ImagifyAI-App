@@ -3,7 +3,7 @@ import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 
 class CustomListView extends StatelessWidget {
-  final image;
+  final String? image;
   const CustomListView({super.key, this.image});
 
   @override
@@ -27,7 +27,7 @@ class CustomListView extends StatelessWidget {
               clipBehavior: Clip.hardEdge,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(context.radius(8)),
-                child: Image.asset(image, fit: BoxFit.contain),
+                child: Image.asset(image!, fit: BoxFit.contain),
               ),
             );
           },

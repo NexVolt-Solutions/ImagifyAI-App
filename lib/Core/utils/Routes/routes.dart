@@ -14,6 +14,7 @@ import 'package:genwalls/view/OnBoardingScreen/on_boarding_screen.dart';
 import 'package:genwalls/view/ProfileScreen/profile_screen.dart';
 import 'package:genwalls/view/ProfileScreen/widget/contact_us.dart';
 import 'package:genwalls/view/ProfileScreen/widget/edit_profile.dart';
+import 'package:genwalls/view/ProfileScreen/widget/library.dart';
 import 'package:genwalls/view/ProfileScreen/widget/privacy_policy.dart';
 import 'package:genwalls/view/ProfileScreen/widget/term_of_use.dart';
 import 'package:genwalls/view/SplahScrren/splash_screen.dart';
@@ -104,6 +105,8 @@ class Routes {
           settings: settings,
           builder: (_) => AccoundCreated(),
         );
+      case RoutesName.LibraryScreen:
+        return MaterialPageRoute(settings: settings, builder: (_) => Library());
       default:
         return MaterialPageRoute(
           settings: settings,

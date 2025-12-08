@@ -118,7 +118,7 @@ class _SignInState extends State<SignIn> {
                       'Forgot Password?',
                       style: GoogleFonts.poppins(
                         color: AppColors.primeryColor,
-                        fontSize: 14.sp,
+                        fontSize: context.text(14),
                         fontWeight: FontWeight.w500,
                       ),
                     ),

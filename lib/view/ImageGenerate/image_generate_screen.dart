@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
@@ -64,11 +63,9 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
               titleColor: AppColors.whiteColor,
               titleAlign: TextAlign.center,
             ),
-
             SizedBox(height: context.h(12)),
             Container(
-              // height: context.h(148),
-              width: double.infinity.w,
+              width: context.w(double.infinity),
               decoration: BoxDecoration(
                 color: AppColors.blackColor,
                 borderRadius: BorderRadius.circular(context.radius(8)),
@@ -220,7 +217,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 20.h),
+            SizedBox(height: context.h(20)),
             NormalText(
               titleText: "Select Size",
               titleSize: context.text(16),
@@ -251,7 +248,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                 ],
               ],
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: context.h(10)),
             Row(
               children: [
                 SizeContiner(
@@ -277,7 +274,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
             SizedBox(height: context.h(20)),
             CustomButton(
               onPressed: () {
-                Future.delayed(Duration(seconds: 4), () {
+                Future.delayed(Duration(seconds: 1), () {
                   imageGenerateViewModel.showStyledNumberDialog(context);
                 });
               },
@@ -289,7 +286,6 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
               text: 'Do Magic',
               icon: AppAssets.magicStarIcon,
             ),
-
             SizedBox(height: context.h(100)),
           ],
         ),
