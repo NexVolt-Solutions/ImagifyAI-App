@@ -17,58 +17,86 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final profileScreenViewModel = ProfileScreenViewModel();
+  bool _hasLoaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasLoaded) return;
+    _hasLoaded = true;
+    
+    final signInViewModel = context.read<SignInViewModel>();
+    final profileViewModel = context.read<ProfileScreenViewModel>();
+    
+    // Load user data if not already loaded
+    if (profileViewModel.currentUser == null && !profileViewModel.isLoading) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          profileViewModel.loadCurrentUser(accessToken: signInViewModel.accessToken);
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.blackColor,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(
-              child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+    return Consumer<ProfileScreenViewModel>(
+      builder: (context, profileScreenViewModel, _) {
+        final user = profileScreenViewModel.currentUser;
+        
+        return Scaffold(
+          backgroundColor: AppColors.blackColor,
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(64),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                ),
+                Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+              ],
             ),
-            Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-          children: [
-            SizedBox(height: context.h(20)),
-            Center(
-              child: ProfileImage(
-                imagePath: AppAssets.conIcon,
-                height: context.h(100),
-                width: context.h(100),
-                fit: BoxFit.cover,
-              ),
-            ),
-            SizedBox(height: context.h(12)),
-            NormalText(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              titleText: "M.Shehzad",
-              titleSize: context.text(16),
-              titleWeight: FontWeight.w500,
-              titleColor: AppColors.primeryColor,
-              titleAlign: TextAlign.center,
-              subText: "Khan@gmail.com",
-              subSize: context.text(12),
-              subColor: AppColors.whiteColor,
-              subWeight: FontWeight.w500,
-              subAlign: TextAlign.center,
-            ),
-            SizedBox(height: context.h(20)),
-            ListView.builder(
-              itemCount: profileScreenViewModel.profileData.length,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                final item = profileScreenViewModel.profileData[index];
+          ),
+          body: SafeArea(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+              children: [
+                SizedBox(height: context.h(20)),
+                Center(
+                  child: ProfileImage(
+                    imagePath: user?.profileImageUrl ?? AppAssets.conIcon,
+                    height: context.h(100),
+                    width: context.h(100),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                SizedBox(height: context.h(12)),
+                NormalText(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  titleText: user?.fullName ?? "User",
+                  titleSize: context.text(16),
+                  titleWeight: FontWeight.w500,
+                  titleColor: AppColors.primeryColor,
+                  titleAlign: TextAlign.center,
+                  subText: user?.email ?? "",
+                  subSize: context.text(12),
+                  subColor: AppColors.whiteColor,
+                  subWeight: FontWeight.w500,
+                  subAlign: TextAlign.center,
+                ),
+                if (profileScreenViewModel.isLoading)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: context.h(20)),
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                SizedBox(height: context.h(20)),
+                ListView.builder(
+                  itemCount: profileScreenViewModel.profileData.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    final item = profileScreenViewModel.profileData[index];
                 return ListTile(
                   onTap: () => profileScreenViewModel.onTapFun(context, index),
                   contentPadding: EdgeInsets.zero,
@@ -117,20 +145,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
             ),
-            SizedBox(height: context.h(20)),
-            CustomButton(
-              onPressed: () => context.read<SignInViewModel>().logout(context),
-              height: context.h(48),
-              width: context.w(350),
-              gradient: AppColors.gradient,
-              text: 'Sign out',
-              iconWidth: null,
-              iconHeight: null,
-              icon: null,
+                SizedBox(height: context.h(20)),
+                CustomButton(
+                  onPressed: () => context.read<SignInViewModel>().logout(context),
+                  height: context.h(48),
+                  width: context.w(350),
+                  gradient: AppColors.gradient,
+                  text: 'Sign out',
+                  iconWidth: null,
+                  iconHeight: null,
+                  icon: null,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

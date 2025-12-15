@@ -9,6 +9,10 @@ class ApiConstants {
   static const String refresh = '/auth/refresh';
   static const String forgotPassword = '/auth/forgot-password';
   static const String signOut = '/auth/sign-out';
+  static const String getCurrentUser = '/users/me';
+  static const String updateUser = '/users/me';
+  static const String updateProfilePicture = '/users/me/profile-pic';
+  static const String updatePassword = '/users/me/password';
   static const String suggestPrompt = '/wallpapers/suggest';
   static const String wallpapers = '/wallpapers/';
   static const String recreateWallpaper = '/wallpapers';

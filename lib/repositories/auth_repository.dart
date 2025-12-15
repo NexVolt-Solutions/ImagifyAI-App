@@ -8,6 +8,10 @@ import 'package:genwalls/models/auth/forgot_password_response.dart';
 import 'package:genwalls/models/auth/register_response.dart';
 import 'package:genwalls/models/auth/refresh_response.dart';
 import 'package:genwalls/models/auth/verify_response.dart';
+import 'package:genwalls/models/user/user.dart';
+import 'package:genwalls/models/user/update_user_response.dart';
+import 'package:genwalls/models/user/update_profile_picture_response.dart';
+import 'package:genwalls/models/user/update_password_response.dart';
 
 class AuthRepository {
   AuthRepository({ApiService? apiService}) : _apiService = apiService ?? ApiService();
@@ -100,6 +104,94 @@ class AuthRepository {
     );
 
     return LogoutResponse.fromJson(json);
+  }
+
+  Future<User> getCurrentUser({String? accessToken}) async {
+    final headers = accessToken != null && accessToken.isNotEmpty
+        ? <String, String>{'Authorization': 'Bearer $accessToken'}
+        : null;
+
+    final json = await _apiService.get(
+      ApiConstants.getCurrentUser,
+      headers: headers,
+    );
+
+    return User.fromJson(json);
+  }
+
+  Future<UpdateUserResponse> updateUser({
+    String? firstName,
+    String? lastName,
+    String? phoneNumber,
+    String? username,
+    String? accessToken,
+  }) async {
+    final headers = accessToken != null && accessToken.isNotEmpty
+        ? <String, String>{'Authorization': 'Bearer $accessToken'}
+        : null;
+
+    final body = <String, String>{};
+    if (firstName != null && firstName.isNotEmpty) {
+      body['first_name'] = firstName;
+    }
+    if (lastName != null && lastName.isNotEmpty) {
+      body['last_name'] = lastName;
+    }
+    if (phoneNumber != null && phoneNumber.isNotEmpty) {
+      body['phone_number'] = phoneNumber;
+    }
+    if (username != null && username.isNotEmpty) {
+      body['username'] = username;
+    }
+
+    final json = await _apiService.put(
+      ApiConstants.updateUser,
+      headers: headers,
+      body: body.isNotEmpty ? body : null,
+    );
+
+    return UpdateUserResponse.fromJson(json);
+  }
+
+  Future<UpdateProfilePictureResponse> updateProfilePicture({
+    required File profileImage,
+    String? accessToken,
+  }) async {
+    final headers = accessToken != null && accessToken.isNotEmpty
+        ? <String, String>{'Authorization': 'Bearer $accessToken'}
+        : null;
+
+    final json = await _apiService.putMultipart(
+      path: ApiConstants.updateProfilePicture,
+      file: profileImage,
+      fileFieldName: 'profile_image',
+      headers: headers,
+    );
+
+    return UpdateProfilePictureResponse.fromJson(json);
+  }
+
+  Future<UpdatePasswordResponse> updatePassword({
+    required String oldPassword,
+    required String password,
+    required String confirmPassword,
+    String? accessToken,
+  }) async {
+    final headers = accessToken != null && accessToken.isNotEmpty
+        ? <String, String>{'Authorization': 'Bearer $accessToken'}
+        : null;
+
+    final json = await _apiService.put(
+      ApiConstants.updatePassword,
+      headers: headers,
+      body: {
+        'old_password': oldPassword,
+        'password': password,
+        'confirm_password': confirmPassword,
+      },
+    );
+
+    return UpdatePasswordResponse.fromJson(json);
   }
 }
 

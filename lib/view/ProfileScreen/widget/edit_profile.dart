@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
@@ -7,8 +8,12 @@ import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/password_text.dart';
+import 'package:genwalls/Core/CustomWidget/profile_image.dart';
 import 'package:genwalls/viewModel/edit_profile_view_model.dart';
+import 'package:genwalls/viewModel/profile_screen_view_model.dart';
+import 'package:genwalls/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -18,10 +23,53 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  final editProfileViewModel = EditProfileViewModel();
+  bool _hasLoaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_hasLoaded) return;
+    _hasLoaded = true;
+    
+    final profileViewModel = context.read<ProfileScreenViewModel>();
+    final editProfileViewModel = context.read<EditProfileViewModel>();
+    final signInViewModel = context.read<SignInViewModel>();
+    
+    // Load user data if available
+    if (profileViewModel.currentUser != null && editProfileViewModel.currentUser == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          editProfileViewModel.loadUserData(profileViewModel.currentUser);
+        }
+      });
+    } else if (profileViewModel.currentUser == null && !profileViewModel.isLoading) {
+      // Load user data if not already loaded
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          profileViewModel.loadCurrentUser(accessToken: signInViewModel.accessToken);
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer2<EditProfileViewModel, ProfileScreenViewModel>(
+      builder: (context, editProfileViewModel, profileViewModel, _) {
+        // Sync user data when profileViewModel updates (only if different)
+        final currentUserId = editProfileViewModel.currentUser?.id;
+        final profileUserId = profileViewModel.currentUser?.id;
+        if (profileViewModel.currentUser != null && 
+            currentUserId != null &&
+            currentUserId != profileUserId) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              editProfileViewModel.loadUserData(profileViewModel.currentUser);
+            }
+          });
+        }
+        
+        return Scaffold(
       backgroundColor: AppColors.blackColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
@@ -47,250 +95,324 @@ class _EditProfileState extends State<EditProfile> {
         ),
       ),
       body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-          children: [
-            SizedBox(height: context.h(20)),
-            Align(
-              alignment: Alignment.topLeft,
-              child: NormalText(
-                titleText: "Edit Profile",
-                titleSize: context.text(20),
-                titleWeight: FontWeight.w600,
-                titleColor: AppColors.whiteColor,
-                titleAlign: TextAlign.start,
+        child: Form(
+          key: editProfileViewModel.formKey,
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+            children: [
+              SizedBox(height: context.h(20)),
+              Align(
+                alignment: Alignment.topLeft,
+                child: NormalText(
+                  titleText: "Edit Profile",
+                  titleSize: context.text(20),
+                  titleWeight: FontWeight.w600,
+                  titleColor: AppColors.whiteColor,
+                  titleAlign: TextAlign.start,
+                ),
               ),
-            ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: NormalText(
-                subText: "Manage your GENWALLS account settings",
-                subSize: context.text(14),
-                subColor: AppColors.textFieldSubTitleColor,
-                subWeight: FontWeight.w500,
-                subAlign: TextAlign.start,
+              Align(
+                alignment: Alignment.topLeft,
+                child: NormalText(
+                  subText: "Manage your GENWALLS account settings",
+                  subSize: context.text(14),
+                  subColor: AppColors.textFieldSubTitleColor,
+                  subWeight: FontWeight.w500,
+                  subAlign: TextAlign.start,
+                ),
               ),
-            ),
-            SizedBox(height: context.h(20)),
-            Container(
-              height: context.h(167),
-              width: context.w(double.infinity),
-              decoration: BoxDecoration(
-                color: AppColors.containerColor,
-                borderRadius: BorderRadius.circular(context.radius(12)),
-              ),
-              child: ListView(
-                scrollDirection: Axis.vertical,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: context.h(32)),
-                  Container(
-                    height: context.h(82),
-                    width: context.w(82),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.subTitleColor,
+              SizedBox(height: context.h(20)),
+              Container(
+                height: context.h(167),
+                width: context.w(double.infinity),
+                decoration: BoxDecoration(
+                  color: AppColors.containerColor,
+                  borderRadius: BorderRadius.circular(context.radius(12)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        editProfileViewModel.profileImage != null
+                            ? ClipOval(
+                                child: Image.file(
+                                  editProfileViewModel.profileImage!,
+                                  height: context.h(82),
+                                  width: context.w(82),
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : ProfileImage(
+                                imagePath: editProfileViewModel.currentUser?.profileImageUrl ?? AppAssets.conIcon,
+                                height: context.h(82),
+                                width: context.w(82),
+                                fit: BoxFit.cover,
+                              ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () => editProfileViewModel.pickImage(),
+                            child: Container(
+                              padding: EdgeInsets.all(context.w(6)),
+                              decoration: BoxDecoration(
+                                color: AppColors.primeryColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: AppColors.blackColor,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.camera_alt,
+                                color: AppColors.whiteColor,
+                                size: context.text(16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Image.asset(
-                      AppAssets.profileIcon,
-                      height: context.h(38),
-                      width: context.w(38),
-                      color: AppColors.whiteColor,
+                    SizedBox(height: context.h(18)),
+                    Center(
+                      child: Text(
+                        'Click the camera icon to change your photo',
+                        style: GoogleFonts.poppins(
+                          color: AppColors.whiteColor,
+                          fontSize: context.text(12),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
+                    if (editProfileViewModel.isUpdatingPicture)
+                      Padding(
+                        padding: EdgeInsets.only(top: context.h(8)),
+                        child: const Center(child: CircularProgressIndicator()),
+                      ),
+                  ],
+                ),
+              ),
+              SizedBox(height: context.h(20)),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: context.w(20)),
+                height: context.h(265),
+                decoration: BoxDecoration(
+                  color: AppColors.containerColor,
+                  borderRadius: BorderRadius.circular(context.radius(12)),
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: NormalText(
+                        titleText: "Persnol Information",
+                        titleSize: context.text(16),
+                        titleWeight: FontWeight.w600,
+                        titleColor: AppColors.whiteColor,
+                        titleAlign: TextAlign.start,
+                      ),
+                    ),
+                    SizedBox(height: context.h(20)),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: CustomTextField(
+                            controller: editProfileViewModel.firstNameController,
+                            validatorType: "name",
+                            label: "First name",
+                            enabledBorderColor: AppColors.textFieldIconColor,
+                          ),
+                        ),
+                        SizedBox(width: context.w(12)),
+                        Expanded(
+                          child: CustomTextField(
+                            controller: editProfileViewModel.lastNameController,
+                            validatorType: "name",
+                            label: "Last Name",
+                            enabledBorderColor: AppColors.textFieldIconColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: context.h(16)),
+                    CustomTextField(
+                      controller: editProfileViewModel.usernameController,
+                      validatorType: "name",
+                      label: "Username",
+                      enabledBorderColor: AppColors.textFieldIconColor,
+                    ),
+                    SizedBox(height: context.h(16)),
+                    CustomTextField(
+                      controller: editProfileViewModel.phoneNumberController,
+                      validatorType: "phone",
+                      label: "Phone Number",
+                      enabledBorderColor: AppColors.textFieldIconColor,
+                      keyboard: TextInputType.phone,
+                    ),
+                    SizedBox(height: context.h(16)),
+                    CustomTextField(
+                      controller: editProfileViewModel.emailController,
+                      validatorType: "email",
+                      label: "Email",
+                      enabledBorderColor: AppColors.textFieldIconColor,
+                      // Email is read-only as it's not in the update API
+                    ),
+                    SizedBox(height: context.h(20)),
+                  ],
+                ),
+              ),
+              SizedBox(height: context.h(20)),
+              Container(
+                height: context.h(470),
+                width: context.w(double.infinity),
+                decoration: BoxDecoration(
+                  color: AppColors.containerColor,
+                  borderRadius: BorderRadius.circular(context.radius(12)),
+                ),
+                child: ListView(
+                  scrollDirection: Axis.vertical,
+                  physics: NeverScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.h(20),
+                    vertical: context.w(20),
                   ),
-                  SizedBox(height: context.h(18)),
-                  Center(
-                    child: Text(
-                      'Click the camera icon to change your photo',
-                      style: GoogleFonts.poppins(
-                        color: AppColors.whiteColor,
-                        fontSize: context.text(12),
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: NormalText(
+                        titleText: "Change Password",
+                        titleSize: context.text(16),
+                        titleWeight: FontWeight.w600,
+                        titleColor: AppColors.whiteColor,
+                        titleAlign: TextAlign.start,
+                      ),
+                    ),
+                    SizedBox(height: context.h(20)),
+                    CustomTextField(
+                      controller: editProfileViewModel.oldPasswordController,
+                      validatorType: "password",
+                      hintText: 'Enter old Password',
+                      hintStyle: TextStyle(
+                        color: AppColors.textFieldSubTitleColor,
                         fontWeight: FontWeight.w500,
+                        fontSize: context.text(12),
                       ),
+                      label: "Old Password",
+                      enabledBorderColor: AppColors.textFieldIconColor,
                     ),
-                  ),
-                ],
+                    SizedBox(height: context.h(16)),
+                    CustomTextField(
+                      controller: editProfileViewModel.newPasswordController,
+                      validatorType: "password",
+                      hintText: 'Enter new Password',
+                      hintStyle: TextStyle(
+                        color: AppColors.textFieldSubTitleColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: context.text(12),
+                      ),
+                      label: "New Password",
+                      enabledBorderColor: AppColors.textFieldIconColor,
+                    ),
+                    SizedBox(height: context.h(16)),
+                    CustomTextField(
+                      controller: editProfileViewModel.confirmPasswordController,
+                      validatorType: "password",
+                      hintText: 'Enter confirm Password',
+                      hintStyle: TextStyle(
+                        color: AppColors.textFieldSubTitleColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: context.text(12),
+                      ),
+                      label: "Confirm Password",
+                      enabledBorderColor: AppColors.textFieldIconColor,
+                    ),
+                    SizedBox(height: context.h(20)),
+                    AlignText(
+                      text: 'Password must contain',
+                      fontWeight: FontWeight.w500,
+                      fontSize: context.text(16),
+                    ),
+                    SizedBox(height: context.h(4)),
+                    Column(
+                      children: List.generate(editProfileViewModel.items.length, (
+                        index,
+                      ) {
+                        bool isSelected =
+                            editProfileViewModel.selectedIndex == index;
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              editProfileViewModel.selectedIndex = index;
+                            });
+                          },
+                          child: PasswordText(
+                            text: editProfileViewModel.items[index],
+                            icon: isSelected ? Icons.check : Icons.cancel,
+                            iconColor: isSelected
+                                ? AppColors.greenColor
+                                : AppColors.grayColor,
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: context.h(20)),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: context.w(20)),
-              height: context.h(265),
-              decoration: BoxDecoration(
-                color: AppColors.containerColor,
-                borderRadius: BorderRadius.circular(context.radius(12)),
-              ),
-              child: ListView(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+              SizedBox(height: context.h(96)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: NormalText(
-                      titleText: "Persnol Information",
-                      titleSize: context.text(16),
-                      titleWeight: FontWeight.w600,
-                      titleColor: AppColors.whiteColor,
-                      titleAlign: TextAlign.start,
-                    ),
+                  CustomButton(
+                    onPressed: editProfileViewModel.isLoading
+                        ? null
+                        : () {
+                            final signInViewModel = context.read<SignInViewModel>();
+                            editProfileViewModel.updateProfile(
+                              context: context,
+                              accessToken: signInViewModel.accessToken,
+                            );
+                          },
+                    height: context.h(48),
+                    width: context.w(165),
+                    text: editProfileViewModel.isLoading ? "Saving..." : "Save Changes",
+                    icon: null,
+                    borderColor: null,
+                    gradient: AppColors.gradient,
+                    iconWidth: null,
+                    iconHeight: null,
                   ),
-                  SizedBox(height: context.h(20)),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: CustomTextField(
-                          validatorType: "name",
-                          label: "First name",
-                          enabledBorderColor: AppColors.textFieldIconColor,
-                        ),
-                      ),
-                      SizedBox(width: context.w(12)),
-                      Expanded(
-                        child: CustomTextField(
-                          validatorType: "name",
-                          label: "Last Name",
-                          enabledBorderColor: AppColors.textFieldIconColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: context.h(16)),
-                  CustomTextField(
-                    validatorType: "email",
-                    label: "Email",
-                    enabledBorderColor: AppColors.textFieldIconColor,
-                  ),
-                  SizedBox(height: context.h(20)),
-                ],
-              ),
-            ),
-            SizedBox(height: context.h(20)),
-            Container(
-              height: context.h(470),
-              width: context.w(double.infinity),
-              decoration: BoxDecoration(
-                color: AppColors.containerColor,
-                borderRadius: BorderRadius.circular(context.radius(12)),
-              ),
-              child: ListView(
-                scrollDirection: Axis.vertical,
-                physics: NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: context.h(20),
-                  vertical: context.w(20),
-                ),
-                children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: NormalText(
-                      titleText: "Change Password",
-                      titleSize: context.text(16),
-                      titleWeight: FontWeight.w600,
-                      titleColor: AppColors.whiteColor,
-                      titleAlign: TextAlign.start,
-                    ),
-                  ),
-                  SizedBox(height: context.h(20)),
-                  CustomTextField(
-                    validatorType: "password",
-                    hintText: 'Enter old Password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
-                    label: "Old Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
-                  ),
-                  SizedBox(height: context.h(16)),
-                  CustomTextField(
-                    validatorType: "password",
-                    hintText: 'Enter new Password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
-                    label: "New Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
-                  ),
-                  SizedBox(height: context.h(16)),
-                  CustomTextField(
-                    validatorType: "password",
-                    hintText: 'Enter confirm Password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
-                    label: "Confirm Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
-                  ),
-                  SizedBox(height: context.h(20)),
-                  AlignText(
-                    text: 'Password must contain',
-                    fontWeight: FontWeight.w500,
-                    fontSize: context.text(16),
-                  ),
-                  SizedBox(height: context.h(4)),
-                  Column(
-                    children: List.generate(editProfileViewModel.items.length, (
-                      index,
-                    ) {
-                      bool isSelected =
-                          editProfileViewModel.selectedIndex == index;
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            editProfileViewModel.selectedIndex = index;
-                          });
-                        },
-                        child: PasswordText(
-                          text: editProfileViewModel.items[index],
-                          icon: isSelected ? Icons.check : Icons.cancel,
-                          iconColor: isSelected
-                              ? AppColors.greenColor
-                              : AppColors.grayColor,
-                        ),
-                      );
-                    }),
+                  CustomButton(
+                    onPressed: editProfileViewModel.isLoading
+                        ? null
+                        : () => Navigator.pop(context),
+                    height: context.h(48),
+                    width: context.w(165),
+                    text: "Cancel",
+                    icon: null,
+                    borderColor: AppColors.whiteColor,
+                    gradient: null,
+                    iconWidth: null,
+                    iconHeight: null,
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: context.h(96)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CustomButton(
-                  height: context.h(48),
-                  width: context.w(165),
-                  text: "Save Changes",
-                  icon: null,
-                  borderColor: null,
-                  gradient: AppColors.gradient,
-                  iconWidth: null,
-                  iconHeight: null,
+              if (editProfileViewModel.isLoading)
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: context.h(12)),
+                  child: const Center(child: CircularProgressIndicator()),
                 ),
-                CustomButton(
-                  height: context.h(48),
-                  width: context.w(165),
-                  text: "Cancel",
-                  icon: null,
-                  borderColor: AppColors.whiteColor,
-                  gradient: null,
-
-                  iconWidth: null,
-                  iconHeight: null,
-                ),
+              SizedBox(height: context.h(50)),
               ],
             ),
-            SizedBox(height: context.h(50)),
-          ],
-        ),
-      ),
+          ),
+        ));
+      },
     );
   }
 }

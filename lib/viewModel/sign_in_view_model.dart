@@ -23,6 +23,8 @@ class SignInViewModel extends ChangeNotifier {
   String? _refreshToken;
   String? _accessToken;
 
+  String? get accessToken => _accessToken;
+
   void toggleRemember(bool? value) {
     rememberMe = value ?? false;
     notifyListeners();

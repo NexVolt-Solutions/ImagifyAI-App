@@ -99,17 +99,42 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> putMultipart({
+    required String path,
+    File? file,
+    String fileFieldName = 'profile_image',
+    Map<String, String>? headers,
+  }) async {
+    final uri = _buildUri(path);
+
+    final request = http.MultipartRequest('PUT', uri)
+      ..headers.addAll(_withDefaultHeaders(headers));
+
+    if (file != null) {
+      request.files.add(await http.MultipartFile.fromPath(fileFieldName, file.path));
+    }
+
+    final streamedResponse = await _client.send(request);
+    final response = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response);
+  }
+
   Uri _buildUri(String path, [Map<String, String>? query]) {
     return Uri.parse('${ApiConstants.baseUrl}$path').replace(queryParameters: query);
   }
 
   Map<String, String> _withDefaultHeaders(Map<String, String>? headers,
       {bool isJson = false}) {
-    return {
+    final defaultHeaders = <String, String>{
       'accept': 'application/json',
-      if (isJson) 'content-type': 'application/json',
-      ...?headers,
     };
+    if (isJson) {
+      defaultHeaders['content-type'] = 'application/json';
+    }
+    if (headers != null && headers.isNotEmpty) {
+      defaultHeaders.addAll(headers);
+    }
+    return defaultHeaders;
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {

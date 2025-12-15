@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:genwalls/models/user/user.dart';
+import 'package:genwalls/repositories/auth_repository.dart';
 
 class ProfileScreenViewModel extends ChangeNotifier {
+  ProfileScreenViewModel({AuthRepository? authRepository})
+      : _authRepository = authRepository ?? AuthRepository();
+
+  final AuthRepository _authRepository;
+
+  User? currentUser;
+  bool isLoading = false;
+  String? errorMessage;
+
   List<Map<String, dynamic>> profileData = [
     {
       'leading': AppAssets.profileIcon,
@@ -54,6 +66,29 @@ class ProfileScreenViewModel extends ChangeNotifier {
       'switchValue': false,
     },
   ];
+
+  Future<void> loadCurrentUser({String? accessToken, bool forceReload = false}) async {
+    if (isLoading) return;
+    
+    // Skip if user data already loaded and not forcing reload
+    if (!forceReload && currentUser != null) return;
+
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      currentUser = await _authRepository.getCurrentUser(accessToken: accessToken);
+      errorMessage = null; // Clear any previous errors on success
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+    } catch (_) {
+      errorMessage = 'Failed to load user data';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
 
   void onTapFun(BuildContext context, int index) {
     if (index == 0) {
