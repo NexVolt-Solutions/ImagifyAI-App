@@ -31,7 +31,6 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => HomeViewModel()),
         ChangeNotifierProvider(create: (context) => BottomNavScreenViewModel()),
         ChangeNotifierProvider(create: (context) => ImageGenerateViewModel()),
-        ChangeNotifierProvider(create: (context) => SignUpViewModel()),
       ],
       child: MaterialApp(
         initialRoute: RoutesName.SplashScreen,
