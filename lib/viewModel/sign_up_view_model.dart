@@ -3,13 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:genwalls/Core/utils/snackbar_util.dart';
 import 'package:genwalls/models/auth/register_response.dart';
 import 'package:genwalls/repositories/auth_repository.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SignUpViewModel extends ChangeNotifier {
-  SignUpViewModel({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository();
 
   final AuthRepository _authRepository;
 
@@ -29,6 +28,38 @@ class SignUpViewModel extends ChangeNotifier {
     "1 or more English letters (A-Z, a,z)",
     "7 or more charactrers",
   ];
+
+  SignUpViewModel({AuthRepository? authRepository})
+      : _authRepository = authRepository ?? AuthRepository() {
+    // Add listener to password controller for real-time validation
+    passwordController.addListener(_validatePassword);
+  }
+
+  // Password validation methods
+  bool get hasNumber => RegExp(r'[0-9]').hasMatch(passwordController.text);
+  bool get hasLetter => RegExp(r'[A-Za-z]').hasMatch(passwordController.text);
+  bool get hasMinLength => passwordController.text.length >= 7;
+
+  bool isRequirementMet(int index) {
+    switch (index) {
+      case 0:
+        return hasNumber;
+      case 1:
+        return hasLetter;
+      case 2:
+        return hasMinLength;
+      default:
+        return false;
+    }
+  }
+
+  void _validatePassword() {
+    notifyListeners();
+  }
+
+  void validatePassword() {
+    notifyListeners();
+  }
 
   Future<void> pickImage() async {
     final picker = ImagePicker();
@@ -72,7 +103,11 @@ class SignUpViewModel extends ChangeNotifier {
 
       final message = response.message ?? 'Registered successfully';
       _showMessage(context, message, isError: false);
-      Navigator.pushNamed(context, RoutesName.VerificationScreen);
+      Navigator.pushNamed(
+        context,
+        RoutesName.VerificationScreen,
+        arguments: emailController.text.trim(),
+      );
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);
@@ -86,16 +121,12 @@ class SignUpViewModel extends ChangeNotifier {
   }
 
   void _showMessage(BuildContext context, String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-      ),
-    );
+    SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
 
   @override
   void dispose() {
+    passwordController.removeListener(_validatePassword);
     usernameController.dispose();
     emailController.dispose();
     passwordController.dispose();

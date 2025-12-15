@@ -6,6 +6,8 @@ import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/profile_image.dart';
 import 'package:genwalls/viewModel/profile_screen_view_model.dart';
+import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -117,12 +119,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             SizedBox(height: context.h(20)),
             CustomButton(
-              onPressed: () {
-                // Navigator.pushNamed(
-                //   context,
-                //   RoutesName.,
-                // );
-              },
+              onPressed: () => context.read<SignInViewModel>().logout(context),
               height: context.h(48),
               width: context.w(350),
               gradient: AppColors.gradient,

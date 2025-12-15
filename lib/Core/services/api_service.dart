@@ -33,8 +33,9 @@ class ApiService {
     String path, {
     Map<String, String>? headers,
     Object? body,
+    Map<String, String>? query,
   }) async {
-    final uri = _buildUri(path);
+    final uri = _buildUri(path, query);
     final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
     final response = await _client.post(
       uri,
@@ -48,8 +49,9 @@ class ApiService {
     String path, {
     Map<String, String>? headers,
     Object? body,
+    Map<String, String>? query,
   }) async {
-    final uri = _buildUri(path);
+    final uri = _buildUri(path, query);
     final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
     final response = await _client.put(
       uri,
@@ -63,8 +65,9 @@ class ApiService {
     String path, {
     Map<String, String>? headers,
     Object? body,
+    Map<String, String>? query,
   }) async {
-    final uri = _buildUri(path);
+    final uri = _buildUri(path, query);
     final mergedHeaders = _withDefaultHeaders(headers, isJson: body != null);
     final response = await _client.delete(
       uri,

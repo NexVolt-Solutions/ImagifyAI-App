@@ -24,6 +24,7 @@ class CustomTextField extends StatelessWidget {
 
   final Widget? suffixIcon;
   final Color? iconColor;
+  final ValueChanged<String>? onChanged;
 
   const CustomTextField({
     super.key,
@@ -42,6 +43,7 @@ class CustomTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.iconColor,
+    this.onChanged,
   });
 
   @override
@@ -64,7 +66,7 @@ class CustomTextField extends StatelessWidget {
           child: TextFormField(
             controller: controller,
             keyboardType: keyboard ?? TextInputType.text,
-
+            onChanged: onChanged,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return "This field is required";

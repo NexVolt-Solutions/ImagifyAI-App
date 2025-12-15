@@ -1,37 +1,4 @@
-// import 'package:flutter/material.dart';
-
-// extension SizeExtension on BuildContext {
-//   /// Screen width and height
-//   double get width => MediaQuery.of(this).size.width;
-//   double get height => MediaQuery.of(this).size.height;
-
-//   /// Percent width/height
-//   double w(double percent) => width * percent;
-//   double h(double percent) => height * percent;
-
-//   /// Safe area paddings
-//   // EdgeInsets get safePadding => MediaQuery.of(this).padding;
-//   /// Responsive padding (horizontal)
-//   double padH(double percent) => width * percent;
-
-//   /// Responsive padding (vertical)
-//   double padV(double percent) => height * percent;
-
-//   /// Responsive radius (based on smallest side)
-//   double radius(double percent) =>
-//       MediaQuery.of(this).size.shortestSide * percent;
-
-//   /// Default spacing values (based on width)
-//   double get s4 => width * 0.01; // ~4px
-//   double get s8 => width * 0.02; // ~8px
-//   double get s12 => width * 0.03; // ~12px
-//   double get s16 => width * 0.04; // ~16px
-//   double get s20 => width * 0.05; // ~20px
-// }
-// // 3:48
-// // final topPadding = context.safePadding.top;
-// // 3:48
-// // padding: EdgeInsets.symmetric(horizontal: context.padH(0.05)),
+ 
 
 import 'package:flutter/material.dart';
 

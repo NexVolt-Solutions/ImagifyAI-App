@@ -1,179 +1,4 @@
-// import 'package:flutter/material.dart';
-// import 'package:genwalls/Core/Constants/app_assets.dart';
-// import 'package:genwalls/Core/Constants/app_colors.dart';
-// import 'package:genwalls/Core/Constants/size_extension.dart';
-// import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-// import 'package:genwalls/Core/CustomWidget/normal_text.dart';
-// import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-// import 'package:genwalls/viewModel/on_boarding_screen_view_model.dart';
-// import 'package:provider/provider.dart';
 
-// class OnboardingScreen extends StatefulWidget {
-//   const OnboardingScreen({super.key});
-
-//   @override
-//   State<OnboardingScreen> createState() => _OnboardingScreenState();
-// }
-
-// class _OnboardingScreenState extends State<OnboardingScreen> {
-//   @override
-//   Widget build(BuildContext context) {
-//     final viewModel = Provider.of<OnBoardingScreenViewModel>(context);
-
-//     final currentData = viewModel.text[viewModel.currentPage];
-
-//     return Scaffold(
-//       backgroundColor: AppColors.blackColor,
-//       bottomNavigationBar: Padding(
-//         padding: EdgeInsets.only(
-//           bottom: context.h(43),
-//           left: context.w(20),
-//           right: context.w(20),
-//         ),
-//         child: CustomButton(
-//           height: context.h(45),
-//           width: context.w(300),
-//           gradient: AppColors.gradient,
-//           text: currentData['buttonText'],
-//           iconWidth: null,
-//           iconHeight: null,
-//           icon: null,
-//           onPressed: () {
-//             if (viewModel.currentPage < viewModel.text.length - 1) {
-//               viewModel.mainController.nextPage(
-//                 duration: const Duration(milliseconds: 350),
-//                 curve: Curves.easeInOut,
-//               );
-//             } else {
-//               Navigator.pushReplacementNamed(context, RoutesName.SignUpScreen);
-//             }
-//           },
-//         ),
-//       ),
-//       appBar: PreferredSize(
-//         preferredSize: const Size.fromHeight(64),
-//         child: Stack(
-//           alignment: Alignment.center,
-//           children: [
-//             Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
-//             Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-//             Positioned(
-//               right: 20,
-//               top: 20,
-//               child: GestureDetector(
-//                 onTap: () {
-//                   Navigator.pushReplacementNamed(
-//                     context,
-//                     RoutesName.SignUpScreen,
-//                   );
-//                 },
-//                 child: NormalText(
-//                   titleText: "Skip",
-//                   titleSize: context.text(16),
-//                   titleWeight: FontWeight.w500,
-//                   titleColor: AppColors.whiteColor,
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//       body: SafeArea(
-//         child: Column(
-//           children: [
-//             SizedBox(
-//               height: context.h(520),
-//               child: PageView.builder(
-//                 controller: viewModel.mainController,
-//                 physics: const BouncingScrollPhysics(),
-//                 onPageChanged: (index) {
-//                   viewModel.updatePage(index);
-//                   if (viewModel.textController.hasClients) {
-//                     viewModel.textController.jumpToPage(index);
-//                   }
-//                 },
-
-//                 itemCount: viewModel.text.length,
-//                 itemBuilder: (context, index) {
-//                   final data = viewModel.text[index];
-//                   return Padding(
-//                     padding: EdgeInsets.symmetric(horizontal: context.w(20)),
-//                     child: Image.asset(data['image'], fit: BoxFit.cover),
-//                   );
-//                 },
-//               ),
-//             ),
-//             SizedBox(height: context.h(40)),
-//             Expanded(
-//               child: PageView.builder(
-//                 controller: viewModel.mainController,
-//                 physics: const BouncingScrollPhysics(),
-//                 onPageChanged: (index) {
-//                   viewModel.updatePage(index);
-//                   if (viewModel.textController.hasClients) {
-//                     viewModel.textController.jumpToPage(index);
-//                   }
-//                 },
-
-//                 itemCount: viewModel.text.length,
-//                 itemBuilder: (context, index) {
-//                   final data = viewModel.text[index];
-//                   return Column(
-//                     mainAxisAlignment: MainAxisAlignment.start,
-//                     children: [
-//                       Text(
-//                         data['title'],
-//                         style: TextStyle(
-//                           color: AppColors.whiteColor,
-//                           fontSize: context.text(22),
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                         textAlign: TextAlign.center,
-//                       ),
-//                       SizedBox(height: context.h(10)),
-//                       Padding(
-//                         padding: EdgeInsets.symmetric(
-//                           horizontal: context.w(25),
-//                         ),
-//                         child: Text(
-//                           data['subtitle'],
-//                           style: TextStyle(
-//                             color: Colors.white70,
-//                             fontSize: context.text(16),
-//                           ),
-//                           textAlign: TextAlign.center,
-//                         ),
-//                       ),
-//                       SizedBox(height: context.h(25)),
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.center,
-//                         children: List.generate(viewModel.text.length, (
-//                           dotIndex,
-//                         ) {
-//                           return Container(
-//                             margin: EdgeInsets.symmetric(horizontal: 4),
-//                             width: viewModel.currentPage == dotIndex ? 12 : 8,
-//                             height: viewModel.currentPage == dotIndex ? 12 : 8,
-//                             decoration: BoxDecoration(
-//                               color: viewModel.currentPage == dotIndex
-//                                   ? AppColors.whiteColor
-//                                   : Colors.white54,
-//                               shape: BoxShape.circle,
-//                             ),
-//                           );
-//                         }),
-//                       ),
-//                     ],
-//                   );
-//                 },
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
@@ -183,6 +8,7 @@ import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/on_boarding_screen_view_model.dart';
 import 'package:provider/provider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -223,56 +49,62 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ),
       ),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
-            Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-            Positioned(
-              right: 20,
-              top: 20,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacementNamed(
-                    context,
-                    RoutesName.SignUpScreen,
-                  );
-                },
-                child: NormalText(
-                  titleText: "Skip",
-                  titleSize: context.text(16),
-                  titleWeight: FontWeight.w500,
-                  titleColor: AppColors.whiteColor,
+        preferredSize: Size.fromHeight(context.h(100)),
+        child: Padding( 
+          padding: EdgeInsets.symmetric(vertical: context.h(20)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),              Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+              Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+
+              Positioned(
+                right: 20,
+                top: 20,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushReplacementNamed(
+                      context,
+                      RoutesName.SignUpScreen,
+                    );
+                  },
+                  child: NormalText(
+                    titleText: "Skip",
+                    titleSize: context.text(16),
+                    titleWeight: FontWeight.w500,
+                    titleColor: AppColors.whiteColor,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: context.h(30)),
             SizedBox(
-              height: context.h(520),
+              height: context.h(410),
+              width: double.infinity,
               child: PageView.builder(
                 controller: viewModel.mainController,
                 physics: const BouncingScrollPhysics(),
                 itemCount: viewModel.text.length,
-                onPageChanged: (index) {
-                  viewModel.updatePage(index);
-                  viewModel.textController.animateToPage(
-                    index,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
                 itemBuilder: (context, index) {
                   final data = viewModel.text[index];
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: context.w(20)),
-                    child: Image.asset(data['image'], fit: BoxFit.cover),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(context.radius(16)),
+                      child: SizedBox(
+                        height: context.h(410),
+                        width: context.w(350),
+                        child: Image.asset(
+                          data['image'],
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   );
                 },
               ),
@@ -282,63 +114,65 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: viewModel.textController,
-                physics: const NeverScrollableScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 itemCount: viewModel.text.length,
+                onPageChanged: (index) {
+                  viewModel.updatePage(index);
+                  viewModel.mainController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
                 itemBuilder: (context, index) {
                   final data = viewModel.text[index];
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        data['title'],
-                        style: TextStyle(
-                          color: AppColors.whiteColor,
-                          fontSize: context.text(22),
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: context.h(10)),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: context.w(25),
-                        ),
-                        child: Text(
-                          data['subtitle'],
+                  return SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          data['title'],
                           style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: context.text(16),
+                            color: AppColors.whiteColor,
+                            fontSize: context.text(22),
+                            fontWeight: FontWeight.w600,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                      ),
-                      SizedBox(height: context.h(25)),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(viewModel.text.length, (
-                          dotIndex,
-                        ) {
-                          return Container(
-                            margin: EdgeInsets.symmetric(horizontal: 5),
-                            width: viewModel.currentPage == dotIndex ? 25 : 8,
-                            height: viewModel.currentPage == dotIndex ? 12 : 8,
-                            decoration: BoxDecoration(
-                              color: viewModel.currentPage == dotIndex
-                                  ? AppColors.whiteColor
-                                  : Colors.white54,
-                              borderRadius: BorderRadius.circular(
-                                context.radius(8),
-                              ),
+                        SizedBox(height: context.h(10)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.w(25),
+                          ),
+                          child: Text(
+                            data['subtitle'],
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: context.text(16),
                             ),
-                          );
-                        }),
-                      ),
-                    ],
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
             ),
+            SizedBox(height: context.h(25)),
+            SmoothPageIndicator(
+              controller: viewModel.mainController,
+              count: viewModel.text.length,
+              effect: ExpandingDotsEffect(
+                activeDotColor: AppColors.whiteColor,
+                dotColor: Colors.white54,
+                dotHeight: 10,
+                dotWidth: 10,
+                expansionFactor: 3,
+                spacing: 8,
+              ),
+            ),
+            SizedBox(height: context.h(20)),
           ],
         ),
       ),

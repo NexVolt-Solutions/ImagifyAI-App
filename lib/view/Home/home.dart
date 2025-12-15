@@ -7,7 +7,7 @@ import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_list_view.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
-import 'package:genwalls/viewModel/bottom_nav_screen_view_model.dart';
+import 'package:genwalls/viewModel/home_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +21,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
+    return Consumer<HomeViewModel>(
+      builder: (context, homeViewModel, _) {
     return Scaffold(
       backgroundColor: AppColors.blackColor,
       body: Scaffold(
@@ -94,7 +96,7 @@ class _HomeState extends State<Home> {
                     color: AppColors.whiteColor,
                   ),
                   child: Container(
-                    height: context.h(318),
+                        height: context.h(380),
                     width: context.w(double.infinity),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(context.radius(12)),
@@ -140,25 +142,64 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                         SizedBox(height: context.h(13)),
-                        Align(
-                          alignment: Alignment.center,
-                          child: CustomButton(
-                            onPressed: () {
-                              final bottomNavProvider =
-                                  Provider.of<BottomNavScreenViewModel>(
-                                    context,
-                                    listen: false,
-                                  );
-
-                              bottomNavProvider.updateIndex(1);
-                            },
-                            height: context.h(47),
-                            width: context.w(212),
-                            gradient: AppColors.gradient,
-                            text: 'Generate wallpaper',
-                          ),
-                        ),
-
+                            CustomTextField(
+                              controller: homeViewModel.promptController,
+                              validatorType: "name",
+                              hintText: "Enter your prompt...",
+                              prefixIcon: Icon(Icons.text_fields),
+                              hintStyle: TextStyle(
+                                color: AppColors.textFieldSubTitleColor,
+                                fontWeight: FontWeight.w500,
+                                fontSize: context.text(12),
+                              ),
+                              enabledBorderColor: AppColors.textFieldIconColor,
+                            ),
+                            SizedBox(height: context.h(12)),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: CustomButton(
+                                    onPressed: () => homeViewModel.fetchSuggestion(context),
+                                    height: context.h(47),
+                                    width: context.w(160),
+                                    gradient: AppColors.gradient,
+                                    text: homeViewModel.isLoading
+                                        ? 'Please wait...'
+                                        : 'Get Suggestion',
+                                  ),
+                                ),
+                                SizedBox(width: context.w(10)),
+                                Expanded(
+                                  child: CustomButton(
+                                    onPressed: () => homeViewModel.createWallpaper(context),
+                                    height: context.h(47),
+                                    width: context.w(160),
+                                    gradient: AppColors.gradient,
+                                    text: homeViewModel.isCreating
+                                        ? 'Please wait...'
+                                        : 'Generate wallpaper',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (homeViewModel.isLoading || homeViewModel.isCreating) ...[
+                              SizedBox(height: context.h(12)),
+                              const Align(
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(),
+                              ),
+                            ],
+                            if ((homeViewModel.suggestion ?? '').isNotEmpty) ...[
+                              SizedBox(height: context.h(12)),
+                              Text(
+                                'Suggestion: ${homeViewModel.suggestion}',
+                                style: GoogleFonts.poppins(
+                                  color: AppColors.whiteColor,
+                                  fontSize: context.text(14),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                         SizedBox(height: context.h(13)),
                       ],
                     ),
@@ -182,6 +223,8 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
+        );
+      },
     );
   }
 }

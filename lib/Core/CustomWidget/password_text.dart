@@ -18,7 +18,7 @@ class PasswordText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: context.padSym(h: 20, v: 4),
+      padding: EdgeInsets.symmetric(vertical: context.h(4)),
       child: Row(
         children: [
           Icon(icon, color: iconColor, size: context.text(18)),

@@ -28,15 +28,16 @@ class _SignUpState extends State<SignUp> {
         return Scaffold(
           backgroundColor: AppColors.blackColor,
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(64),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                  child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                ),
-                Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-              ],
+            preferredSize: Size.fromHeight(context.h(100)),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: context.h(20)),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                ],
+              ),
             ),
           ),
           body: SafeArea(
@@ -45,8 +46,7 @@ class _SignUpState extends State<SignUp> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                  SizedBox(height: context.h(25)),
-                  NormalText(
+                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     titleText: "Sign Up",
                     titleSize: context.text(20),
@@ -67,7 +67,9 @@ class _SignUpState extends State<SignUp> {
                       ),
                       child: signUpViewModel.profileImage != null
                           ? ClipRRect(
-                              borderRadius: BorderRadius.circular(context.radius(10)),
+                              borderRadius: BorderRadius.circular(
+                                context.radius(10),
+                              ),
                               child: Image.file(
                                 File(signUpViewModel.profileImage!.path),
                                 fit: BoxFit.cover,
@@ -133,6 +135,9 @@ class _SignUpState extends State<SignUp> {
                     ),
                     label: "Password",
                     enabledBorderColor: AppColors.textFieldIconColor,
+                    onChanged: (value) {
+                      signUpViewModel.validatePassword();
+                    },
                   ),
                   SizedBox(height: context.h(16)),
                   CustomTextField(
@@ -159,16 +164,16 @@ class _SignUpState extends State<SignUp> {
                   ),
                   SizedBox(height: context.h(4)),
                   Column(
-                    children: List.generate(signUpViewModel.items.length, (index) {
-                      final isSelected = signUpViewModel.selectedIndex == index;
-                      return GestureDetector(
-                        onTap: () => signUpViewModel.selectRequirementIndex(index),
-                        child: PasswordText(
-                          text: signUpViewModel.items[index],
-                          icon: isSelected ? Icons.check : Icons.cancel,
-                          iconColor:
-                              isSelected ? AppColors.greenColor : AppColors.grayColor,
-                        ),
+                    children: List.generate(signUpViewModel.items.length, (
+                      index,
+                    ) {
+                      final isRequirementMet = signUpViewModel.isRequirementMet(index);
+                      return PasswordText(
+                        text: signUpViewModel.items[index],
+                        icon: isRequirementMet ? Icons.check_circle : Icons.cancel,
+                        iconColor: isRequirementMet
+                            ? AppColors.greenColor
+                            : AppColors.grayColor,
                       );
                     }),
                   ),
@@ -202,53 +207,45 @@ class _SignUpState extends State<SignUp> {
                     ],
                   ),
                   SizedBox(height: context.h(24)),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-                    child: Container(
-                      height: context.h(47.9),
-                      width: context.w(350),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: AppColors.whiteColor),
-                        borderRadius: BorderRadius.circular(
-                          context.radius(context.radius(8)),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            AppAssets.googleIcon,
-                            height: context.h(23.94),
-                            width: context.w(23.94),
-                          ),
-                          SizedBox(width: context.w(8)),
-                          Text(
-                            'Continue with Google',
-                            style: GoogleFonts.poppins(
-                              color: AppColors.grayColor,
-                              fontSize: context.text(14),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                  Container(
+                    height: context.h(47.9),
+                    width: context.w(350),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.whiteColor),
+                      borderRadius: BorderRadius.circular(
+                        context.radius(context.radius(8)),
                       ),
                     ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          AppAssets.googleIcon,
+                          height: context.h(23.94),
+                          width: context.w(23.94),
+                        ),
+                        SizedBox(width: context.w(8)),
+                        Text(
+                          'Continue with Google',
+                          style: GoogleFonts.poppins(
+                            color: AppColors.grayColor,
+                            fontSize: context.text(14),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(height: context.h(24)),
-                  CustomTextRich(
-                    text1: 'Already Have an Account? ',
-                    text2: 'SignIn',
-                    textSize1: context.text(14),
-                    textSize2: context.text(14),
-                  ),
-                  SizedBox(height: context.h(8.06)),
-                  SizedBox(height: context.h(20)),
+                
+                   SizedBox(height: context.h(20)),
                   CustomButton(
                     onPressed: () => signUpViewModel.register(context),
                     height: context.h(48),
                     width: context.w(350),
                     gradient: AppColors.gradient,
-                    text: signUpViewModel.isLoading ? 'Please wait...' : 'Register',
+                    text: signUpViewModel.isLoading
+                        ? 'Please wait...'
+                        : 'Register',
                     iconWidth: null,
                     iconHeight: null,
                     icon: null,
@@ -260,6 +257,14 @@ class _SignUpState extends State<SignUp> {
                       child: CircularProgressIndicator(),
                     ),
                   ],
+                    SizedBox(height: context.h(16)),
+                  CustomTextRich(
+                    text1: 'Already Have an Account? ',
+                    text2: 'SignIn',
+                    textSize1: context.text(14),
+                    textSize2: context.text(14),
+                  ),                   SizedBox(height: context.h(20)),
+
                 ],
               ),
             ),

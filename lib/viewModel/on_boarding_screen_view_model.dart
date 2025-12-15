@@ -30,11 +30,32 @@ class OnBoardingScreenViewModel extends ChangeNotifier {
     },
   ];
 
+  bool _isSyncing = false;
+
   OnBoardingScreenViewModel() {
     mainController.addListener(() {
-      if (textController.hasClients &&
-          textController.page != mainController.page) {
-        textController.jumpTo(mainController.position.pixels);
+      if (!_isSyncing && textController.hasClients) {
+        final mainPage = mainController.page?.round() ?? 0;
+        final textPage = textController.page?.round() ?? 0;
+        if (mainPage != textPage) {
+          _isSyncing = true;
+          textController.jumpToPage(mainPage);
+          updatePage(mainPage);
+          _isSyncing = false;
+        }
+      }
+    });
+
+    textController.addListener(() {
+      if (!_isSyncing && mainController.hasClients) {
+        final textPage = textController.page?.round() ?? 0;
+        final mainPage = mainController.page?.round() ?? 0;
+        if (textPage != mainPage) {
+          _isSyncing = true;
+          mainController.jumpToPage(textPage);
+          updatePage(textPage);
+          _isSyncing = false;
+        }
       }
     });
   }

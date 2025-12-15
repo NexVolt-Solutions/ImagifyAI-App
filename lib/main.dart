@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/myApp/my_app.dart';
+import 'package:genwalls/view/my_app.dart';
 
 void main() {
   runApp(const MyApp());
