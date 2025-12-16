@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:genwalls/Core/Constants/api_constants.dart';
 import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/models/auth/logout_response.dart';
@@ -32,13 +33,86 @@ class AuthRepository {
       'confirm_password': confirmPassword,
     };
 
-    final json = await _apiService.postMultipart(
-      path: ApiConstants.register,
-      fields: fields,
-      file: profileImage,
-    );
+    if (kDebugMode) {
+      print('=== AUTH REPOSITORY: REGISTER ===');
+      print('Endpoint: ${ApiConstants.baseUrl}${ApiConstants.register}');
+      print('Fields: $fields');
+      print('Has file: ${profileImage != null}');
+    }
 
-    return RegisterResponse.fromJson(json);
+    try {
+      if (kDebugMode) {
+        print('Calling _apiService.postMultipart...');
+      }
+      
+      final json = await _apiService.postMultipart(
+        path: ApiConstants.register,
+        fields: fields,
+        file: profileImage,
+      );
+
+      if (kDebugMode) {
+        print('=== API RESPONSE RECEIVED ===');
+        print('Response JSON: $json');
+        print('Response keys: ${json.keys.toList()}');
+      }
+
+      // Validate JSON structure before parsing
+      if (json.isEmpty) {
+        if (kDebugMode) {
+          print('ERROR: Empty response from server');
+        }
+        throw ApiException('Empty response from server');
+      }
+
+      try {
+        if (kDebugMode) {
+          print('Parsing RegisterResponse from JSON...');
+        }
+        final response = RegisterResponse.fromJson(json);
+        if (kDebugMode) {
+          print('RegisterResponse parsed successfully');
+          print('Status: ${response.status}');
+          print('Message: ${response.message}');
+        }
+        return response;
+      } catch (e, stackTrace) {
+        if (kDebugMode) {
+          print('=== ERROR PARSING RegisterResponse ===');
+          print('Exception: $e');
+          print('Stack trace: $stackTrace');
+          print('JSON that failed to parse: $json');
+        }
+        // If parsing fails, check if there's an error message in the response
+        final errorMsg = json['message']?.toString() ?? 
+                        json['error']?.toString() ?? 
+                        'Failed to parse registration response';
+        throw ApiException(errorMsg);
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('=== ERROR IN AUTH REPOSITORY REGISTER ===');
+        print('Exception type: ${e.runtimeType}');
+        print('Exception: $e');
+        print('Stack trace: $stackTrace');
+      }
+      
+      // Re-throw ApiException as-is
+      if (e is ApiException) {
+        if (kDebugMode) {
+          print('Re-throwing ApiException: ${e.message}');
+        }
+        rethrow;
+      }
+      
+      // Wrap other exceptions with more context
+      if (kDebugMode) {
+        print('Wrapping exception as ApiException');
+      }
+      throw ApiException(
+        'Registration failed: ${e.toString()}',
+      );
+    }
   }
 
   Future<VerifyResponse> verifyEmail({

@@ -7,6 +7,7 @@ import 'package:genwalls/Core/utils/snackbar_util.dart';
 import 'package:genwalls/models/auth/register_response.dart';
 import 'package:genwalls/repositories/auth_repository.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class SignUpViewModel extends ChangeNotifier {
 
@@ -92,7 +93,18 @@ class SignUpViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
+    if (kDebugMode) {
+      print('=== REGISTRATION START ===');
+      print('Username: ${usernameController.text.trim()}');
+      print('Email: ${emailController.text.trim()}');
+      print('Has profile image: ${profileImage != null}');
+    }
+
     try {
+      if (kDebugMode) {
+        print('Calling _authRepository.register...');
+      }
+      
       final RegisterResponse response = await _authRepository.register(
         username: usernameController.text.trim(),
         email: emailController.text.trim(),
@@ -101,7 +113,29 @@ class SignUpViewModel extends ChangeNotifier {
         profileImage: profileImage,
       );
 
+      if (kDebugMode) {
+        print('=== REGISTRATION RESPONSE ===');
+        print('Response status: ${response.status}');
+        print('Response message: ${response.message}');
+        print('Response data: ${response.data}');
+      }
+
+      // Check if registration was successful
+      if (response.status == false) {
+        final message = response.message ?? 'Registration failed. Please try again.';
+        errorMessage = message;
+        if (kDebugMode) {
+          print('Registration failed with status: false');
+          print('Error message: $message');
+        }
+        _showMessage(context, message);
+        return;
+      }
+
       final message = response.message ?? 'Registered successfully';
+      if (kDebugMode) {
+        print('Registration successful! Navigating to verification screen...');
+      }
       _showMessage(context, message, isError: false);
       Navigator.pushNamed(
         context,
@@ -110,13 +144,69 @@ class SignUpViewModel extends ChangeNotifier {
       );
     } on ApiException catch (e) {
       errorMessage = e.message;
+      if (kDebugMode) {
+        print('=== API EXCEPTION ===');
+        print('Status code: ${e.statusCode}');
+        print('Message: ${e.message}');
+        print('Full exception: $e');
+      }
       _showMessage(context, e.message);
-    } catch (_) {
-      errorMessage = 'Something went wrong. Please try again.';
+    } on SocketException catch (e) {
+      errorMessage = 'No internet connection. Please check your network and try again.';
+      if (kDebugMode) {
+        print('=== SOCKET EXCEPTION ===');
+        print('Message: ${e.message}');
+        print('OS Error: ${e.osError}');
+        print('Full exception: $e');
+      }
+      _showMessage(context, errorMessage!);
+    } on HttpException catch (e) {
+      errorMessage = 'Network error: ${e.message}';
+      if (kDebugMode) {
+        print('=== HTTP EXCEPTION ===');
+        print('Message: ${e.message}');
+        print('Full exception: $e');
+      }
+      _showMessage(context, errorMessage!);
+    } on FormatException catch (e) {
+      errorMessage = 'Invalid response from server. Please try again.';
+      if (kDebugMode) {
+        print('=== FORMAT EXCEPTION ===');
+        print('Message: ${e.message}');
+        print('Source: ${e.source}');
+        print('Offset: ${e.offset}');
+        print('Full exception: $e');
+      }
+      _showMessage(context, errorMessage!);
+    } catch (e, stackTrace) {
+      // Provide more detailed error message
+      if (kDebugMode) {
+        print('=== UNKNOWN EXCEPTION ===');
+        print('Exception type: ${e.runtimeType}');
+        print('Exception: $e');
+        print('Stack trace: $stackTrace');
+      }
+      
+      final errorMsg = e.toString();
+      if (errorMsg.contains('Exception') || errorMsg.contains('Error')) {
+        errorMessage = errorMsg.split(':').last.trim();
+        if (errorMessage!.isEmpty || errorMessage == errorMsg) {
+          errorMessage = 'Registration failed. Please check your connection and try again.';
+        }
+      } else {
+        errorMessage = 'Registration failed. Please check your connection and try again.';
+      }
+      
+      if (kDebugMode) {
+        print('Final error message: $errorMessage');
+      }
       _showMessage(context, errorMessage!);
     } finally {
       isLoading = false;
       notifyListeners();
+      if (kDebugMode) {
+        print('=== REGISTRATION END ===');
+      }
     }
   }
 
