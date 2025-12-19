@@ -2,31 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/auth/forgot_password_response.dart';
 import 'package:genwalls/repositories/auth_repository.dart';
 
-class ForgotPasswordViewModel extends ChangeNotifier {
-  ForgotPasswordViewModel({AuthRepository? authRepository})
+class SetNewPasswordViewModel extends ChangeNotifier {
+  SetNewPasswordViewModel({AuthRepository? authRepository})
       : _authRepository = authRepository ?? AuthRepository();
 
   final AuthRepository _authRepository;
 
   final formKey = GlobalKey<FormState>();
-  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
 
   bool isLoading = false;
   String? errorMessage;
-  String? _email; // Store email for OTP verification flow
 
-  String? get email => _email;
-
-  Future<void> sendReset(BuildContext context) async {
+  Future<void> setNewPassword(BuildContext context) async {
     if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
 
-    final email = emailController.text.trim();
-    if (email.isEmpty) {
-      _showMessage(context, 'Email is required');
+    final password = passwordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+
+    if (password != confirmPassword) {
+      _showMessage(context, 'Password and Confirm Password must match');
       return;
     }
 
@@ -35,17 +34,20 @@ class ForgotPasswordViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final ForgotPasswordResponse response =
-          await _authRepository.forgotPassword(email: email);
-      _email = email; // Store email for next step
-      final message = response.message ?? 'OTP sent to your email';
+      final response = await _authRepository.setNewPassword(
+        password: password,
+        confirmPassword: confirmPassword,
+      );
+
+      final message = response['message']?.toString() ?? 
+                     'Password updated successfully! Your account is secure';
       _showMessage(context, message, isError: false);
       
-      // Navigate to OTP verification screen
-      Navigator.pushNamed(
+      // Navigate to login screen
+      Navigator.pushNamedAndRemoveUntil(
         context,
-        RoutesName.ForgotVerificationScreen,
-        arguments: email,
+        RoutesName.SignInScreen,
+        (route) => false,
       );
     } on ApiException catch (e) {
       errorMessage = e.message;
@@ -65,7 +67,9 @@ class ForgotPasswordViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 }
+

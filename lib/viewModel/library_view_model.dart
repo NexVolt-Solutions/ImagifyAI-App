@@ -3,6 +3,8 @@ import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/Core/utils/snackbar_util.dart';
 import 'package:genwalls/models/wallpaper/wallpaper.dart';
 import 'package:genwalls/repositories/wallpaper_repository.dart';
+import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:provider/provider.dart';
 
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({WallpaperRepository? wallpaperRepository})
@@ -17,12 +19,20 @@ class LibraryViewModel extends ChangeNotifier {
   Future<void> loadWallpapers(BuildContext context) async {
     if (isLoading) return;
 
+    // Get access token from SignInViewModel
+    final signInViewModel = context.read<SignInViewModel>();
+    final accessToken = signInViewModel.accessToken;
+
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      wallpapers = await _wallpaperRepository.fetchWallpapers();
+      if (accessToken == null || accessToken.isEmpty) {
+        throw ApiException('Access token is required. Please login again.');
+      }
+      
+      wallpapers = await _wallpaperRepository.fetchWallpapers(accessToken: accessToken);
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);

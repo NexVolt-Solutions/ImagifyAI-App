@@ -31,7 +31,10 @@ class SizeContiner extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: height1,
-        width: width1,
+        width: width1 == double.infinity ? null : width1, // Allow flexible width
+        constraints: width1 == double.infinity 
+            ? BoxConstraints(minWidth: 0, maxWidth: double.infinity)
+            : null,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(context.radius(8)),
           border: Border.all(
@@ -40,13 +43,17 @@ class SizeContiner extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: context.padSym(h: 12),
+          padding: context.padSym(h: 8), // Reduced horizontal padding
           child: Center(
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   height: height2,
-                  width: width2,
+                  constraints: BoxConstraints(
+                    minWidth: width2,
+                    maxWidth: width2 * 1.5, // Allow container to grow slightly
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: isSelected
@@ -60,19 +67,26 @@ class SizeContiner extends StatelessWidget {
                       text1,
                       style: GoogleFonts.poppins(
                         color: AppColors.whiteColor,
-                        fontSize: context.text(10),
+                        fontSize: context.text(9), // Slightly smaller font
                         fontWeight: FontWeight.w400,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
-                SizedBox(width: context.w(8)),
-                Text(
-                  text2,
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: context.text(12),
-                    fontWeight: FontWeight.w500,
+                SizedBox(width: context.w(6)), // Reduced spacing
+                Flexible(
+                  child: Text(
+                    text2,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: context.text(11), // Slightly smaller font
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
                 ),
               ],

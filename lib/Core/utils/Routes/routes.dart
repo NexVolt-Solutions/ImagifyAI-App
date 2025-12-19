@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/view/Auth/ForgotScreen/Widget/AccountCreated/accound_created.dart';
 import 'package:genwalls/view/Auth/ForgotScreen/Widget/ConfirmEmail/confirm_email.dart';
+import 'package:genwalls/view/Auth/ForgotScreen/Widget/SetNewPassword/set_new_password_screen.dart';
 import 'package:genwalls/view/Auth/ForgotScreen/Widget/Verification/forgot_verification_screen.dart';
 import 'package:genwalls/view/Auth/ForgotScreen/forgot_screen.dart';
 import 'package:genwalls/view/Auth/SignIn/sign_in.dart';
@@ -99,6 +100,11 @@ class Routes {
         return MaterialPageRoute(
           settings: settings,
           builder: (_) => ForgotVerificationScreen(),
+        );
+      case RoutesName.SetNewPasswordScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const SetNewPasswordScreen(),
         );
       case RoutesName.AccountCreatedScreen:
         return MaterialPageRoute(

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
@@ -55,8 +56,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),              Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
-              Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+              SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),              SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
 
               Positioned(
                 right: 20,

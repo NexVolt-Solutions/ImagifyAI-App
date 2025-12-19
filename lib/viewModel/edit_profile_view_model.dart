@@ -75,7 +75,7 @@ class EditProfileViewModel extends ChangeNotifier {
       }
     } catch (e) {
       // Handle image picker errors silently or show message if needed
-      errorMessage = 'Failed to pick image';
+      errorMessage = 'Couldn\'t select image. Please try again!';
       notifyListeners();
     }
   }
@@ -92,17 +92,26 @@ class EditProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (currentUser?.id == null || currentUser!.id!.isEmpty) {
+        throw ApiException('User ID is required to update profile picture');
+      }
+
       final response = await _authRepository.updateProfilePicture(
         profileImage: profileImage!,
         accessToken: accessToken,
+        userId: currentUser!.id!,
       );
 
-      final message = response.message ?? 'Profile picture updated successfully';
+      final message = response.message ?? 'Your profile picture has been updated!';
       SnackbarUtil.showTopSnackBar(context, message, isError: false);
       
       // Reload user data after update only if requested
-      if (reloadUserData) {
-        currentUser = await _authRepository.getCurrentUser(accessToken: accessToken);
+      if (reloadUserData && currentUser?.id != null) {
+        final userId = currentUser!.id!;
+        currentUser = await _authRepository.getCurrentUser(
+          accessToken: accessToken,
+          userId: userId,
+        );
         loadUserData(currentUser);
         
         // Also update ProfileScreenViewModel
@@ -114,7 +123,7 @@ class EditProfileViewModel extends ChangeNotifier {
       errorMessage = e.message;
       SnackbarUtil.showTopSnackBar(context, e.message);
     } catch (_) {
-      errorMessage = 'Failed to update profile picture';
+      errorMessage = 'Couldn\'t update your photo. Let\'s try again!';
       SnackbarUtil.showTopSnackBar(context, errorMessage!);
     } finally {
       isUpdatingPicture = false;
@@ -145,7 +154,7 @@ class EditProfileViewModel extends ChangeNotifier {
 
     // Validate password fields
     if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-      SnackbarUtil.showTopSnackBar(context, 'Please fill all password fields');
+      SnackbarUtil.showTopSnackBar(context, 'Please complete all password fields');
       return;
     }
 
@@ -159,14 +168,19 @@ class EditProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (currentUser?.id == null || currentUser!.id!.isEmpty) {
+        throw ApiException('User ID is required to update password');
+      }
+
       final response = await _authRepository.updatePassword(
         oldPassword: oldPassword,
         password: newPassword,
         confirmPassword: confirmPassword,
-        accessToken: accessToken,
+        accessToken: accessToken!,
+        userId: currentUser!.id!,
       );
 
-      final message = response.message ?? 'Password updated successfully';
+      final message = response.message ?? 'Password updated successfully! Your account is secure';
       SnackbarUtil.showTopSnackBar(context, message, isError: false);
       
       // Clear password fields after successful update
@@ -177,7 +191,7 @@ class EditProfileViewModel extends ChangeNotifier {
       errorMessage = e.message;
       SnackbarUtil.showTopSnackBar(context, e.message);
     } catch (_) {
-      errorMessage = 'Failed to update password';
+      errorMessage = 'Couldn\'t update password. Please try again!';
       SnackbarUtil.showTopSnackBar(context, errorMessage!);
     } finally {
       isLoading = false;
@@ -187,9 +201,9 @@ class EditProfileViewModel extends ChangeNotifier {
 
   Future<void> updateProfile({
     required BuildContext context,
-    String? accessToken,
+    required String accessToken,
   }) async {
-    if (isLoading || accessToken == null) return;
+    if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
 
     // Validate password fields if they are filled
@@ -208,6 +222,10 @@ class EditProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      if (currentUser?.id == null || currentUser!.id!.isEmpty) {
+        throw ApiException('User ID is required to update profile');
+      }
+
       // Update user profile information
       final response = await _authRepository.updateUser(
         firstName: firstNameController.text.trim(),
@@ -215,9 +233,10 @@ class EditProfileViewModel extends ChangeNotifier {
         phoneNumber: phoneNumberController.text.trim(),
         username: usernameController.text.trim(),
         accessToken: accessToken,
+        userId: currentUser!.id!,
       );
 
-      final message = response.message ?? 'Profile updated successfully';
+      final message = response.message ?? 'Your profile has been updated!';
       SnackbarUtil.showTopSnackBar(context, message, isError: false);
       
       // Update profile picture if selected (don't reload user data here)
@@ -235,8 +254,14 @@ class EditProfileViewModel extends ChangeNotifier {
       }
       
       // Reload user data only once after all updates complete
-      currentUser = await _authRepository.getCurrentUser(accessToken: accessToken);
-      loadUserData(currentUser);
+      if (currentUser?.id != null) {
+        final userId = currentUser!.id!;
+        currentUser = await _authRepository.getCurrentUser(
+          accessToken: accessToken,
+          userId: userId,
+        );
+        loadUserData(currentUser);
+      }
       
       // Also update ProfileScreenViewModel
       final profileViewModel = context.read<ProfileScreenViewModel>();
@@ -248,7 +273,7 @@ class EditProfileViewModel extends ChangeNotifier {
       errorMessage = e.message;
       SnackbarUtil.showTopSnackBar(context, e.message);
     } catch (_) {
-      errorMessage = 'Failed to update profile';
+      errorMessage = 'Couldn\'t save your changes. Let\'s try again!';
       SnackbarUtil.showTopSnackBar(context, errorMessage!);
     } finally {
       isLoading = false;

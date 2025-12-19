@@ -5,7 +5,8 @@ class AppColors {
   static const Color whiteColor = Colors.white;
   static const Color grayColor = Colors.grey;
   static const Color greenColor = Colors.green;
-  static const Color bottomBarColor = Color(0x171722F2);
+  static const Color bottomBarColor = Color(0xFF171722);
+  static const Color bottomBarIconColor = Color(0xFF6C7278);
 
   static const Color subTitleColor = Color(0xFFA2A2A2);
   static const Color primeryColor = Color(0xFF9F56FE);

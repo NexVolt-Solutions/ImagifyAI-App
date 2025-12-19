@@ -18,6 +18,7 @@ class RoutesName {
   static const String ContactScreen = 'contact_screen';
   static const String ConfirmEmailScreen = 'confirm_email_screen';
   static const String ForgotVerificationScreen = 'forgot_verificatio_screen';
+  static const String SetNewPasswordScreen = 'set_new_password_screen';
   static const String AccountCreatedScreen = 'account_created_screen';
   static const String LibraryScreen = 'library_screen';
 }

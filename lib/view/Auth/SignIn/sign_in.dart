@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:flutter_svg/svg.dart';
+  import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
+  import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,133 +31,122 @@ class _SignInState extends State<SignIn> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned(
-                  child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                Align(
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
                 ),
-                Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.contain),
               ],
             ),
           ),
           body: SafeArea(
             child: Form(
               key: signInViewModel.formKey,
-              child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-                children: [
-                  SizedBox(height: context.h(25)),
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    titleText: "Sign In",
-                    titleSize: context.text(20),
-                    titleWeight: FontWeight.w600,
-                    titleColor: AppColors.primeryColor,
-                    titleAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: context.h(11)),
-                  CustomTextField(
-                    controller: signInViewModel.emailController,
-                    prefixIcon: Icon(Icons.email),
-                    validatorType: "email",
-                    hintText: 'Enter your email',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
+              child: Padding(
+                padding: context.padSym(h: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(height: context.h(25)),
+                    NormalText(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      titleText: "Sign In",
+                      titleSize: context.text(20),
+                      titleWeight: FontWeight.w600,
+                      titleColor: AppColors.primeryColor,
+                      titleAlign: TextAlign.center,
                     ),
-                    label: "Email",
-                    enabledBorderColor: AppColors.textFieldIconColor,
-                  ),
-                  SizedBox(height: context.h(16)),
-                  CustomTextField(
-                    controller: signInViewModel.passwordController,
-                    prefixIcon: Icon(Icons.lock),
-                    validatorType: "password",
-                    hintText: 'Enter your password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
+                    SizedBox(height: context.h(11)),
+                    CustomTextField(
+                      controller: signInViewModel.emailController,
+                      prefixIcon: Icon(Icons.email),
+                      validatorType: "email",
+                      hintText: 'Enter your email',
+                      hintStyle: TextStyle(
+                        color: AppColors.textFieldSubTitleColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: context.text(12),
+                      ),
+                      label: "Email",
+                      enabledBorderColor: AppColors.textFieldIconColor,
                     ),
-                    label: "Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
-                  ),
-                  SizedBox(height: context.h(24)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: signInViewModel.rememberMe,
-                            checkColor: AppColors.greenColor,
-                            side: BorderSide(color: AppColors.whiteColor),
-                            fillColor:
-                                WidgetStateProperty.resolveWith<Color>((states) {
-                              return AppColors.blackColor;
-                            }),
-                            onChanged: signInViewModel.toggleRemember,
-                          ),
-                          Text(
-                            'Remember me',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontSize: context.text(14),
-                              fontWeight: FontWeight.w500,
+                    SizedBox(height: context.h(16)),
+                    CustomTextField(
+                      controller: signInViewModel.passwordController,
+                      prefixIcon: Icon(Icons.lock),
+                      validatorType: "password",
+                      hintText: 'Enter your password',
+                      hintStyle: TextStyle(
+                        color: AppColors.textFieldSubTitleColor,
+                        fontWeight: FontWeight.w500,
+                        fontSize: context.text(12),
+                      ),
+                      label: "Password",
+                      enabledBorderColor: AppColors.textFieldIconColor,
+                    ),
+                    SizedBox(height: context.h(24)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: signInViewModel.rememberMe,
+                              checkColor: AppColors.greenColor,
+                              side: BorderSide(color: AppColors.whiteColor),
+                              fillColor:
+                                  WidgetStateProperty.resolveWith<Color>((states) {
+                                return AppColors.blackColor;
+                              }),
+                              onChanged: signInViewModel.toggleRemember,
                             ),
-                          ),
-                        ],
-                      ),
-                      InkWell(
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            RoutesName.ConfirmEmailScreen,
-                          );
-                        },
-                        child: Text(
-                          'Forgot Password?',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.primeryColor,
-                            fontSize: context.text(14),
-                            fontWeight: FontWeight.w500,
-                          ),
+                            Text(
+                              'Remember me',
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: context.text(14),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: context.h(40)),
-                  CustomButton(
-                    onPressed: () => signInViewModel.login(context),
-                    height: context.h(48),
-                    width: context.w(350),
-                    gradient: AppColors.gradient,
-                    text: signInViewModel.isLoading ? 'Please wait...' : 'Login',
-                    iconWidth: null,
-                    iconHeight: null,
-                    icon: null,
-                  ),
-                  if (signInViewModel.isLoading) ...[
-                    SizedBox(height: context.h(12)),
-                    const Align(
-                      alignment: Alignment.center,
-                      child: CircularProgressIndicator(),
+                        CustomTextRich(
+                           text2: 'Forgot Password?',
+                           textSize2: context.text(14),
+                          onTap2: () {
+                            Navigator.pushNamed(context, RoutesName.ForgotScreen);
+                          },
+                        ),
+                      ],
                     ),
+                    SizedBox(height: context.h(16)),
+                  CustomTextRich(
+                           text1: 'Don\'t have an account? ',
+                           text2: 'SignUp',
+                           textSize1: context.text(14),
+                           textSize2: context.text(14),
+                          onTap2: () {
+                            Navigator.pushNamed(context, RoutesName.SignUpScreen);
+                          },
+                        ),
+                    Expanded(child: SizedBox()),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: CustomButton(
+                        onPressed: () => signInViewModel.login(context),
+                        height: context.h(48),
+                        width: context.w(350),
+                        gradient: AppColors.gradient,
+                        text: signInViewModel.isLoading ? 'Signing you in...' : 'Sign In',
+                        iconWidth: null,
+                        iconHeight: null,
+                        icon: null,
+                      ),
+                    ),
+                    SizedBox(height: context.h(20)),
+                    
                   ],
-                  SizedBox(height: context.h(40)),
-                  CustomButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, RoutesName.SignUpScreen);
-                    },
-                    height: context.h(48),
-                    width: context.w(350),
-                    gradient: AppColors.gradient,
-                    text: 'Register',
-                    iconWidth: null,
-                    iconHeight: null,
-                    icon: null,
-                  ),
-                ],
+                ),
               ),
             ),
           ),

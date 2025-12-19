@@ -12,12 +12,13 @@ class CustomTextRich extends StatelessWidget {
     this.text2,
     this.textSize1,
     this.textSize2,
+    this.onTap2,
   });
   final String? text1;
   final String? text2;
   final double? textSize1;
   final double? textSize2;
-
+  final VoidCallback? onTap2;
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -30,8 +31,8 @@ class CustomTextRich extends StatelessWidget {
               TextSpan(
                 text: text1,
                 style: GoogleFonts.poppins(
-                  color: Colors.grey,
-                  fontSize: context.text(14),
+                    color: AppColors.textFieldSubTitleColor,
+                  fontSize: textSize1 ?? textSize2 ??   context.text(14),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -39,12 +40,12 @@ class CustomTextRich extends StatelessWidget {
                 text: text2,
                 style: GoogleFonts.poppins(
                   color: AppColors.primeryColor,
-                  fontSize: context.text(14),
+                  fontSize: textSize2 ?? context.text(14),
                   fontWeight: FontWeight.w500,
                 ),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
-                    Navigator.pushNamed(context, RoutesName.SignInScreen);
+                    onTap2?.call();
                   },
               ),
             ],

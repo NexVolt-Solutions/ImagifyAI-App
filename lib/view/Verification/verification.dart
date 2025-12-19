@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
@@ -20,6 +21,8 @@ class Verification extends StatefulWidget {
 
 class _VerificationState extends State<Verification> {
   bool _initialized = false;
+  // Create formKey in widget state to ensure uniqueness per widget instance
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void didChangeDependencies() {
@@ -64,15 +67,15 @@ class _VerificationState extends State<Verification> {
               alignment: Alignment.center,
               children: [
                 Positioned(
-                  child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
                 ),
-                Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
               ],
             ),
           ),
           body: SafeArea(
             child: Form(
-              key: verificationViewModel.formKey,
+              key: _formKey,
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
@@ -162,12 +165,12 @@ class _VerificationState extends State<Verification> {
                   ),
                   SizedBox(height: context.h(40)),
                   CustomButton(
-                    onPressed: () => verificationViewModel.verify(context),
+                    onPressed: () => verificationViewModel.verify(context, formKey: _formKey),
                     height: context.h(48),
                     width: context.w(350),
                     gradient: AppColors.gradient,
                     text:
-                        verificationViewModel.isLoading ? 'Please wait...' : 'Verify',
+                        verificationViewModel.isLoading ? 'Verifying...' : 'Verify Account',
                     iconWidth: null,
                     iconHeight: null,
                     icon: null,

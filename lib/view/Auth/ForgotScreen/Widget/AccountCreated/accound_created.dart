@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
@@ -21,9 +22,9 @@ class AccoundCreated extends StatelessWidget {
             alignment: Alignment.center,
             children: [
               Positioned(
-                child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
               ),
-              Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+              SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
             ],
           ),
         ),

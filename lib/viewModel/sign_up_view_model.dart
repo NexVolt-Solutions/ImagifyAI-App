@@ -13,7 +13,8 @@ class SignUpViewModel extends ChangeNotifier {
 
   final AuthRepository _authRepository;
 
-  final formKey = GlobalKey<FormState>();
+  // FormKey is no longer stored here to avoid GlobalKey conflicts
+  // It will be passed from the widget when needed
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -80,7 +81,7 @@ class SignUpViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(BuildContext context) async {
+  Future<void> register(BuildContext context, {required GlobalKey<FormState> formKey}) async {
     if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
 
@@ -114,27 +115,35 @@ class SignUpViewModel extends ChangeNotifier {
       );
 
       if (kDebugMode) {
-        print('=== REGISTRATION RESPONSE ===');
+        print('=== REGISTRATION RESPONSE RECEIVED IN VIEW MODEL ===');
         print('Response status: ${response.status}');
         print('Response message: ${response.message}');
         print('Response data: ${response.data}');
+        print('Response type: ${response.runtimeType}');
       }
 
-      // Check if registration was successful
+   
       if (response.status == false) {
         final message = response.message ?? 'Registration failed. Please try again.';
         errorMessage = message;
         if (kDebugMode) {
-          print('Registration failed with status: false');
+          print('=== REGISTRATION FAILED ===');
+          print('Status: false');
           print('Error message: $message');
+          print('Response data: ${response.data}');
         }
         _showMessage(context, message);
         return;
       }
 
+      // Registration successful (status is null/true or we have success message)
       final message = response.message ?? 'Registered successfully';
       if (kDebugMode) {
-        print('Registration successful! Navigating to verification screen...');
+        print('=== REGISTRATION SUCCESSFUL ===');
+        print('Status: ${response.status ?? "null (success by 200 status code)"}');
+        print('Message: $message');
+        print('Navigating to verification screen...');
+        print('Email for verification: ${emailController.text.trim()}');
       }
       _showMessage(context, message, isError: false);
       Navigator.pushNamed(
@@ -142,6 +151,10 @@ class SignUpViewModel extends ChangeNotifier {
         RoutesName.VerificationScreen,
         arguments: emailController.text.trim(),
       );
+      
+      if (kDebugMode) {
+        print('=== REGISTRATION FLOW COMPLETED ===');
+      }
     } on ApiException catch (e) {
       errorMessage = e.message;
       if (kDebugMode) {
@@ -206,6 +219,8 @@ class SignUpViewModel extends ChangeNotifier {
       notifyListeners();
       if (kDebugMode) {
         print('=== REGISTRATION END ===');
+        print('isLoading: false');
+        print('errorMessage: $errorMessage');
       }
     }
   }

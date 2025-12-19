@@ -1,8 +1,8 @@
 class AppAssets {
   //main Logo
   static const String splashLogo = "assets/logo/splashLogo.png";
-  static const String starLogo = "assets/logo/star.png";
-  static const String genWallsLogo = "assets/logo/genwalllogo.png";
+  static const String starLogo = "assets/logo/star.svg";
+  static const String genWallsLogo = "assets/logo/genwalllogo.svg";
 
   //icons
   static const String googleIcon = "assets/icon/google.png";

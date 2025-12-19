@@ -27,7 +27,16 @@ class CustomListView extends StatelessWidget {
               clipBehavior: Clip.hardEdge,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(context.radius(8)),
-                child: Image.asset(image!, fit: BoxFit.contain),
+                child: image != null && image!.isNotEmpty
+                    ? Image.asset(image!, fit: BoxFit.contain)
+                    : Container(
+                        color: Colors.grey[900],
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: Colors.grey[600],
+                          size: 40,
+                        ),
+                      ),
               ),
             );
           },

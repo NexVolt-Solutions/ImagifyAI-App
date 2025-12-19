@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
 
 class ProfileImage extends StatelessWidget {
   final String imagePath;
@@ -26,11 +25,18 @@ class ProfileImage extends StatelessWidget {
               width: width,
               fit: fit,
               errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  AppAssets.conIcon,
+                return Container(
                   height: height,
                   width: width,
-                  fit: fit,
+                  decoration: const BoxDecoration(
+                    color: Colors.grey,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    size: height != null ? height! * 0.6 : 24,
+                    color: Colors.white70,
+                  ),
                 );
               },
               loadingBuilder: (context, child, loadingProgress) {

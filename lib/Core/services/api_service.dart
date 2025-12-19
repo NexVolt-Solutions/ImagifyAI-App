@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:genwalls/Core/Constants/api_constants.dart';
@@ -28,6 +29,35 @@ class ApiService {
     final uri = _buildUri(path, query);
     final response = await _client.get(uri, headers: _withDefaultHeaders(headers));
     return _handleResponse(response);
+  }
+
+  // Get raw bytes (for image downloads)
+  Future<Uint8List> getRaw(
+    String path, {
+    Map<String, String>? headers,
+    Map<String, String>? query,
+  }) async {
+    final uri = _buildUri(path, query);
+    final response = await _client.get(uri, headers: _withDefaultHeaders(headers));
+    
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return response.bodyBytes;
+    }
+    
+    // If error, parse as JSON for error message
+    final decoded = jsonDecode(response.body);
+    final errorMessage = decoded['message']?.toString() ?? 
+                        decoded['msg']?.toString() ?? 
+                        decoded['error']?.toString();
+    
+    if (errorMessage == null || errorMessage.isEmpty) {
+      throw ApiException(
+        'Failed to download wallpaper',
+        statusCode: response.statusCode,
+      );
+    }
+    
+    throw ApiException(errorMessage, statusCode: response.statusCode);
   }
 
   Future<Map<String, dynamic>> post(
@@ -125,16 +155,20 @@ class ApiService {
           print('Content-Type: $contentType');
         }
         
-        // Use fromPath - it's more efficient and http package auto-detects content-type
-        // The content-type will be automatically set based on file extension
-        request.files.add(await http.MultipartFile.fromPath(
+        // Read file bytes and create MultipartFile with explicit content-type
+        // Some servers require explicit content-type in the multipart file
+        final fileBytes = await file.readAsBytes();
+        final mediaType = http.MediaType.parse(contentType);
+        request.files.add(http.MultipartFile.fromBytes(
           fileFieldName,
-          file.path,
+          fileBytes,
           filename: filename,
+          contentType: mediaType,
         ));
         
         if (kDebugMode) {
           print('File added successfully');
+          print('File bytes length: ${fileBytes.length}');
         }
       } catch (e) {
         if (kDebugMode) {
@@ -151,7 +185,7 @@ class ApiService {
       print('Request fields: ${request.fields}');
       if (request.files.isNotEmpty) {
         for (var file in request.files) {
-          print('File in request: field=${file.field}, filename=${file.filename}, length=${file.length}');
+          print('File in request: field=${file.field}, filename=${file.filename}, length=${file.length}, contentType=${file.contentType}');
         }
       }
       if (file != null) {
@@ -167,8 +201,8 @@ class ApiService {
       if (kDebugMode) {
         print('Sending multipart request...');
       }
-      final streamedResponse = await _client.send(request);
-      final response = await http.Response.fromStream(streamedResponse);
+    final streamedResponse = await _client.send(request);
+    final response = await http.Response.fromStream(streamedResponse);
       
       if (kDebugMode) {
         print('=== HTTP RESPONSE ===');
@@ -177,7 +211,7 @@ class ApiService {
         print('Response headers: ${response.headers}');
       }
       
-      return _handleResponse(response);
+    return _handleResponse(response);
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('=== ERROR IN POST MULTIPART ===');
@@ -336,12 +370,54 @@ class ApiService {
       return decoded;
     }
 
-    // Check for error message in various possible fields
-    final errorMessage = decoded['message']?.toString() ?? 
-                        decoded['msg']?.toString() ?? 
-                        decoded['error']?.toString() ?? 
-                        decoded['errors']?.toString() ??
-                        'Something went wrong';
+    // Extract error message - check multiple possible fields
+    String? errorMessage;
+    
+    // Check 'detail' field first (can be string or array)
+    if (decoded.containsKey('detail')) {
+      final detail = decoded['detail'];
+      if (detail is List && detail.isNotEmpty) {
+        // Handle array format: [{"loc": ["field"], "msg": "Error message", "type": "value_error"}]
+        final firstError = detail[0];
+        if (firstError is Map) {
+          errorMessage = firstError['msg']?.toString() ?? firstError['message']?.toString();
+        }
+        if (errorMessage == null || errorMessage.isEmpty) {
+          errorMessage = detail.toString();
+        }
+      } else {
+        // Handle string format: "Not Found"
+        errorMessage = detail?.toString();
+      }
+    }
+    
+    // Check 'msg' field (used by some APIs)
+    if ((errorMessage == null || errorMessage.isEmpty) && decoded.containsKey('msg')) {
+      errorMessage = decoded['msg']?.toString();
+    }
+    
+    // Check 'message' field
+    if ((errorMessage == null || errorMessage.isEmpty) && decoded.containsKey('message')) {
+      errorMessage = decoded['message']?.toString();
+    }
+    
+    // Check 'error' field
+    if ((errorMessage == null || errorMessage.isEmpty) && decoded.containsKey('error')) {
+      errorMessage = decoded['error']?.toString();
+    }
+    
+    // If no error message found, throw with status code only
+    if (errorMessage == null || errorMessage.isEmpty) {
+      if (kDebugMode) {
+        print('⚠️  No error message found in response');
+        print('Response keys: ${decoded.keys.toList()}');
+        print('Full response: $decoded');
+      }
+      throw ApiException(
+        'API request failed with status ${response.statusCode}',
+        statusCode: response.statusCode,
+      );
+    }
     
     if (kDebugMode) {
       print('=== THROWING API EXCEPTION ===');

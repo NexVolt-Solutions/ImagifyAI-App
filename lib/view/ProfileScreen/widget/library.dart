@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
@@ -41,8 +42,8 @@ class _LibraryState extends State<Library> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
@@ -118,14 +119,22 @@ class _LibraryState extends State<Library> {
                                   ? Image.network(
                                       imageUrl,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Image.asset(
-                                        AppAssets.conIcon,
-                                        fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => Container(
+                                        color: Colors.grey[900],
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.grey[600],
+                                          size: 40,
+                                        ),
                                       ),
                                     )
-                                  : Image.asset(
-                                      AppAssets.conIcon,
-                                      fit: BoxFit.cover,
+                                  : Container(
+                                      color: Colors.grey[900],
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey[600],
+                                        size: 40,
+                                      ),
                                     ),
                             ),
                           ),

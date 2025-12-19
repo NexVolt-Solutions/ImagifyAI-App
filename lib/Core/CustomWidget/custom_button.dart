@@ -44,6 +44,7 @@ class CustomButton extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
               Image.asset(
@@ -55,12 +56,17 @@ class CustomButton extends StatelessWidget {
               ),
               SizedBox(width: context.w(5)),
             ],
-            Text(
-              text ?? "",
-              style: GoogleFonts.poppins(
-                color: AppColors.whiteColor,
-                fontSize: fontSize ?? context.text(16),
-                fontWeight: FontWeight.w500,
+            Flexible(
+              child: Text(
+                text ?? "",
+                style: GoogleFonts.poppins(
+                  color: AppColors.whiteColor,
+                  fontSize: fontSize ?? context.text(16),
+                  fontWeight: FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                textAlign: TextAlign.center,
               ),
             ),
           ],

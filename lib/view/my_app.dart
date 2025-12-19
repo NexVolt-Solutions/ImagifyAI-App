@@ -14,6 +14,8 @@ import 'package:genwalls/viewModel/sign_in_view_model.dart';
 import 'package:genwalls/viewModel/sign_up_view_model.dart';
 import 'package:genwalls/viewModel/splash_screen_view_model.dart';
 import 'package:genwalls/viewModel/verification_view_model.dart';
+import 'package:genwalls/viewModel/forgor_verification_view_model.dart';
+import 'package:genwalls/viewModel/set_new_password_view_model.dart';
 import 'package:provider/provider.dart';
 
 class MyApp extends StatefulWidget {
@@ -36,6 +38,8 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => SignInViewModel()),
         ChangeNotifierProvider(create: (context) => ForgotPasswordViewModel()),
         ChangeNotifierProvider(create: (context) => VerificationViewModel()),
+        ChangeNotifierProvider(create: (context) => ForgorVerificationViewModel()),
+        ChangeNotifierProvider(create: (context) => SetNewPasswordViewModel()),
         ChangeNotifierProvider(create: (context) => LibraryViewModel()),
         ChangeNotifierProvider(create: (context) => HomeViewModel()),
         ChangeNotifierProvider(create: (context) => BottomNavScreenViewModel()),

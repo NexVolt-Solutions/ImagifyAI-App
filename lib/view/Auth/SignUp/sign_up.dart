@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:flutter_svg/svg.dart';
+  import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
@@ -9,6 +10,7 @@ import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
 import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/password_text.dart';
+import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/sign_up_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +23,8 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+    late final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SignUpViewModel>(
@@ -34,15 +38,15 @@ class _SignUpState extends State<SignUp> {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                  Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
                 ],
               ),
             ),
           ),
           body: SafeArea(
             child: Form(
-              key: signUpViewModel.formKey,
+              key: _formKey,
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
@@ -239,13 +243,13 @@ class _SignUpState extends State<SignUp> {
                 
                    SizedBox(height: context.h(20)),
                   CustomButton(
-                    onPressed: () => signUpViewModel.register(context),
+                    onPressed: () => signUpViewModel.register(context, formKey: _formKey),
                     height: context.h(48),
                     width: context.w(350),
                     gradient: AppColors.gradient,
                     text: signUpViewModel.isLoading
-                        ? 'Please wait...'
-                        : 'Register',
+                        ? 'Creating your account...'
+                        : 'Create Account',
                     iconWidth: null,
                     iconHeight: null,
                     icon: null,
@@ -263,6 +267,9 @@ class _SignUpState extends State<SignUp> {
                     text2: 'SignIn',
                     textSize1: context.text(14),
                     textSize2: context.text(14),
+                    onTap2: () {  
+                      Navigator.pushNamed(context, RoutesName.SignInScreen);
+                    },
                   ),                   SizedBox(height: context.h(20)),
 
                 ],

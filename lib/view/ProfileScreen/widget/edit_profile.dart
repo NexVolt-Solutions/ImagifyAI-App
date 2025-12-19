@@ -145,7 +145,7 @@ class _EditProfileState extends State<EditProfile> {
                                 ),
                               )
                             : ProfileImage(
-                                imagePath: editProfileViewModel.currentUser?.profileImageUrl ?? AppAssets.conIcon,
+                                imagePath: editProfileViewModel.currentUser?.profileImageUrl ?? '',
                                 height: context.h(82),
                                 width: context.w(82),
                                 fit: BoxFit.cover,
@@ -373,10 +373,13 @@ class _EditProfileState extends State<EditProfile> {
                         ? null
                         : () {
                             final signInViewModel = context.read<SignInViewModel>();
-                            editProfileViewModel.updateProfile(
-                              context: context,
-                              accessToken: signInViewModel.accessToken,
-                            );
+                            final accessToken = signInViewModel.accessToken;
+                            if (accessToken != null && accessToken.isNotEmpty) {
+                              editProfileViewModel.updateProfile(
+                                context: context,
+                                accessToken: accessToken,
+                              );
+                            }
                           },
                     height: context.h(48),
                     width: context.w(165),

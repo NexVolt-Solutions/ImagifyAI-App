@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/services/api_service.dart';
+import 'package:genwalls/Core/services/token_storage_service.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/models/user/user.dart';
 import 'package:genwalls/repositories/auth_repository.dart';
@@ -78,7 +79,20 @@ class ProfileScreenViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      currentUser = await _authRepository.getCurrentUser(accessToken: accessToken);
+      if (accessToken == null || accessToken.isEmpty) {
+        throw ApiException('Access token is required. Please login again.');
+      }
+
+      // Get userId from TokenStorageService
+      final userId = await TokenStorageService.getUserId();
+      if (userId == null || userId.isEmpty) {
+        throw ApiException('User ID is required. Please login again.');
+      }
+
+      currentUser = await _authRepository.getCurrentUser(
+        accessToken: accessToken,
+        userId: userId,
+      );
       errorMessage = null; // Clear any previous errors on success
     } on ApiException catch (e) {
       errorMessage = e.message;

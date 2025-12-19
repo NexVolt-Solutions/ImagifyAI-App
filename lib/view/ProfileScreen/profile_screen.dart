@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
@@ -46,18 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         
         return Scaffold(
           backgroundColor: AppColors.blackColor,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(64),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                  child: Image.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                ),
-                Image.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-              ],
-            ),
-          ),
           body: SafeArea(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: context.h(20)),
@@ -65,7 +52,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: context.h(20)),
                 Center(
                   child: ProfileImage(
-                    imagePath: user?.profileImageUrl ?? AppAssets.conIcon,
+                    imagePath: user?.profileImageUrl ?? '',
                     height: context.h(100),
                     width: context.h(100),
                     fit: BoxFit.cover,
@@ -155,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   iconWidth: null,
                   iconHeight: null,
                   icon: null,
-                ),
+                ),SizedBox(height: context.h(100)),
               ],
             ),
           ),
