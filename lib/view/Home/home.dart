@@ -9,7 +9,6 @@ import 'package:genwalls/Core/CustomWidget/custom_list_view.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
 import 'package:genwalls/models/user/user.dart';
 import 'package:genwalls/viewModel/home_view_model.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
@@ -36,40 +35,21 @@ class _HomeState extends State<Home> {
     }
     
     // Load user data when screen initializes
-    // Add a small delay to ensure token is available after login
+    // loadCurrentUser now has a fallback to read from storage directly
+    // so we can call it even if SignInViewModel hasn't loaded tokens yet
     final homeViewModel = context.read<HomeViewModel>();
-    final signInViewModel = context.read<SignInViewModel>();
     
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        if (kDebugMode) {
-          print('--- Checking for access token ---');
-          print('SignInViewModel accessToken: ${signInViewModel.accessToken != null ? "Present" : "Missing"}');
-        }
-        
-        // Wait a bit to ensure token is available after login navigation
-        // Also wait for SignInViewModel to finish loading tokens from storage
-        await Future.delayed(const Duration(milliseconds: 500));
+        // Small delay to ensure context is fully ready
+        await Future.delayed(const Duration(milliseconds: 200));
         
         if (mounted) {
-          final token = signInViewModel.accessToken;
           if (kDebugMode) {
-            print('After delay - Access token: ${token != null && token.isNotEmpty ? "Present" : "Missing"}');
-            if (token != null) {
-              print('Token length: ${token.length}');
-            }
+            print('✅ Calling loadCurrentUser (with storage fallback)...');
           }
-          
-          if (mounted && token != null && token.isNotEmpty) {
-            if (kDebugMode) {
-              print('✅ Token available, calling loadCurrentUser...');
-            }
-            homeViewModel.loadCurrentUser(context);
-          } else {
-            if (kDebugMode) {
-              print('❌ Token not available, skipping loadCurrentUser');
-            }
-          }
+          // loadCurrentUser will handle token retrieval with fallback to storage
+          homeViewModel.loadCurrentUser(context);
         }
       }
     });

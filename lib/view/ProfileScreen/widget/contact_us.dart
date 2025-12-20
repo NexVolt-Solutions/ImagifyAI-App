@@ -211,7 +211,7 @@ class _ContactUsState extends State<ContactUs> {
             ),
             SizedBox(height: context.h(100)),
             CustomButton(
-              height: context.h(48),
+               
               width: context.w(350),
               text: "Save Changes",
               borderColor: null,

@@ -1,10 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/on_boarding_screen_view_model.dart';
@@ -25,58 +23,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.blackColor,
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
-          bottom: context.h(43),
-          left: context.w(20),
-          right: context.w(20),
-        ),
-        child: CustomButton(
-          height: context.h(45),
-          width: context.w(300),
-          gradient: AppColors.gradient,
-          text: viewModel.text[viewModel.currentPage]['buttonText'],
-          icon: null,
-          onPressed: () {
-            if (viewModel.currentPage < viewModel.text.length - 1) {
-              viewModel.mainController.nextPage(
-                duration: const Duration(milliseconds: 350),
-                curve: Curves.easeInOut,
-              );
-            } else {
-              Navigator.pushReplacementNamed(context, RoutesName.SignUpScreen);
-            }
-          },
-        ),
-      ),
+
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(context.h(100)),
-        child: Padding( 
+        preferredSize: Size.fromHeight(context.h(64)),
+        child: Padding(
           padding: EdgeInsets.symmetric(vertical: context.h(20)),
           child: Stack(
             alignment: Alignment.center,
             children: [
-              SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),              SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+              SvgPicture.asset(AppAssets.starLogo),
 
-              Positioned(
-                right: 20,
-                top: 20,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      RoutesName.SignUpScreen,
-                    );
-                  },
-                  child: NormalText(
-                    titleText: "Skip",
-                    titleSize: context.text(16),
-                    titleWeight: FontWeight.w500,
-                    titleColor: AppColors.whiteColor,
-                  ),
-                ),
-              ),
+              SvgPicture.asset(AppAssets.genWallsLogo),
             ],
           ),
         ),
@@ -84,6 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            SizedBox(height: context.h(20)),
             SizedBox(
               height: context.h(410),
               width: double.infinity,
@@ -93,25 +51,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 itemCount: viewModel.text.length,
                 itemBuilder: (context, index) {
                   final data = viewModel.text[index];
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: context.w(20)),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(context.radius(16)),
-                      child: SizedBox(
-                        height: context.h(410),
-                        width: context.w(350),
-                        child: Image.asset(
-                          data['image'],
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  );
+                  return Image.asset(data['image']);
                 },
               ),
             ),
 
-            SizedBox(height: context.h(40)),
+            SizedBox(height: context.h(66)),
             Expanded(
               child: PageView.builder(
                 controller: viewModel.textController,
@@ -161,19 +106,53 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
             SizedBox(height: context.h(25)),
-            SmoothPageIndicator(
-              controller: viewModel.mainController,
-              count: viewModel.text.length,
-              effect: ExpandingDotsEffect(
-                activeDotColor: AppColors.whiteColor,
-                dotColor: Colors.white54,
-                dotHeight: 10,
-                dotWidth: 10,
-                expansionFactor: 3,
-                spacing: 8,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Spacer(),
+                SmoothPageIndicator(
+                  controller: viewModel.mainController,
+                  count: viewModel.text.length,
+                  effect: ExpandingDotsEffect(
+                    activeDotColor: AppColors.whiteColor,
+                    dotColor: AppColors.primeryColor,
+                    dotHeight: 10,
+                    dotWidth: 10,
+                    expansionFactor: 3,
+                    spacing: 8,
+                  ),
+                ),
+                SizedBox(width: context.w(111)),
+                GestureDetector(
+                  onTap: () async {
+                    if (viewModel.currentPage < viewModel.text.length - 1) {
+                      viewModel.mainController.nextPage(
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeInOut,
+                      );
+                    } else {
+                      // Mark onboarding as completed when "Done" is clicked
+                      await viewModel.completeOnboarding();
+                      Navigator.pushReplacementNamed(
+                        context,
+                        RoutesName.SignInScreen,
+                      );
+                    }
+                  },
+                  child: NormalText(
+                    titleText:
+                        viewModel.text[viewModel.currentPage]['buttonText'] ??
+                        '',
+                    titleSize: context.text(16),
+                    titleWeight: FontWeight.w500,
+                    titleColor: AppColors.whiteColor,
+                  ),
+                ),
+                SizedBox(width: context.w(20)),
+              ],
             ),
-            SizedBox(height: context.h(20)),
+            SizedBox(height: context.h(45)),
           ],
         ),
       ),

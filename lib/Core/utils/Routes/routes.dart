@@ -48,6 +48,7 @@ class Routes {
           settings: settings,
           builder: (_) => ForgotScreen(),
         );
+        
       case RoutesName.HomeScreen:
         return MaterialPageRoute(settings: settings, builder: (_) => Home());
       case RoutesName.ImageGenerateScreen:

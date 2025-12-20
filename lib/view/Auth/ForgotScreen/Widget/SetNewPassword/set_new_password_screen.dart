@@ -18,12 +18,14 @@ class SetNewPasswordScreen extends StatefulWidget {
 }
 
 class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
-  int selectedIndex = -1;
   final List<String> items = const [
     "1 or more numbers (0-9)",
-    "1 or more English letters (A-Z, a,z)",
-    "7 or more charactrers",
+    "1 or more English letters (A-Z, a-z)",
+    "7 or more characters",
   ];
+  
+  // Create unique formKey for this screen instance
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -36,20 +38,35 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned(
-                  child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.starLogo,),
+                SvgPicture.asset(AppAssets.genWallsLogo,),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: context.h(8)),
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: AppColors.whiteColor,
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      splashRadius: 20,
+                    ),
+                  ),
                 ),
-                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
               ],
             ),
           ),
           body: SafeArea(
             child: Form(
-              key: viewModel.formKey,
+              key: _formKey,
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                  SizedBox(height: context.h(25)),
+                  SizedBox(height: context.h(35)),
                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     titleText: "Set New Password",
@@ -58,7 +75,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                     titleColor: AppColors.primeryColor,
                     titleAlign: TextAlign.center,
                   ),
-                  SizedBox(height: context.h(11)),
+                  SizedBox(height: context.h(24)),
                   CustomTextField(
                     controller: viewModel.passwordController,
                     prefixIcon: const Icon(Icons.lock),
@@ -72,7 +89,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                     label: "New Password",
                     enabledBorderColor: AppColors.textFieldIconColor,
                   ),
-                  SizedBox(height: context.h(16)),
+                  SizedBox(height: context.h(24)),
                   CustomTextField(
                     controller: viewModel.confirmPasswordController,
                     prefixIcon: const Icon(Icons.lock),
@@ -86,7 +103,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                     label: "Confirm Password",
                     enabledBorderColor: AppColors.textFieldIconColor,
                   ),
-                  SizedBox(height: context.h(20)),
+                    SizedBox(height: context.h(24)),
                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     titleText: "Password must contain",
@@ -106,26 +123,18 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: context.h(32)),
+                  SizedBox(height: context.h(24)),
                   CustomButton(
-                    onPressed: () => viewModel.setNewPassword(context),
-                    height: context.h(48),
-                    width: context.w(350),
+                    onPressed: viewModel.isLoading
+                        ? null
+                        : () => viewModel.setNewPassword(context, _formKey),
+                
                     gradient: AppColors.gradient,
                     text: viewModel.isLoading
-                        ? 'Please wait...'
-                        : 'Set New Password',
-                    iconWidth: null,
-                    iconHeight: null,
-                    icon: null,
+                        ? 'Saving...'
+                        : 'Save',
                   ),
-                  if (viewModel.isLoading) ...[
-                    SizedBox(height: context.h(12)),
-                    const Align(
-                      alignment: Alignment.center,
-                      child: CircularProgressIndicator(),
-                    ),
-                  ],
+                  SizedBox(height: context.h(32)),
                 ],
               ),
             ),

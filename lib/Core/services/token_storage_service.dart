@@ -5,6 +5,8 @@ class TokenStorageService {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _userIdKey = 'user_id';
+  static const String _onboardingCompletedKey = 'onboarding_completed';
+  static const String _rememberedEmailKey = 'remembered_email';
 
   /// Save access token to SharedPreferences
   static Future<bool> saveAccessToken(String token) async {
@@ -239,6 +241,7 @@ class TokenStorageService {
   }
 
   /// Clear all tokens (logout)
+  /// Note: This does NOT clear remembered email - that's handled separately
   static Future<bool> clearTokens() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -257,6 +260,155 @@ class TokenStorageService {
     } catch (e) {
       if (kDebugMode) {
         print('Error clearing tokens: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Save onboarding completion status
+  static Future<bool> setOnboardingCompleted(bool completed) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 100));
+      final prefs = await SharedPreferences.getInstance();
+      final saved = await prefs.setBool(_onboardingCompletedKey, completed);
+      
+      if (kDebugMode) {
+        print('=== ONBOARDING STATUS SAVED ===');
+        print('Onboarding completed: $completed');
+        print('Saved: $saved');
+      }
+      
+      return saved;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving onboarding status: $e');
+        // Retry once
+        try {
+          await Future.delayed(const Duration(milliseconds: 500));
+          final prefs = await SharedPreferences.getInstance();
+          return await prefs.setBool(_onboardingCompletedKey, completed);
+        } catch (retryError) {
+          if (kDebugMode) {
+            print('Retry also failed: $retryError');
+          }
+        }
+      }
+      return false;
+    }
+  }
+
+  /// Check if onboarding has been completed
+  static Future<bool> isOnboardingCompleted() async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 100));
+      final prefs = await SharedPreferences.getInstance();
+      final completed = prefs.getBool(_onboardingCompletedKey) ?? false;
+      
+      if (kDebugMode) {
+        print('=== CHECKING ONBOARDING STATUS ===');
+        print('Onboarding completed: $completed');
+      }
+      
+      return completed;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking onboarding status: $e');
+        // Retry once
+        try {
+          await Future.delayed(const Duration(milliseconds: 500));
+          final prefs = await SharedPreferences.getInstance();
+          return prefs.getBool(_onboardingCompletedKey) ?? false;
+        } catch (retryError) {
+          if (kDebugMode) {
+            print('Retry also failed: $retryError');
+          }
+        }
+      }
+      return false;
+    }
+  }
+
+  /// Save remembered email for "Remember Me" functionality
+  static Future<bool> saveRememberedEmail(String email) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 100));
+      final prefs = await SharedPreferences.getInstance();
+      final saved = await prefs.setString(_rememberedEmailKey, email);
+      
+      if (kDebugMode) {
+        print('=== REMEMBERED EMAIL SAVED ===');
+        print('Email saved: $email');
+        print('Saved: $saved');
+      }
+      
+      return saved;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving remembered email: $e');
+        // Retry once
+        try {
+          await Future.delayed(const Duration(milliseconds: 500));
+          final prefs = await SharedPreferences.getInstance();
+          return await prefs.setString(_rememberedEmailKey, email);
+        } catch (retryError) {
+          if (kDebugMode) {
+            print('Retry also failed: $retryError');
+          }
+        }
+      }
+      return false;
+    }
+  }
+
+  /// Get remembered email for "Remember Me" functionality
+  static Future<String?> getRememberedEmail() async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 100));
+      final prefs = await SharedPreferences.getInstance();
+      final email = prefs.getString(_rememberedEmailKey);
+      
+      if (kDebugMode) {
+        print('=== GETTING REMEMBERED EMAIL ===');
+        print('Email found: ${email != null && email.isNotEmpty}');
+        if (email != null) {
+          print('Email: $email');
+        }
+      }
+      
+      return email;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting remembered email: $e');
+        // Retry once
+        try {
+          await Future.delayed(const Duration(milliseconds: 500));
+          final prefs = await SharedPreferences.getInstance();
+          return prefs.getString(_rememberedEmailKey);
+        } catch (retryError) {
+          if (kDebugMode) {
+            print('Retry also failed: $retryError');
+          }
+        }
+      }
+      return null;
+    }
+  }
+
+  /// Clear remembered email
+  static Future<bool> clearRememberedEmail() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final removed = await prefs.remove(_rememberedEmailKey);
+      
+      if (kDebugMode) {
+        print('=== REMEMBERED EMAIL CLEARED ===');
+        print('Email removed: $removed');
+      }
+      
+      return removed;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error clearing remembered email: $e');
       }
       return false;
     }

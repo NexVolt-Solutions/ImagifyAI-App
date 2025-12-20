@@ -381,7 +381,7 @@ class _EditProfileState extends State<EditProfile> {
                               );
                             }
                           },
-                    height: context.h(48),
+                     
                     width: context.w(165),
                     text: editProfileViewModel.isLoading ? "Saving..." : "Save Changes",
                     icon: null,
@@ -394,7 +394,7 @@ class _EditProfileState extends State<EditProfile> {
                     onPressed: editProfileViewModel.isLoading
                         ? null
                         : () => Navigator.pop(context),
-                    height: context.h(48),
+                     
                     width: context.w(165),
                     text: "Cancel",
                     icon: null,

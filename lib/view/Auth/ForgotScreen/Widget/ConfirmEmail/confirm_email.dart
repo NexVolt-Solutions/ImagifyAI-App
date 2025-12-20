@@ -68,7 +68,7 @@ class _ConfirmEmailState extends State<ConfirmEmail> {
                     RoutesName.ForgotVerificationScreen,
                   );
                 },
-                height: context.h(48),
+                 
                 width: context.w(350),
                 gradient: AppColors.gradient,
 

@@ -21,10 +21,25 @@ class AccoundCreated extends StatelessWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Positioned(
-                  child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-              ),
-              SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.starLogo,),
+                SvgPicture.asset(AppAssets.genWallsLogo,),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: context.h(8)),
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: AppColors.whiteColor,
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      splashRadius: 20,
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -51,15 +66,16 @@ class AccoundCreated extends StatelessWidget {
               SizedBox(height: context.h(253)),
               CustomButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, RoutesName.SignInScreen);
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    RoutesName.SignInScreen,
+                    (route) => false,
+                  );
                 },
-                height: context.h(48),
-                width: context.w(350),
-                gradient: AppColors.gradient,
-                text: 'Next',
-                iconWidth: null,
-                iconHeight: null,
-                icon: null,
+                 
+                 gradient: AppColors.gradient,
+                text: 'Login',
+               
               ),
             ],
           ),

@@ -56,7 +56,10 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                 children: [
                   TextFormField(
                     controller: imageGenerateViewModel.promptController,
-                    maxLines: null,
+                    maxLines: 4,
+                    minLines: 1,
+                    enabled: true,
+                    readOnly: false,
                     style: GoogleFonts.poppins(
                       color: AppColors.whiteColor,
                       fontSize: context.text(12),
@@ -75,6 +78,9 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                         right: context.w(5),
                       ),
                     ),
+                    maxLength: null,
+                    textInputAction: TextInputAction.newline,
+                    keyboardType: TextInputType.multiline,
                   ),
 
                   Positioned(
@@ -295,7 +301,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
             SizedBox(height: context.h(20)),
             CustomButton(
               onPressed: () => imageGenerateViewModel.createWallpaper(context),
-              height: context.h(48),
+               
               width: context.w(350),
               iconHeight: 24,
               iconWidth: 24,

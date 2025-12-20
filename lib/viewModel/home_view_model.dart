@@ -132,9 +132,9 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
 
-    // Get access token from SignInViewModel
+    // Get access token from SignInViewModel first
     final signInViewModel = context.read<SignInViewModel>();
-    final accessToken = signInViewModel.accessToken;
+    String? accessToken = signInViewModel.accessToken;
 
     if (kDebugMode) {
       print('--- Token Check ---');
@@ -142,6 +142,27 @@ class HomeViewModel extends ChangeNotifier {
       if (accessToken != null) {
         print('Access token length: ${accessToken.length}');
         print('Access token preview: ${accessToken.substring(0, accessToken.length > 30 ? 30 : accessToken.length)}...');
+      }
+    }
+
+    // Fallback: If SignInViewModel doesn't have token yet (race condition), load directly from storage
+    if (accessToken == null || accessToken.isEmpty) {
+      if (kDebugMode) {
+        print('⚠️  Token not in SignInViewModel, trying to load from storage directly...');
+      }
+      try {
+        accessToken = await TokenStorageService.getAccessToken();
+        if (accessToken != null && accessToken.isNotEmpty) {
+          // Update SignInViewModel with the token we found
+          if (kDebugMode) {
+            print('✅ Token found in storage, updating SignInViewModel...');
+          }
+          // Note: We can't directly set private _accessToken, but this ensures we have it for this call
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error loading token from storage: $e');
+        }
       }
     }
 

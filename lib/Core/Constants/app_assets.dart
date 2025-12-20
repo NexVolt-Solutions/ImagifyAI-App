@@ -17,9 +17,13 @@ class AppAssets {
   static const String emailIcon = "assets/icon/emailIcon.png";
   static const String imageIconPlus = "assets/icon/imageIconPlus.png";
   static const String cameraIconPlus = "assets/icon/avaterCamera.png";
+
   static const String profileIcon = "assets/icon/avaterIconPro.png";
-  static const String onBoardingIcon = "assets/icon/onBordingScreenIcon.png";
-  static const String imagIcon = "assets/icon/image.PNG";
+
+  static const String onBoardingIcon1 = "assets/icon/onBordingScreenIcon1.png";
+  static const String onBoardingIcon2 = "assets/icon/onBordingScreenIcon2.png";
+   static const String onBoardingIcon3 = "assets/icon/onBordingScreenIcon3.png";
+
   static const String tickIcon = "assets/icon/tickIcon.png";
 
   //profileIcon

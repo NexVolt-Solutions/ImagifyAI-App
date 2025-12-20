@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
@@ -26,6 +27,13 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
   String? _errorMessage;
   int _retryCount = 0;
   String? _lastWallpaperId;
+  late TextEditingController _promptController;
+
+  @override
+  void initState() {
+    super.initState();
+    _promptController = TextEditingController();
+  }
 
   @override
   void didChangeDependencies() {
@@ -40,6 +48,11 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
         if (args is Wallpaper) {
           final viewModel = context.read<ImageCreatedViewModel>();
           viewModel.setWallpaper(args);
+          
+          // Initialize prompt controller with wallpaper prompt
+          _promptController.text = args.prompt.isNotEmpty 
+              ? args.prompt
+              : '3D cartoon-style illustration of a young girl with Día de los Muertos face paint, wearing casual clothes, standing in a glowing.';
           
           // Track the initial wallpaper ID
           _lastWallpaperId = args.id;
@@ -132,6 +145,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
   void dispose() {
     _pollingTimer?.cancel();
     _elapsedTimeController?.close();
+    _promptController.dispose();
     super.dispose();
   }
 
@@ -148,8 +162,11 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
         
         final wp = imageCreatedViewModel.wallpaper;
         final imageUrl = wp?.imageUrl ?? '';
-        final promptText = wp?.prompt ??
-            '3D cartoon-style illustration of a young girl with Día de los Muertos face paint, wearing casual clothes, standing in a glowing.';
+        
+        // Update prompt controller if wallpaper changes
+        if (wp != null && wp.prompt.isNotEmpty && _promptController.text != wp.prompt) {
+          _promptController.text = wp.prompt;
+        }
 
         return Scaffold(
           backgroundColor: AppColors.blackColor,
@@ -363,26 +380,53 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                     color: Color(0xFF17171D),
                     borderRadius: BorderRadius.circular(context.radius(12)),
                   ),
-                  child: ListView(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                  child: Stack(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(bottom: context.h(20)),
-                        child: Text(
-                          promptText,
-                          style: GoogleFonts.poppins(
-                            color: AppColors.whiteColor,
+                      TextFormField(
+                        controller: _promptController,
+                        maxLines: 4,
+                        minLines: 1,
+                        enabled: true,
+                        readOnly: false,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.whiteColor,
+                          fontSize: context.text(14),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Enter your prompt...',
+                          hintStyle: GoogleFonts.poppins(
+                            color: AppColors.textFieldIconColor,
                             fontSize: context.text(14),
                             fontWeight: FontWeight.w500,
                           ),
-                          textAlign: TextAlign.center,
+                          contentPadding: EdgeInsets.only(
+                            bottom: context.h(30),
+                            right: context.w(40),
+                            left: context.w(10),
+                            top: context.h(10),
+                          ),
                         ),
+                        textInputAction: TextInputAction.newline,
+                        keyboardType: TextInputType.multiline,
                       ),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Padding(
-                          padding: context.padSym(h: 20),
+                      Positioned(
+                        bottom: context.h(10),
+                        right: context.w(10),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Copy prompt to clipboard
+                            Clipboard.setData(ClipboardData(text: _promptController.text));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Prompt copied to clipboard'),
+                                duration: Duration(seconds: 2),
+                                backgroundColor: AppColors.primeryColor,
+                              ),
+                            );
+                          },
                           child: Icon(
                             Icons.copy,
                             color: AppColors.whiteColor,
@@ -393,7 +437,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: context.h(31)),
+                SizedBox(height: context.h(16)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -401,7 +445,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                       onPressed: imageCreatedViewModel.isLoading
                           ? null
                           : () => imageCreatedViewModel.recreate(context),
-                      height: context.h(48),
+                       
                       width: context.w(165),
                       iconHeight: 24,
                       iconWidth: 24,
@@ -413,7 +457,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                       onPressed: imageCreatedViewModel.isDownloading
                           ? null
                           : () => imageCreatedViewModel.showDownloadDialog(context),
-                      height: context.h(48),
+                       
                       width: context.w(165),
                       iconHeight: 24,
                       iconWidth: 24,
@@ -425,6 +469,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                     ),
                   ],
                 ),
+                SizedBox(height: context.h(20)),
               ],
             ),
           ),

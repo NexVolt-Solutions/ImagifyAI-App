@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-  import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
@@ -32,14 +32,30 @@ class _SignUpState extends State<SignUp> {
         return Scaffold(
           backgroundColor: AppColors.blackColor,
           appBar: PreferredSize(
-            preferredSize: Size.fromHeight(context.h(100)),
+            preferredSize: Size.fromHeight(context.h(64)),
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: context.h(20)),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),  Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: context.h(8)),
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: AppColors.whiteColor,
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      splashRadius: 20,
+                    ),
+                  ),
+                ),
                 ],
               ),
             ),
@@ -50,7 +66,7 @@ class _SignUpState extends State<SignUp> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                   NormalText(
+                  NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     titleText: "Sign Up",
                     titleSize: context.text(20),
@@ -59,43 +75,45 @@ class _SignUpState extends State<SignUp> {
                     titleAlign: TextAlign.center,
                   ),
                   SizedBox(height: context.h(16)),
-                  GestureDetector(
-                    onTap: () => signUpViewModel.pickImage(),
-                    child: Container(
-                      height: context.h(120),
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: AppColors.blackColor,
-                        border: Border.all(color: AppColors.textFieldIconColor),
-                        borderRadius: BorderRadius.circular(context.radius(12)),
-                      ),
-                      child: signUpViewModel.profileImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                context.radius(10),
-                              ),
-                              child: Image.file(
-                                File(signUpViewModel.profileImage!.path),
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  AppAssets.cameraIconPlus,
-                                  height: context.h(40),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => signUpViewModel.pickImage(),
+                      child: Container(
+                        height: context.h(180),
+                        width: context.h(180),
+                        decoration: BoxDecoration(  
+                          color: AppColors.containerColor,
+                          border: Border.all(color: AppColors.whiteColor),
+                          shape: BoxShape.circle,
+                        ),
+                        child: signUpViewModel.profileImage != null
+                            ? ClipOval(
+                                child: Image.file(
+                                  File(signUpViewModel.profileImage!.path),
+                                  fit: BoxFit.cover,
+                                  width: context.h(180),
+                                  height: context.h(180),
                                 ),
-                                SizedBox(height: context.h(8)),
-                                Text(
-                                  'Add profile image',
-                                  style: GoogleFonts.poppins(
-                                    color: AppColors.textFieldSubTitleColor,
-                                    fontSize: context.text(12),
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    AppAssets.cameraIconPlus,
+                                    height: context.h(42),
+                                    width: context.w(42),
                                   ),
-                                ),
-                              ],
-                            ),
+                                  SizedBox(height: context.h(8)),
+                                  Text(
+                                    'Add profile image',
+                                    style: GoogleFonts.poppins(
+                                      color: AppColors.textFieldSubTitleColor,
+                                      fontSize: context.text(12),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
                     ),
                   ),
                   SizedBox(height: context.h(16)),
@@ -112,7 +130,7 @@ class _SignUpState extends State<SignUp> {
                     label: "User Name",
                     enabledBorderColor: AppColors.textFieldIconColor,
                   ),
-                  SizedBox(height: context.h(16)),
+                  SizedBox(height: context.h(24)),
                   CustomTextField(
                     controller: signUpViewModel.emailController,
                     prefixIcon: Icon(Icons.email),
@@ -126,7 +144,7 @@ class _SignUpState extends State<SignUp> {
                     label: "Email",
                     enabledBorderColor: AppColors.textFieldIconColor,
                   ),
-                  SizedBox(height: context.h(16)),
+                  SizedBox(height: context.h(24)),
                   CustomTextField(
                     controller: signUpViewModel.passwordController,
                     prefixIcon: Icon(Icons.lock),
@@ -143,7 +161,7 @@ class _SignUpState extends State<SignUp> {
                       signUpViewModel.validatePassword();
                     },
                   ),
-                  SizedBox(height: context.h(16)),
+                  SizedBox(height: context.h(24)),    
                   CustomTextField(
                     controller: signUpViewModel.confirmPasswordController,
                     prefixIcon: Icon(Icons.lock),
@@ -173,11 +191,11 @@ class _SignUpState extends State<SignUp> {
                     ) {
                       final isRequirementMet = signUpViewModel.isRequirementMet(index);
                       return PasswordText(
-                        text: signUpViewModel.items[index],
+                          text: signUpViewModel.items[index],
                         icon: isRequirementMet ? Icons.check_circle : Icons.cancel,
                         iconColor: isRequirementMet
-                            ? AppColors.greenColor
-                            : AppColors.grayColor,
+                              ? AppColors.greenColor
+                              : AppColors.grayColor,
                       );
                     }),
                   ),
@@ -244,7 +262,7 @@ class _SignUpState extends State<SignUp> {
                    SizedBox(height: context.h(20)),
                   CustomButton(
                     onPressed: () => signUpViewModel.register(context, formKey: _formKey),
-                    height: context.h(48),
+                     
                     width: context.w(350),
                     gradient: AppColors.gradient,
                     text: signUpViewModel.isLoading

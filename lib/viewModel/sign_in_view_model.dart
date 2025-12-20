@@ -14,6 +14,7 @@ class SignInViewModel extends ChangeNotifier {
   SignInViewModel({AuthRepository? authRepository})
       : _authRepository = authRepository ?? AuthRepository() {
     _loadTokensFromStorage();
+    _loadRememberedEmail();
   }
 
   final AuthRepository _authRepository;
@@ -33,6 +34,14 @@ class SignInViewModel extends ChangeNotifier {
   void toggleRemember(bool? value) {
     rememberMe = value ?? false;
     notifyListeners();
+    
+    // If "Remember Me" is unchecked, clear saved email
+    if (!rememberMe) {
+      TokenStorageService.clearRememberedEmail();
+      if (kDebugMode) {
+        print('✅ Remembered email cleared (Remember Me unchecked)');
+      }
+    }
   }
 
   Future<void> login(BuildContext context) async {
@@ -134,6 +143,20 @@ class SignInViewModel extends ChangeNotifier {
         await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
       }
       
+      // Save email if "Remember Me" is checked
+      if (rememberMe) {
+        await TokenStorageService.saveRememberedEmail(email);
+        if (kDebugMode) {
+          print('✅ Email saved for "Remember Me": $email');
+        }
+      } else {
+        // Clear remembered email if "Remember Me" is unchecked
+        await TokenStorageService.clearRememberedEmail();
+        if (kDebugMode) {
+          print('✅ Remembered email cleared (Remember Me unchecked)');
+        }
+      }
+      
       notifyListeners(); // Notify listeners so Provider updates with new token
       _showMessage(context, message, isError: false);
       Navigator.pushNamed(context, RoutesName.BottomNavScreen);
@@ -208,6 +231,9 @@ class SignInViewModel extends ChangeNotifier {
       // Clear tokens from SharedPreferences
       await TokenStorageService.clearTokens();
       
+      // Clear remembered email on logout
+      await TokenStorageService.clearRememberedEmail();
+      
       emailController.clear();
       passwordController.clear();
       notifyListeners();
@@ -231,8 +257,8 @@ class SignInViewModel extends ChangeNotifier {
   /// Load tokens from SharedPreferences on initialization
   Future<void> _loadTokensFromStorage() async {
     try {
-      // Wait a bit to ensure platform channels are ready
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Wait a bit to ensure platform channels are ready (reduced delay for faster loading)
+      await Future.delayed(const Duration(milliseconds: 100));
       
       final accessToken = await TokenStorageService.getAccessToken();
       final refreshToken = await TokenStorageService.getRefreshToken();
@@ -271,6 +297,25 @@ class SignInViewModel extends ChangeNotifier {
             print('Retry also failed: $retryError');
           }
         }
+      }
+    }
+  }
+
+  /// Load remembered email from storage
+  Future<void> _loadRememberedEmail() async {
+    try {
+      final rememberedEmail = await TokenStorageService.getRememberedEmail();
+      if (rememberedEmail != null && rememberedEmail.isNotEmpty) {
+        emailController.text = rememberedEmail;
+        rememberMe = true; // Set remember me to true if email was saved
+        if (kDebugMode) {
+          print('✅ Remembered email loaded: $rememberedEmail');
+        }
+        notifyListeners();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error loading remembered email: $e');
       }
     }
   }

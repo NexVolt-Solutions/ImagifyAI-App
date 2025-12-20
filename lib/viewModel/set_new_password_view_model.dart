@@ -10,14 +10,14 @@ class SetNewPasswordViewModel extends ChangeNotifier {
 
   final AuthRepository _authRepository;
 
-  final formKey = GlobalKey<FormState>();
+  GlobalKey<FormState>? formKey;
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
   bool isLoading = false;
   String? errorMessage;
 
-  Future<void> setNewPassword(BuildContext context) async {
+  Future<void> setNewPassword(BuildContext context, GlobalKey<FormState> formKey) async {
     if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
 
@@ -41,14 +41,25 @@ class SetNewPasswordViewModel extends ChangeNotifier {
 
       final message = response['message']?.toString() ?? 
                      'Password updated successfully! Your account is secure';
+      
+      // Clear form and controllers before navigation
+      passwordController.clear();
+      confirmPasswordController.clear();
+      formKey.currentState?.reset();
+      
       _showMessage(context, message, isError: false);
       
+      // Add a small delay to ensure the form is disposed before navigation
+      await Future.delayed(const Duration(milliseconds: 100));
+      
       // Navigate to login screen
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        RoutesName.SignInScreen,
-        (route) => false,
-      );
+      if (context.mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RoutesName.AccountCreatedScreen,
+          (route) => false,
+        );
+      }
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);

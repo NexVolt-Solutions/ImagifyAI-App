@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-  import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/normal_text.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:genwalls/viewModel/forgor_verification_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
+import 'package:provider/provider.dart';
 
 class ForgotVerificationScreen extends StatefulWidget {
   const ForgotVerificationScreen({super.key});
@@ -19,7 +20,21 @@ class ForgotVerificationScreen extends StatefulWidget {
 
 class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set email in view model when screen loads
+    final email = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+    if (email.isNotEmpty) {
+      Provider.of<ForgorVerificationViewModel>(context, listen: false).setEmail(email);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final email = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+    
+    return Consumer<ForgorVerificationViewModel>(
+      builder: (context, viewModel, _) {
     final defaultPinTheme = PinTheme(
       width: context.h(45),
       height: context.h(45),
@@ -41,10 +56,25 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Positioned(
-              child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+            SvgPicture.asset(AppAssets.starLogo,),
+            SvgPicture.asset(AppAssets.genWallsLogo,),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: context.h(8)),
+                child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(
+                    Icons.arrow_back_ios,
+                    color: AppColors.whiteColor,
+                    size: 20,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
+                  splashRadius: 20,
+                ),
+              ),
             ),
-            SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
           ],
         ),
       ),
@@ -52,16 +82,16 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: context.h(20)),
           children: [
-            SizedBox(height: context.h(60)),
+            SizedBox(height: context.h(35)),
             NormalText(
               crossAxisAlignment: CrossAxisAlignment.center,
-              titleText: "for Verification",
+              titleText: "Verification",
               titleSize: context.text(20),
               titleWeight: FontWeight.w600,
               titleColor: AppColors.primeryColor,
               titleAlign: TextAlign.center,
             ),
-            SizedBox(height: context.h(16)),
+            SizedBox(height: context.h(32)),
             Image.asset(
               AppAssets.verifIcon,
               height: context.h(60),
@@ -80,19 +110,23 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
             SizedBox(height: context.h(16)),
             NormalText(
               crossAxisAlignment: CrossAxisAlignment.center,
-              subText:
-                  'Enter the 6-digit that we have sent to  yahoo@gmail.com',
-              subWeight: FontWeight.w500,
+              subText: email.isNotEmpty
+                  ? 'Enter the 6-digit code that we have sent to $email'
+                  : 'Enter the 6-digit code that we have sent to your email',
+              subWeight: FontWeight.w400,
               subColor: AppColors.whiteColor,
               subAlign: TextAlign.center,
-              subSize: context.text(16),
+              subSize: context.text(14),
             ),
             SizedBox(height: context.h(16)),
             Pinput(
               length: 6,
+              controller: viewModel.codeController,
               defaultPinTheme: defaultPinTheme,
               focusedPinTheme: defaultPinTheme.copyWith(
-                decoration: defaultPinTheme.decoration!,
+                decoration: defaultPinTheme.decoration!.copyWith(
+                  border: Border.all(color: AppColors.primeryColor),
+                ),
               ),
               separatorBuilder: (index) => SizedBox(width: context.w(10)),
               showCursor: true,
@@ -108,35 +142,50 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
                 ),
               ),
               onCompleted: (pin) {
-                print(pin);
+                viewModel.verify(context);
               },
             ),
             SizedBox(height: context.h(16)),
-            Text(
-              '02:30s',
-              style: GoogleFonts.poppins(
-                color: AppColors.whiteColor,
-                fontSize: context.text(16),
-                fontWeight: FontWeight.w500,
+            if (!viewModel.canResend) ...[
+              Text(
+                viewModel.timerText,
+                style: GoogleFonts.poppins(
+                  color: AppColors.whiteColor,
+                  fontSize: context.text(16),
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: context.h(257)),
+            ] else ...[
+              TextButton(
+                onPressed: viewModel.isLoading
+                    ? null
+                    : () => viewModel.resendCode(context),
+                child: Text(
+                  'Resend Code',
+                  style: GoogleFonts.poppins(
+                    color: AppColors.primeryColor,
+                    fontSize: context.text(16),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+            SizedBox(height: context.h(40)),
             CustomButton(
-              onPressed: () {
-                Navigator.pushNamed(context, RoutesName.AccountCreatedScreen);
-              },
-              height: context.h(48),
-              width: context.w(350),
+              onPressed: viewModel.isLoading
+                  ? null
+                  : () => viewModel.verify(context),
+               
               gradient: AppColors.gradient,
-              text: 'Verify',
-              iconWidth: null,
-              iconHeight: null,
-              icon: null,
+              text: viewModel.isLoading ? 'Verifying...' : 'Verify',
+           
             ),
           ],
         ),
       ),
+    );
+      },
     );
   }
 }

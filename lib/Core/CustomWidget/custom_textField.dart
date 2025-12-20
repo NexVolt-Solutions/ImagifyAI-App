@@ -62,7 +62,7 @@ class CustomTextField extends StatelessWidget {
           ),
         SizedBox(height: context.h(8)),
         SizedBox(
-          height: context.h(48),
+          height: context.h(54),
           child: TextFormField(
             controller: controller,
             keyboardType: keyboard ?? TextInputType.text,
@@ -129,11 +129,11 @@ class CustomTextField extends StatelessWidget {
                   ),
 
               filled: true,
-              fillColor: fillColor ?? AppColors.blackColor,
+              fillColor: fillColor ?? Colors.transparent,
 
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
-                  color: enabledBorderColor ?? AppColors.whiteColor,
+                  color: enabledBorderColor ?? AppColors.primeryColor,
                   width: borderWidth ?? context.w(1.5),
                 ),
                 borderRadius: BorderRadius.circular(
@@ -143,12 +143,35 @@ class CustomTextField extends StatelessWidget {
 
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(
-                  color: focusedBorderColor ?? AppColors.whiteColor,
+                  color: focusedBorderColor ?? AppColors.primeryColor,
                   width: borderWidth ?? context.radius(1.5),
                 ),
                 borderRadius: BorderRadius.circular(
-                  borderRadius ?? context.radius(8),
+                  context.radius(8),
                 ),
+              ),
+                  border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: AppColors.primeryColor,
+                    width: borderWidth ?? context.w(1.5),
+                ),
+                borderRadius: BorderRadius.circular(
+                  borderRadius ?? context.radius(8),
+                ) 
+              ),
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: AppColors.errorColor,
+                  width: borderWidth ?? context.w(1.5),
+                ),
+                borderRadius: BorderRadius.circular(context.radius(8)),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: AppColors.errorColor,
+                  width: borderWidth ?? context.w(1.5),
+                ),
+                borderRadius: BorderRadius.circular(context.radius(8)),
               ),
             ),
           ),

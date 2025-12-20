@@ -6,7 +6,6 @@ import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/normal_text.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/verification_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
@@ -62,14 +61,29 @@ class _VerificationState extends State<Verification> {
         return Scaffold(
           backgroundColor: AppColors.blackColor,
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(64),
+              preferredSize: Size.fromHeight(context.h(64)),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Positioned(
-                  child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.starLogo,),
+                SvgPicture.asset(AppAssets.genWallsLogo,),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: context.h(8)),
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: AppColors.whiteColor,
+                        size: 20,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      splashRadius: 20,
+                    ),
+                  ),
                 ),
-                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
               ],
             ),
           ),
@@ -77,9 +91,9 @@ class _VerificationState extends State<Verification> {
             child: Form(
               key: _formKey,
               child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                padding: EdgeInsets.symmetric(horizontal  : context.h(20)),
                 children: [
-                  SizedBox(height: context.h(60)),
+                  SizedBox(height: context.h(35)),
                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     titleText: "Verification",
@@ -88,14 +102,9 @@ class _VerificationState extends State<Verification> {
                     titleColor: AppColors.primeryColor,
                     titleAlign: TextAlign.center,
                   ),
-                  SizedBox(height: context.h(16)),
-                  Image.asset(
-                    AppAssets.verifIcon,
-                    height: context.h(60),
-                    width: context.w(60),
-                    fit: BoxFit.contain,
-                  ),
-                  SizedBox(height: context.h(16)),
+                  SizedBox(height: context.h(32)),
+                 SvgPicture.asset(AppAssets.verifIcon,),
+                  SizedBox(height: context.h(32)),
                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     titleText: "Verify Your Account",
@@ -104,31 +113,31 @@ class _VerificationState extends State<Verification> {
                     titleColor: AppColors.whiteColor,
                     titleAlign: TextAlign.start,
                   ),
-                  SizedBox(height: context.h(16)),
+                   SizedBox(height: context.h(32)),
                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     subText:
                         'Enter the 6-digit code that we have sent to $emailDisplay',
-                    subWeight: FontWeight.w500,
+                    subWeight: FontWeight.w400,
                     subColor: AppColors.whiteColor,
                     subAlign: TextAlign.center,
-                    subSize: context.text(16),
+                    subSize: context.text(14),
                   ),
-                  SizedBox(height: context.h(20)),
+                  SizedBox(height: context.h(24)),
                   CustomTextField(
-                    controller: verificationViewModel.emailController,
-                    validatorType: "email",
-                    label: "Email",
-                    hintText: 'Enter your email',
+                    controller: verificationViewModel.codeController,
+                    validatorType: "code",
+                    label: "Verification Code",
+                    hintText: 'Enter the 6-digit code',
                     hintStyle: TextStyle(
                       color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
                       fontSize: context.text(12),
                     ),
                     enabledBorderColor: AppColors.textFieldIconColor,
-                    prefixIcon: const Icon(Icons.email),
+                    prefixIcon: const Icon(Icons.email, size: 20,),
                   ),
-                  SizedBox(height: context.h(16)),
+                  SizedBox(height: context.h(24)),
                   Pinput(
                     length: 6,
                     controller: verificationViewModel.codeController,
@@ -153,27 +162,40 @@ class _VerificationState extends State<Verification> {
                       ),
                     ),
                   ),
-                  SizedBox(height: context.h(16)),
-                  Text(
-                    '02:30s',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.whiteColor,
-                      fontSize: context.text(16),
-                      fontWeight: FontWeight.w500,
+                  SizedBox(height: context.h(24)),
+                  if (!verificationViewModel.canResend) ...[
+                    Text(
+                      verificationViewModel.timerText,
+                      style: GoogleFonts.poppins(
+                        color: AppColors.whiteColor,
+                        fontSize: context.text(16),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: context.h(40)),
+                  ] else ...[
+                    TextButton(
+                      onPressed: verificationViewModel.isLoading
+                          ? null
+                          : () => verificationViewModel.resendCode(context),
+                      child: Text(
+                        'Resend Code',
+                        style: GoogleFonts.poppins(
+                          color: AppColors.primeryColor,
+                          fontSize: context.text(16),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                    SizedBox(height: context.h(32)),
                   CustomButton(
                     onPressed: () => verificationViewModel.verify(context, formKey: _formKey),
-                    height: context.h(48),
-                    width: context.w(350),
-                    gradient: AppColors.gradient,
+                     
+                     gradient: AppColors.gradient,
                     text:
                         verificationViewModel.isLoading ? 'Verifying...' : 'Verify Account',
-                    iconWidth: null,
-                    iconHeight: null,
-                    icon: null,
+                 
                   ),
                   if (verificationViewModel.isLoading) ...[
                     SizedBox(height: context.h(12)),
@@ -182,19 +204,7 @@ class _VerificationState extends State<Verification> {
                       child: CircularProgressIndicator(),
                     ),
                   ],
-                  SizedBox(height: context.h(40)),
-                  CustomButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, RoutesName.SignInScreen);
-                    },
-                    height: context.h(48),
-                    width: context.w(350),
-                    gradient: AppColors.gradient,
-                    text: 'Back to Login',
-                    iconWidth: null,
-                    iconHeight: null,
-                    icon: null,
-                  ),
+                 
                 ],
               ),
             ),

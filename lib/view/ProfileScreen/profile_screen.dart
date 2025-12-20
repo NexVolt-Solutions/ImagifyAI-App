@@ -135,7 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: context.h(20)),
                 CustomButton(
                   onPressed: () => context.read<SignInViewModel>().logout(context),
-                  height: context.h(48),
+                   
                   width: context.w(350),
                   gradient: AppColors.gradient,
                   text: 'Sign out',

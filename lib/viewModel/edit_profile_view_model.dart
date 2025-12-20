@@ -59,7 +59,7 @@ class EditProfileViewModel extends ChangeNotifier {
     usernameController.text = user.username ?? '';
     profileImage = null; // Reset selected image when loading user data
     notifyListeners();
-  }
+  } 
 
   Future<void> pickImage() async {
     try {

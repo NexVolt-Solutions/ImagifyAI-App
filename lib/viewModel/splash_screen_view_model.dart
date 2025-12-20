@@ -21,7 +21,7 @@ class SplashScreenViewModel extends ChangeNotifier {
       }
     }
     
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () async {
       if (context.mounted) {
         if (isLoggedIn) {
           // User is logged in, navigate to home screen
@@ -31,12 +31,31 @@ class SplashScreenViewModel extends ChangeNotifier {
           }
           Navigator.pushReplacementNamed(context, RoutesName.BottomNavScreen);
         } else {
-          // User is not logged in, navigate to onboarding
-          if (kDebugMode) {
-            print('=== SPLASH SCREEN: USER IS NOT LOGGED IN ===');
-            print('Navigating to OnboardingScreen...');
+          // Check if onboarding has been completed
+          bool onboardingCompleted = false;
+          try {
+            onboardingCompleted = await TokenStorageService.isOnboardingCompleted();
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error checking onboarding status: $e');
+            }
           }
-          Navigator.pushReplacementNamed(context, RoutesName.OnboardingScreen);
+          
+          if (onboardingCompleted) {
+            // Onboarding completed, navigate to sign in screen
+            if (kDebugMode) {
+              print('=== SPLASH SCREEN: ONBOARDING COMPLETED ===');
+              print('Navigating to SignInScreen...');
+            }
+            Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
+          } else {
+            // Onboarding not completed, show onboarding screen
+            if (kDebugMode) {
+              print('=== SPLASH SCREEN: ONBOARDING NOT COMPLETED ===');
+              print('Navigating to OnboardingScreen...');
+            }
+            Navigator.pushReplacementNamed(context, RoutesName.OnboardingScreen);
+          }
         }
       }
     });

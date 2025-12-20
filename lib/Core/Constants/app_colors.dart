@@ -10,7 +10,7 @@ class AppColors {
 
   static const Color subTitleColor = Color(0xFFA2A2A2);
   static const Color primeryColor = Color(0xFF9F56FE);
-  static const Color lightPurple = Color(0xFFD5B4FF);
+  static const Color lightPurple = Color(0xFFD4B3FF);
   static const Color containerColor = Color(0xFF1A1A1A);
   static const Color textFieldBoderColor = Color(0xFF343434);
   static const Color textFieldIconColor = Color(0xFF6C7278);
