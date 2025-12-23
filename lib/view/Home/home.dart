@@ -34,9 +34,7 @@ class _HomeState extends State<Home> {
       print('═══════════════════════════════════════════════════════════');
     }
     
-    // Load user data when screen initializes
-    // loadCurrentUser now has a fallback to read from storage directly
-    // so we can call it even if SignInViewModel hasn't loaded tokens yet
+  
     final homeViewModel = context.read<HomeViewModel>();
     
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -46,9 +44,8 @@ class _HomeState extends State<Home> {
         
         if (mounted) {
           if (kDebugMode) {
-            print('✅ Calling loadCurrentUser (with storage fallback)...');
+            print('✅ Calling loadCurrentUser...');
           }
-          // loadCurrentUser will handle token retrieval with fallback to storage
           homeViewModel.loadCurrentUser(context);
         }
       }
@@ -69,8 +66,14 @@ class _HomeState extends State<Home> {
               pinned: true,
                delegate: _UserProfileHeaderDelegate(
                 height: 85.0,
-                child: ListTile(    
-                   leading: ClipOval(
+                child: SizedBox(
+                  height: 85.0,
+                  child: ListTile(    
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: context.w(16),
+                      vertical: context.h(8),
+                    ),
+                    leading: ClipOval(
                     child: homeViewModel.currentUser?.profileImageUrl != null &&
                             homeViewModel.currentUser!.profileImageUrl!.isNotEmpty
                         ? Image.network(
@@ -139,6 +142,7 @@ class _HomeState extends State<Home> {
                       fontSize: context.text(14),
                       fontWeight: FontWeight.w500,
                     ),
+                  ),
                   ),
                 ),
               ),
@@ -321,14 +325,17 @@ class _UserProfileHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: AppColors.blackColor,
-      child: child,
+    return SizedBox(
+      height: height,
+      child: Container(
+        color: AppColors.blackColor,
+        child: child,
+      ),
     );
   }
 
   @override
   bool shouldRebuild(_UserProfileHeaderDelegate oldDelegate) {
-    return child != oldDelegate.child;
+    return child != oldDelegate.child || height != oldDelegate.height;
   }
 }

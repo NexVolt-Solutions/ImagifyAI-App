@@ -290,8 +290,12 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                               } else if (error.toString().contains('timeout') || 
                                          error.toString().contains('TimeoutException')) {
                                 errorMsg = 'Connection timeout\nPlease check your internet';
-                              } else if (error.toString().contains('SocketException')) {
-                                errorMsg = 'No internet connection';
+                              } else if (error.toString().contains('SocketException') ||
+                                         error.toString().contains('Connection reset') ||
+                                         error.toString().contains('Connection closed')) {
+                                errorMsg = 'Connection error\nPlease check your internet';
+                              } else if (error.toString().contains('HttpException')) {
+                                errorMsg = 'Network error\nPlease try again';
                               }
                               
                               if (kDebugMode) {
@@ -307,6 +311,23 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                     _imageLoadError = true;
                                     _errorMessage = errorMsg;
                                   });
+                                  
+                                  // Auto-retry for network errors (up to 3 times)
+                                  if ((error.toString().contains('SocketException') ||
+                                       error.toString().contains('HttpException') ||
+                                       error.toString().contains('Connection') ||
+                                       error.toString().contains('timeout')) &&
+                                      _retryCount < 3) {
+                                    Future.delayed(const Duration(seconds: 2), () {
+                                      if (mounted) {
+                                        setState(() {
+                                          _imageLoadError = false;
+                                          _errorMessage = null;
+                                          _retryCount++;
+                                        });
+                                      }
+                                    });
+                                  }
                                 }
                               });
                               

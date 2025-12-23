@@ -132,10 +132,13 @@ class AuthRepository {
   Future<VerifyResponse> verifyEmail({
     required String code,
   }) async {
+    // Convert code string to integer to match API spec: {"code": 999999}
+    final codeInt = int.tryParse(code) ?? 0;
+    
     final json = await _apiService.post(
       ApiConstants.verifyEmail,
       body: {
-        'code': code,
+        'code': codeInt,
       },
     );
 

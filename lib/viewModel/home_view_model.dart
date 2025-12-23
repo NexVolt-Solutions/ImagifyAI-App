@@ -123,16 +123,8 @@ class HomeViewModel extends ChangeNotifier {
       }
       return;
     }
-    
-    // Skip if user data already loaded and not forcing reload
-    if (!forceReload && currentUser != null) {
-      if (kDebugMode) {
-        print('⚠️  User already loaded, skipping...');
-      }
-      return;
-    }
 
-    // Get access token from SignInViewModel first
+    // Get access token from SignInViewModel
     final signInViewModel = context.read<SignInViewModel>();
     String? accessToken = signInViewModel.accessToken;
 
@@ -145,29 +137,12 @@ class HomeViewModel extends ChangeNotifier {
       }
     }
 
-    // Fallback: If SignInViewModel doesn't have token yet (race condition), load directly from storage
     if (accessToken == null || accessToken.isEmpty) {
-      if (kDebugMode) {
-        print('⚠️  Token not in SignInViewModel, trying to load from storage directly...');
+      // User not logged in, clear cached user and skip loading
+      if (currentUser != null) {
+        currentUser = null;
+        notifyListeners();
       }
-      try {
-        accessToken = await TokenStorageService.getAccessToken();
-        if (accessToken != null && accessToken.isNotEmpty) {
-          // Update SignInViewModel with the token we found
-          if (kDebugMode) {
-            print('✅ Token found in storage, updating SignInViewModel...');
-          }
-          // Note: We can't directly set private _accessToken, but this ensures we have it for this call
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Error loading token from storage: $e');
-        }
-      }
-    }
-
-    if (accessToken == null || accessToken.isEmpty) {
-      // User not logged in, skip loading
       if (kDebugMode) {
         print('❌ No access token available, skipping user load');
         print('═══════════════════════════════════════════════════════════');
@@ -177,8 +152,48 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
 
+    // Get userId from storage to check if user changed
+    final userId = await TokenStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      // No user ID means not logged in, clear cached user
+      if (currentUser != null) {
+        currentUser = null;
+        notifyListeners();
+      }
+      if (kDebugMode) {
+        print('❌ No user ID available, skipping user load');
+        print('═══════════════════════════════════════════════════════════');
+        print('=== HOME VIEW MODEL: loadCurrentUser END (NO USER ID) ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+      return;
+    }
+
+    // Check if the stored userId matches the cached user
+    // If they don't match, clear cache and reload (user changed)
+    if (!forceReload && currentUser != null) {
+      if (currentUser!.id == userId) {
+        if (kDebugMode) {
+          print('✅ User already loaded and matches stored user ID, skipping...');
+          print('Cached User ID: ${currentUser!.id}');
+          print('Stored User ID: $userId');
+        }
+        return;
+      } else {
+        if (kDebugMode) {
+          print('⚠️  User ID changed! Clearing cached user and reloading...');
+          print('Cached User ID: ${currentUser!.id}');
+          print('Stored User ID: $userId');
+        }
+        // Clear cached user since it's a different user
+        currentUser = null;
+        notifyListeners();
+      }
+    }
+
     if (kDebugMode) {
       print('✅ Access token available, proceeding to load user...');
+      print('User ID from storage: $userId');
     }
 
     isLoadingUser = true;
@@ -186,15 +201,8 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Get userId from TokenStorageService
-      final userId = await TokenStorageService.getUserId();
-      if (userId == null || userId.isEmpty) {
-        throw ApiException('User ID is required. Please login again.');
-      }
-
       if (kDebugMode) {
         print('--- Calling AuthRepository.getCurrentUser ---');
-        print('User ID from storage: $userId');
       }
       currentUser = await _authRepository.getCurrentUser(
         accessToken: accessToken,

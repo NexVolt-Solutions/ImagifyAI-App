@@ -30,6 +30,71 @@ class SignInViewModel extends ChangeNotifier {
   String? _accessToken;
 
   String? get accessToken => _accessToken;
+  String? get refreshToken => _refreshToken;
+
+  // Silent token refresh (without showing messages) - used for automatic token refresh
+  Future<bool> refreshTokenSilently() async {
+    if ((_refreshToken ?? '').isEmpty) {
+      if (kDebugMode) {
+        print('⚠️ No refresh token available for silent refresh');
+      }
+      return false;
+    }
+
+    try {
+      final RefreshResponse response = await _authRepository.refreshToken(
+        refreshToken: _refreshToken!,
+      );
+      
+      // Check if we got valid tokens
+      if (response.accessToken == null || response.accessToken!.isEmpty) {
+        if (kDebugMode) {
+          print('❌ Refresh response missing access token');
+        }
+        // Clear invalid tokens
+        _accessToken = null;
+        _refreshToken = null;
+        await TokenStorageService.clearTokens();
+        notifyListeners();
+        return false;
+      }
+      
+      _refreshToken = response.refreshToken ?? _refreshToken;
+      _accessToken = response.accessToken;
+      
+      // Save updated tokens to SharedPreferences
+      if (_accessToken != null && _refreshToken != null) {
+        await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
+      }
+      
+      if (kDebugMode) {
+        print('✅ Token refreshed silently');
+      }
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      if (kDebugMode) {
+        print('❌ Failed to refresh token silently: ${e.message}');
+        print('   Status code: ${e.statusCode}');
+      }
+      // Clear invalid tokens on refresh failure
+      _accessToken = null;
+      _refreshToken = null;
+      await TokenStorageService.clearTokens();
+      notifyListeners();
+      return false;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Unexpected error refreshing token silently: $e');
+      }
+      // Clear tokens on any error
+      _accessToken = null;
+      _refreshToken = null;
+      await TokenStorageService.clearTokens();
+      notifyListeners();
+      return false;
+    }
+  }
 
   void toggleRemember(bool? value) {
     rememberMe = value ?? false;
