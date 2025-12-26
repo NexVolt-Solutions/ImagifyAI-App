@@ -32,46 +32,75 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        height: height ?? context.h(48),
-        width: width ?? double.infinity,
-        decoration: BoxDecoration(
-          gradient: gradient,
-          border: Border.all(color: borderColor ?? AppColors.blackColor),
-          borderRadius: BorderRadius.circular(context.radius(8)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (icon != null) ...[
-              Image.asset(
-                icon!,
-                height: iconHeight ?? context.h(20),
-                width: iconWidth ?? context.w(20),
-                color: AppColors.whiteColor,
-                fit: BoxFit.cover,
-              ),
-              SizedBox(width: context.w(5)),
-            ],
-            Flexible(
-              child: Text(
-                text ?? "",
-                style: GoogleFonts.poppins(
+    final double? buttonWidth = width ?? double.infinity;
+    
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determine the actual width to use based on constraints
+        double? actualWidth = buttonWidth;
+        
+        // If width is infinity and constraints are unbounded (e.g., inside Row),
+        // don't set width (let it size to content)
+        if (buttonWidth == double.infinity && constraints.maxWidth == double.infinity) {
+          actualWidth = null;
+        }
+        
+        Widget buttonContent = Container(
+          height: height ?? context.h(48),
+          width: actualWidth,
+          padding: EdgeInsets.symmetric(horizontal: context.w(16)),
+          decoration: BoxDecoration(
+            gradient: gradient,
+            border: Border.all(color: borderColor ?? AppColors.blackColor),
+            borderRadius: BorderRadius.circular(context.radius(8)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              if (icon != null) ...[
+                Image.asset(
+                  icon!,
+                  height: iconHeight ?? context.h(20),
+                  width: iconWidth ?? context.w(20),
                   color: AppColors.whiteColor,
-                  fontSize: fontSize ?? context.text(16),
-                  fontWeight: FontWeight.w500,
+                  fit: BoxFit.cover,
                 ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                textAlign: TextAlign.center,
+                SizedBox(width: context.w(5)),
+              ],
+              Flexible(
+                child: Text(
+                  text ?? "",
+                  style: GoogleFonts.poppins(
+                    color: AppColors.whiteColor,
+                    fontSize: fontSize ?? context.text(16),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                ),
               ),
+            ],
+          ),
+        );
+
+        // If width is infinity and we have bounded constraints, wrap in SizedBox
+        if (buttonWidth == double.infinity && constraints.maxWidth != double.infinity) {
+          return GestureDetector(
+            onTap: onPressed,
+            child: SizedBox(
+              width: double.infinity,
+              child: buttonContent,
             ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        return GestureDetector(
+          onTap: onPressed,
+          child: buttonContent,
+        );
+      },
     );
   }
 }

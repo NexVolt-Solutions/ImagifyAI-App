@@ -5,6 +5,7 @@ import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/Core/services/token_storage_service.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:genwalls/Core/utils/jwt_decoder.dart';
 import 'package:genwalls/Core/utils/snackbar_util.dart';
 import 'package:genwalls/models/user/user.dart';
 import 'package:genwalls/models/wallpaper/suggest_response.dart';
@@ -124,7 +125,7 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
 
-    // Get access token from SignInViewModel
+    // Get access token from SignInViewModel first
     final signInViewModel = context.read<SignInViewModel>();
     String? accessToken = signInViewModel.accessToken;
 
@@ -134,6 +135,29 @@ class HomeViewModel extends ChangeNotifier {
       if (accessToken != null) {
         print('Access token length: ${accessToken.length}');
         print('Access token preview: ${accessToken.substring(0, accessToken.length > 30 ? 30 : accessToken.length)}...');
+      }
+    }
+
+    // If SignInViewModel doesn't have token yet, try loading directly from storage
+    // This handles the race condition where HomeViewModel loads before SignInViewModel finishes loading tokens
+    if (accessToken == null || accessToken.isEmpty) {
+      if (kDebugMode) {
+        print('⚠️  SignInViewModel token not available, trying to load from storage...');
+      }
+      try {
+        accessToken = await TokenStorageService.getAccessToken();
+        if (accessToken != null && accessToken.isNotEmpty) {
+          // Update SignInViewModel with the token we just loaded
+          // Note: We can't directly set private fields, but this ensures consistency
+          if (kDebugMode) {
+            print('✅ Token loaded from storage directly');
+            print('Token length: ${accessToken.length}');
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error loading token from storage: $e');
+        }
       }
     }
 
@@ -152,8 +176,46 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
 
+    // At this point, accessToken is guaranteed to be non-null and non-empty
+    final String validAccessToken = accessToken;
+
     // Get userId from storage to check if user changed
-    final userId = await TokenStorageService.getUserId();
+    String? userId = await TokenStorageService.getUserId();
+    
+    // If userId is not in storage, try to extract it from JWT token
+    if (userId == null || userId.isEmpty) {
+      if (kDebugMode) {
+        print('⚠️  User ID not found in storage, attempting to extract from JWT...');
+      }
+      
+      try {
+        // Try to extract userId from JWT token
+        userId = JwtDecoder.getUserId(validAccessToken);
+        
+        if (userId != null && userId.isNotEmpty) {
+          // Save the extracted userId to storage for future use
+          await TokenStorageService.saveUserId(userId);
+          if (kDebugMode) {
+            print('✅ User ID extracted from JWT and saved: $userId');
+          }
+        } else {
+          if (kDebugMode) {
+            print('❌ User ID not found in JWT token either');
+            // Try to decode and log JWT payload for debugging
+            final decoded = JwtDecoder.decode(validAccessToken);
+            if (decoded != null) {
+              print('JWT Payload keys: ${decoded.keys.toList()}');
+              print('JWT Payload: $decoded');
+            }
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error extracting userId from JWT: $e');
+        }
+      }
+    }
+    
     if (userId == null || userId.isEmpty) {
       // No user ID means not logged in, clear cached user
       if (currentUser != null) {
@@ -205,7 +267,7 @@ class HomeViewModel extends ChangeNotifier {
         print('--- Calling AuthRepository.getCurrentUser ---');
       }
       currentUser = await _authRepository.getCurrentUser(
-        accessToken: accessToken,
+        accessToken: validAccessToken,
         userId: userId,
       );
       errorMessage = null; // Clear any previous errors on success
@@ -217,16 +279,101 @@ class HomeViewModel extends ChangeNotifier {
         print('Email: ${currentUser?.email}');
       }
     } on ApiException catch (e) {
-      errorMessage = e.message;
-      // Don't show error snackbar here, just log it
-       if (kDebugMode) {
-        print('❌ ApiException in loadCurrentUser: ${e.message}');
-        if (e.statusCode == 403) {
-          print('⚠️  Status Code: 403 Forbidden');
-         }
+      // Handle token expiration - automatically refresh and retry
+      // Only refresh on actual expiration errors, not "missing user_id" or other validation errors
+      final messageLower = e.message.toLowerCase();
+      final isTokenExpired = e.statusCode == 401 && 
+          (messageLower.contains('expired') && !messageLower.contains('missing'));
+      
+      if (isTokenExpired) {
+        if (kDebugMode) {
+          print('🔄 Token expired, attempting to refresh...');
+        }
+        
+        // Get SignInViewModel to refresh token
+        final signInViewModel = context.read<SignInViewModel>();
+        
+        // Try to refresh the token
+        final refreshed = await signInViewModel.refreshTokenSilently();
+        
+        if (refreshed && signInViewModel.accessToken != null) {
+          if (kDebugMode) {
+            print('✅ Token refreshed, retrying getCurrentUser...');
+          }
+          
+          // Retry the request with new token
+          try {
+            // Ensure we have the latest token from SignInViewModel
+            final refreshedAccessToken = signInViewModel.accessToken;
+            if (refreshedAccessToken == null || refreshedAccessToken.isEmpty) {
+              // Fallback: try loading from storage
+              final tokenFromStorage = await TokenStorageService.getAccessToken();
+              if (tokenFromStorage != null && tokenFromStorage.isNotEmpty) {
+                if (kDebugMode) {
+                  print('⚠️  Using token from storage for retry');
+                }
+                currentUser = await _authRepository.getCurrentUser(
+                  accessToken: tokenFromStorage,
+                  userId: userId,
+                );
+              } else {
+                throw Exception('No access token available after refresh');
+              }
+            } else {
+              currentUser = await _authRepository.getCurrentUser(
+                accessToken: refreshedAccessToken,
+                userId: userId,
+              );
+            }
+            errorMessage = null; // Clear any previous errors on success
+            
+            if (kDebugMode) {
+              print('✅ User loaded successfully after token refresh!');
+              print('User ID: ${currentUser?.id}');
+              print('Username: ${currentUser?.username}');
+              print('Email: ${currentUser?.email}');
+            }
+          } on ApiException catch (retryError) {
+            // If retry also fails with 401, don't retry again (avoid infinite loop)
+            if (retryError.statusCode == 401) {
+              if (kDebugMode) {
+                print('❌ Retry failed with 401: ${retryError.message}');
+                print('⚠️  This might indicate a backend issue with the refreshed token');
+              }
+              errorMessage = 'Session expired. Please login again.';
+            } else {
+              if (kDebugMode) {
+                print('❌ Failed to load user after token refresh: ${retryError.message}');
+              }
+              errorMessage = 'Couldn\'t load your profile. Let\'s try refreshing!';
+            }
+            currentUser = null;
+          } catch (retryError) {
+            if (kDebugMode) {
+              print('❌ Unexpected error during retry: $retryError');
+            }
+            errorMessage = 'Couldn\'t load your profile. Let\'s try refreshing!';
+            currentUser = null;
+          }
+        } else {
+          if (kDebugMode) {
+            print('❌ Failed to refresh token');
+          }
+          errorMessage = 'Session expired. Please login again.';
+          currentUser = null;
+        }
+      } else {
+        errorMessage = e.message;
+        // Don't show error snackbar here, just log it
+        if (kDebugMode) {
+          print('❌ ApiException in loadCurrentUser: ${e.message}');
+          if (e.statusCode == 403) {
+            print('⚠️  Status Code: 403 Forbidden');
+          }
+        }
+        // Set currentUser to null so UI doesn't try to display invalid data
+        currentUser = null;
       }
-      // Set currentUser to null so UI doesn't try to display invalid data
-      currentUser = null;
     } catch (e) {
       errorMessage = 'Couldn\'t load your profile. Let\'s try refreshing!';
       if (kDebugMode) {

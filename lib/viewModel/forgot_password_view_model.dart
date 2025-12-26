@@ -11,7 +11,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
 
   final AuthRepository _authRepository;
 
-  final formKey = GlobalKey<FormState>();
+  // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final emailController = TextEditingController();
 
   bool isLoading = false;
@@ -20,7 +20,7 @@ class ForgotPasswordViewModel extends ChangeNotifier {
 
   String? get email => _email;
 
-  Future<void> sendReset(BuildContext context) async {
+  Future<void> sendReset(BuildContext context, {required GlobalKey<FormState> formKey}) async {
     if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
 

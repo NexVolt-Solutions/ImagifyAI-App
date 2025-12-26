@@ -61,118 +61,115 @@ class CustomTextField extends StatelessWidget {
             ),
           ),
         SizedBox(height: context.h(8)),
-        SizedBox(
-          height: context.h(54),
-          child: TextFormField(
-            controller: controller,
-            keyboardType: keyboard ?? TextInputType.text,
-            onChanged: onChanged,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return "This field is required";
-              }
-
-              if (validatorType == "name" && value.length < 3) {
-                return "Enter a valid name";
-              }
-
-              if (validatorType == "phone" &&
-                  !RegExp(r'^[0-9]{10,13}$').hasMatch(value)) {
-                return "Enter a valid phone number";
-              }
-
-              if (validatorType == "email" &&
-                  !RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$").hasMatch(value)) {
-                return "Enter a valid email";
-              }
-
-              return null;
-            },
-
-            style: GoogleFonts.poppins(
-              color: AppColors.whiteColor,
-              fontSize: context.text(14),
-              fontWeight: FontWeight.w500,
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboard ?? TextInputType.text,
+          onChanged: onChanged,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "This field is required";
+            }
+        
+            if (validatorType == "name" && value.length < 3) {
+              return "Enter a valid name";
+            }
+        
+            if (validatorType == "phone" &&
+                !RegExp(r'^[0-9]{10,13}$').hasMatch(value)) {
+              return "Enter a valid phone number";
+            }
+        
+            if (validatorType == "email" &&
+                !RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$").hasMatch(value)) {
+              return "Enter a valid email";
+            }
+        
+            return null;
+          },
+        
+          style: GoogleFonts.poppins(
+            color: AppColors.whiteColor,
+            fontSize: context.text(14),
+            fontWeight: FontWeight.w500,
+          ),
+        
+          decoration: InputDecoration(
+            prefixIcon: prefixIcon != null
+                ? Padding(
+                    padding: context.padAll(10),
+                    child: IconTheme(
+                      data: IconThemeData(
+                        color: iconColor ?? AppColors.whiteColor,
+                      ),
+                      child: prefixIcon!,
+                    ),
+                  )
+                : null,
+        
+            suffixIcon: suffixIcon != null
+                ? Padding(
+                    padding: context.padAll(10),
+                    child: IconTheme(
+                      data: IconThemeData(
+                        color: iconColor ?? AppColors.textFieldIconColor,
+                      ),
+                      child: suffixIcon!,
+                    ),
+                  )
+                : null,
+        
+            hintText: hintText,
+            hintStyle:
+                hintStyle ??
+                TextStyle(
+                  color: hintColor ?? AppColors.whiteColor,
+                  fontSize: context.text(14),
+                ),
+        
+            filled: true,
+            fillColor: fillColor ?? Colors.transparent,
+        
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: enabledBorderColor ?? AppColors.primeryColor,
+                width: borderWidth ?? context.w(1.5),
+              ),
+              borderRadius: BorderRadius.circular(
+                borderRadius ?? context.radius(8),
+              ),
             ),
-
-            decoration: InputDecoration(
-              prefixIcon: prefixIcon != null
-                  ? Padding(
-                      padding: context.padAll(10),
-                      child: IconTheme(
-                        data: IconThemeData(
-                          color: iconColor ?? AppColors.whiteColor,
-                        ),
-                        child: prefixIcon!,
-                      ),
-                    )
-                  : null,
-
-              suffixIcon: suffixIcon != null
-                  ? Padding(
-                      padding: context.padAll(10),
-                      child: IconTheme(
-                        data: IconThemeData(
-                          color: iconColor ?? AppColors.textFieldIconColor,
-                        ),
-                        child: suffixIcon!,
-                      ),
-                    )
-                  : null,
-
-              hintText: hintText,
-              hintStyle:
-                  hintStyle ??
-                  TextStyle(
-                    color: hintColor ?? AppColors.whiteColor,
-                    fontSize: context.text(14),
-                  ),
-
-              filled: true,
-              fillColor: fillColor ?? Colors.transparent,
-
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: enabledBorderColor ?? AppColors.primeryColor,
+        
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: focusedBorderColor ?? AppColors.primeryColor,
+                width: borderWidth ?? context.radius(1.5),
+              ),
+              borderRadius: BorderRadius.circular(
+                context.radius(8),
+              ),
+            ),
+                border: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.primeryColor,
                   width: borderWidth ?? context.w(1.5),
-                ),
-                borderRadius: BorderRadius.circular(
-                  borderRadius ?? context.radius(8),
-                ),
               ),
-
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: focusedBorderColor ?? AppColors.primeryColor,
-                  width: borderWidth ?? context.radius(1.5),
-                ),
-                borderRadius: BorderRadius.circular(
-                  context.radius(8),
-                ),
+              borderRadius: BorderRadius.circular(
+                borderRadius ?? context.radius(8),
+              ) 
+            ),
+            errorBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.errorColor,
+                width: borderWidth ?? context.w(1.5),
               ),
-                  border: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.primeryColor,
-                    width: borderWidth ?? context.w(1.5),
-                ),
-                borderRadius: BorderRadius.circular(
-                  borderRadius ?? context.radius(8),
-                ) 
+              borderRadius: BorderRadius.circular(context.radius(8)),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                color: AppColors.errorColor,
+                width: borderWidth ?? context.w(1.5),
               ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.errorColor,
-                  width: borderWidth ?? context.w(1.5),
-                ),
-                borderRadius: BorderRadius.circular(context.radius(8)),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.errorColor,
-                  width: borderWidth ?? context.w(1.5),
-                ),
-                borderRadius: BorderRadius.circular(context.radius(8)),
-              ),
+              borderRadius: BorderRadius.circular(context.radius(8)),
             ),
           ),
         ),

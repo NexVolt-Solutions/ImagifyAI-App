@@ -3,6 +3,7 @@ class LoginResponse {
     this.message,
     this.status,
     this.data,
+    this.userId,
     this.accessToken,
     this.refreshToken,
     this.tokenType,
@@ -11,6 +12,7 @@ class LoginResponse {
   final String? message;
   final bool? status;
   final dynamic data;
+  final String? userId;
   final String? accessToken;
   final String? refreshToken;
   final String? tokenType;
@@ -20,6 +22,7 @@ class LoginResponse {
       message: json['message']?.toString(),
       status: json['status'] is bool ? json['status'] as bool : _parseStatus(json['status']),
       data: json['data'],
+      userId: json['user_id']?.toString(),
       accessToken: json['access_token']?.toString(),
       refreshToken: json['refresh_token']?.toString(),
       tokenType: json['token_type']?.toString(),

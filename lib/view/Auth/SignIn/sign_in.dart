@@ -20,6 +20,9 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  // Create formKey in widget state to ensure uniqueness per widget instance
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Consumer<SignInViewModel>(
@@ -41,7 +44,7 @@ class _SignInState extends State<SignIn> {
           ),
           body: SafeArea(
             child: Form(
-              key: signInViewModel.formKey,
+              key: _formKey,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   return SingleChildScrollView(
@@ -135,8 +138,9 @@ class _SignInState extends State<SignIn> {
                             Column(
                               children: [
                                 CustomButton(
-                                  onPressed: () => signInViewModel.login(context),
-                                   
+                                  onPressed: signInViewModel.isLoading
+                                      ? null
+                                      : () => signInViewModel.login(context, formKey: _formKey),
                                   width: context.w(350),
                                   gradient: AppColors.gradient,
                                   text: signInViewModel.isLoading
@@ -145,6 +149,41 @@ class _SignInState extends State<SignIn> {
                                   iconWidth: null,
                                   iconHeight: null,
                                   icon: null,
+                                ),
+                                SizedBox(height: context.h(20)),
+                                GestureDetector(
+                                  onTap: signInViewModel.isLoading
+                                      ? null
+                                      : () => signInViewModel.signInWithGoogle(context),
+                                  child: Container(
+                                    height: context.h(47.9),
+                                    width: context.w(350),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: AppColors.whiteColor),
+                                      borderRadius: BorderRadius.circular(
+                                        context.radius(8),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          AppAssets.googleIcon,
+                                          height: context.h(23.94),
+                                          width: context.w(23.94),
+                                        ),
+                                        SizedBox(width: context.w(8)),
+                                        Text(
+                                          'Continue with Google',
+                                          style: GoogleFonts.poppins(
+                                            color: AppColors.whiteColor,
+                                            fontSize: context.text(14),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 SizedBox(height: context.h(20)),
                                 CustomTextRich(

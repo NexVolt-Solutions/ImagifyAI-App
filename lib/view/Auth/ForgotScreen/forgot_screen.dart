@@ -18,6 +18,9 @@ class ForgotScreen extends StatefulWidget {
 }
 
 class _ForgotScreenState extends State<ForgotScreen> {
+  // Create formKey in widget state to ensure uniqueness per widget instance
+  final _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ForgotPasswordViewModel>(
@@ -54,7 +57,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
           ), 
           body: SafeArea( 
             child: Form(
-              key: forgotPasswordViewModel.formKey,
+              key: _formKey,
               child: SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: context.h(20)),
@@ -97,7 +100,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                       ),
                       SizedBox(height: context.h(24)),
                       CustomButton(
-                        onPressed: () => forgotPasswordViewModel.sendReset(context),
+                        onPressed: () => forgotPasswordViewModel.sendReset(context, formKey: _formKey),
                        
                         gradient: AppColors.gradient,
                         text: forgotPasswordViewModel.isLoading

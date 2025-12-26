@@ -9,6 +9,7 @@ import 'package:genwalls/models/auth/logout_response.dart';
 import 'package:genwalls/models/auth/login_response.dart';
 import 'package:genwalls/models/auth/refresh_response.dart';
 import 'package:genwalls/repositories/auth_repository.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignInViewModel extends ChangeNotifier {
   SignInViewModel({AuthRepository? authRepository})
@@ -19,7 +20,7 @@ class SignInViewModel extends ChangeNotifier {
 
   final AuthRepository _authRepository;
 
-  final formKey = GlobalKey<FormState>();
+  // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -34,11 +35,30 @@ class SignInViewModel extends ChangeNotifier {
 
   // Silent token refresh (without showing messages) - used for automatic token refresh
   Future<bool> refreshTokenSilently() async {
+    // If refresh token is not in memory, try loading from storage
     if ((_refreshToken ?? '').isEmpty) {
       if (kDebugMode) {
-        print('⚠️ No refresh token available for silent refresh');
+        print('⚠️ Refresh token not in memory, trying to load from storage...');
       }
-      return false;
+      try {
+        final refreshTokenFromStorage = await TokenStorageService.getRefreshToken();
+        if (refreshTokenFromStorage != null && refreshTokenFromStorage.isNotEmpty) {
+          _refreshToken = refreshTokenFromStorage;
+          if (kDebugMode) {
+            print('✅ Refresh token loaded from storage');
+          }
+        } else {
+          if (kDebugMode) {
+            print('⚠️ No refresh token available for silent refresh');
+          }
+          return false;
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Error loading refresh token from storage: $e');
+        }
+        return false;
+      }
     }
 
     try {
@@ -65,6 +85,56 @@ class SignInViewModel extends ChangeNotifier {
       // Save updated tokens to SharedPreferences
       if (_accessToken != null && _refreshToken != null) {
         await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
+        
+        // Save userId from refresh response if provided (preferred source)
+        String? userIdToSave = response.userId;
+        
+        // If not in response, try to extract from JWT token
+        if (userIdToSave == null || userIdToSave.isEmpty) {
+          if (kDebugMode) {
+            print('⚠️  User ID not in refresh response, extracting from new JWT...');
+          }
+          try {
+            userIdToSave = JwtDecoder.getUserId(_accessToken!);
+            if (userIdToSave != null && userIdToSave.isNotEmpty) {
+              if (kDebugMode) {
+                print('✅ User ID extracted from new JWT: $userIdToSave');
+              }
+            } else {
+              if (kDebugMode) {
+                print('❌ User ID not found in new JWT token');
+              }
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('❌ Error extracting userId from new JWT: $e');
+            }
+          }
+        } else {
+          if (kDebugMode) {
+            print('✅ User ID from refresh response: $userIdToSave');
+          }
+        }
+        
+        // Save userId if we found it (from response or JWT)
+        if (userIdToSave != null && userIdToSave.isNotEmpty) {
+          await TokenStorageService.saveUserId(userIdToSave);
+          if (kDebugMode) {
+            print('✅ User ID saved to storage: $userIdToSave');
+          }
+        } else {
+          // If still no userId, check if we have one in storage already
+          final existingUserId = await TokenStorageService.getUserId();
+          if (existingUserId == null || existingUserId.isEmpty) {
+            if (kDebugMode) {
+              print('⚠️  Warning: No user ID available after token refresh');
+            }
+          } else {
+            if (kDebugMode) {
+              print('✅ Using existing user ID from storage: $existingUserId');
+            }
+          }
+        }
       }
       
       if (kDebugMode) {
@@ -77,21 +147,34 @@ class SignInViewModel extends ChangeNotifier {
         print('❌ Failed to refresh token silently: ${e.message}');
         print('   Status code: ${e.statusCode}');
       }
-      // Clear invalid tokens on refresh failure
-      _accessToken = null;
-      _refreshToken = null;
-      await TokenStorageService.clearTokens();
-      notifyListeners();
-      return false;
+      
+      // Only clear tokens on authentication errors (401, 403), not server errors (500, 503, etc.)
+      // Server errors might be temporary and we don't want to log the user out
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        if (kDebugMode) {
+          print('⚠️  Authentication error during refresh, clearing tokens...');
+        }
+        // Clear invalid tokens on authentication failure
+        _accessToken = null;
+        _refreshToken = null;
+        await TokenStorageService.clearTokens();
+        notifyListeners();
+        return false;
+      } else {
+        // Server error (500, 503, etc.) - don't clear tokens, might be temporary
+        if (kDebugMode) {
+          print('⚠️  Server error during refresh (${e.statusCode}), keeping existing tokens');
+          print('   This might be a temporary server issue');
+        }
+        // Don't clear tokens on server errors - they might still be valid
+        return false;
+      }
     } catch (e) {
       if (kDebugMode) {
         print('❌ Unexpected error refreshing token silently: $e');
       }
-      // Clear tokens on any error
-      _accessToken = null;
-      _refreshToken = null;
-      await TokenStorageService.clearTokens();
-      notifyListeners();
+      // For unexpected errors, don't clear tokens - might be network issues
+      // Only clear if it's clearly an authentication issue
       return false;
     }
   }
@@ -109,7 +192,7 @@ class SignInViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> login(BuildContext context) async {
+  Future<void> login(BuildContext context, {required GlobalKey<FormState> formKey}) async {
     if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
 
@@ -142,21 +225,12 @@ class SignInViewModel extends ChangeNotifier {
         print('Access token length: ${_accessToken?.length ?? 0}');
         print('Login response data: ${response.data}');
         
-        // Check login response for user_id
-        String? userIdFromResponse;
-        if (response.data != null) {
-          print('Data type: ${response.data.runtimeType}');
-          if (response.data is Map) {
-            final dataMap = response.data as Map;
-            print('Data keys: ${dataMap.keys.toList()}');
-            userIdFromResponse = dataMap['id']?.toString();
-            print('User ID in data: $userIdFromResponse');
-          }
-        }
+        // Extract user_id from login response (API returns it at root level)
+        String? userIdFromResponse = response.userId;
         
-        // Try to extract user_id from JWT token
+        // Fallback: Try to extract user_id from JWT token if not in response
         String? userIdFromJwt;
-        if (_accessToken != null && _accessToken!.isNotEmpty) {
+        if (userIdFromResponse == null && _accessToken != null && _accessToken!.isNotEmpty) {
           try {
             final decoded = JwtDecoder.decode(_accessToken!);
             if (decoded != null) {
@@ -174,10 +248,6 @@ class SignInViewModel extends ChangeNotifier {
               } else {
                 print('❌ User ID NOT found in JWT');
                 print('JWT only contains: ${decoded.keys.toList()}');
-                if (decoded.containsKey('sub')) {
-                  print('⚠️  JWT contains "sub" field: ${decoded['sub']}');
-                  print('⚠️  "sub" appears to be email, not user_id');
-                }
               }
             }
           } catch (e) {
@@ -190,16 +260,17 @@ class SignInViewModel extends ChangeNotifier {
         if (userIdToSave != null && userIdToSave.isNotEmpty) {
           await TokenStorageService.saveUserId(userIdToSave);
           if (kDebugMode) {
+            print('=== USER ID SAVED ===');
+            print('User ID: $userIdToSave');
+            print('Saved: true');
             print('✅ User ID saved to storage: $userIdToSave');
             print('   Source: ${userIdFromResponse != null ? "Login Response" : "JWT Token"}');
           }
         } else {
-          print('❌ CRITICAL: User ID not found in login response or JWT token!');
-          print('❌ Cannot fetch user profile without user_id');
-          print('❌ Backend needs to either:');
-          print('   1. Include user_id in login response, OR');
-          print('   2. Include user_id in JWT token payload, OR');
-          print('   3. Support /users/me endpoint');
+          if (kDebugMode) {
+            print('❌ CRITICAL: User ID not found in login response or JWT token!');
+            print('❌ Cannot fetch user profile without user_id');
+          }
         }
       }
       
@@ -230,6 +301,140 @@ class SignInViewModel extends ChangeNotifier {
       _showMessage(context, e.message);
     } catch (_) {
       errorMessage = 'Hmm, something unexpected happened. Let\'s try that again!';
+      _showMessage(context, errorMessage!);
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> signInWithGoogle(BuildContext context) async {
+    if (isLoading) return;
+
+    isLoading = true;
+    errorMessage = null;
+    notifyListeners();
+
+    try {
+      // Initialize Google Sign-In
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+
+      // Sign in with Google
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
+
+      // Get authentication details
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      if (googleAuth.idToken == null) {
+        throw Exception('Failed to get ID token from Google');
+      }
+
+      if (kDebugMode) {
+        print('=== GOOGLE SIGN-IN ===');
+        print('User: ${googleUser.displayName}');
+        print('Email: ${googleUser.email}');
+        print('ID Token received: ${googleAuth.idToken != null}');
+      }
+
+      // Call backend API with Google credentials
+      final LoginResponse response = await _authRepository.googleSignIn(
+        idToken: googleAuth.idToken!,
+        name: googleUser.displayName ?? googleUser.email,
+        picture: googleUser.photoUrl,
+      );
+
+      final message = response.message ?? 'Logged in successfully';
+      _refreshToken = response.refreshToken;
+      _accessToken = response.accessToken;
+
+      if (kDebugMode) {
+        print('=== GOOGLE SIGN-IN SUCCESSFUL ===');
+        print('Access token received: ${_accessToken != null && _accessToken!.isNotEmpty}');
+        print('Refresh token received: ${_refreshToken != null && _refreshToken!.isNotEmpty}');
+        print('Access token length: ${_accessToken?.length ?? 0}');
+
+        // Extract user_id from login response (API returns it at root level)
+        String? userIdFromResponse = response.userId;
+
+        // Fallback: Try to extract user_id from JWT token if not in response
+        String? userIdFromJwt;
+        if (userIdFromResponse == null && _accessToken != null && _accessToken!.isNotEmpty) {
+          try {
+            final decoded = JwtDecoder.decode(_accessToken!);
+            if (decoded != null) {
+              print('=== JWT TOKEN PAYLOAD ===');
+              print('JWT Payload keys: ${decoded.keys.toList()}');
+              print('JWT Payload: $decoded');
+
+              // Try to get user_id from JWT
+              userIdFromJwt = decoded['user_id']?.toString() ??
+                  decoded['userId']?.toString() ??
+                  decoded['id']?.toString();
+
+              if (userIdFromJwt != null) {
+                print('✅ User ID found in JWT: $userIdFromJwt');
+              } else {
+                print('❌ User ID NOT found in JWT');
+                print('JWT only contains: ${decoded.keys.toList()}');
+              }
+            }
+          } catch (e) {
+            print('❌ Failed to decode JWT: $e');
+          }
+        }
+
+        // Save user_id if found in either response or JWT
+        final userIdToSave = userIdFromResponse ?? userIdFromJwt;
+        if (userIdToSave != null && userIdToSave.isNotEmpty) {
+          await TokenStorageService.saveUserId(userIdToSave);
+          if (kDebugMode) {
+            print('=== USER ID SAVED ===');
+            print('User ID: $userIdToSave');
+            print('Saved: true');
+            print('✅ User ID saved to storage: $userIdToSave');
+            print('   Source: ${userIdFromResponse != null ? "Google Sign-In Response" : "JWT Token"}');
+          }
+        } else {
+          if (kDebugMode) {
+            print('❌ CRITICAL: User ID not found in Google sign-in response or JWT token!');
+            print('❌ Cannot fetch user profile without user_id');
+          }
+        }
+      }
+
+      // Save tokens to SharedPreferences
+      if (_accessToken != null && _refreshToken != null) {
+        await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
+      }
+
+      // Save email for "Remember Me" (Google sign-in always remembers)
+      if (googleUser.email.isNotEmpty) {
+        await TokenStorageService.saveRememberedEmail(googleUser.email);
+        if (kDebugMode) {
+          print('✅ Email saved for "Remember Me": ${googleUser.email}');
+        }
+      }
+
+      notifyListeners(); // Notify listeners so Provider updates with new token
+      _showMessage(context, message, isError: false);
+      Navigator.pushNamed(context, RoutesName.BottomNavScreen);
+    } on ApiException catch (e) {
+      errorMessage = e.message;
+      _showMessage(context, e.message);
+    } catch (e) {
+      errorMessage = 'Failed to sign in with Google. Please try again.';
+      if (kDebugMode) {
+        print('❌ Google Sign-In Error: $e');
+      }
       _showMessage(context, errorMessage!);
     } finally {
       isLoading = false;
@@ -336,6 +541,31 @@ class SignInViewModel extends ChangeNotifier {
           print('=== TOKENS LOADED FROM STORAGE ===');
           print('Access token loaded: ${_accessToken != null && _accessToken!.isNotEmpty}');
           print('Refresh token loaded: ${_refreshToken != null && _refreshToken!.isNotEmpty}');
+        }
+        
+        // Check if userId exists in storage, if not, try to extract from JWT
+        final existingUserId = await TokenStorageService.getUserId();
+        if (existingUserId == null || existingUserId.isEmpty) {
+          if (kDebugMode) {
+            print('⚠️  User ID not in storage, extracting from JWT...');
+          }
+          try {
+            final userIdFromJwt = JwtDecoder.getUserId(accessToken);
+            if (userIdFromJwt != null && userIdFromJwt.isNotEmpty) {
+              await TokenStorageService.saveUserId(userIdFromJwt);
+              if (kDebugMode) {
+                print('✅ User ID extracted from JWT and saved: $userIdFromJwt');
+              }
+            } else {
+              if (kDebugMode) {
+                print('❌ User ID not found in JWT token');
+              }
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('❌ Error extracting userId from JWT: $e');
+            }
+          }
         }
         
         notifyListeners();

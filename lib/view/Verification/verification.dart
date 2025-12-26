@@ -4,7 +4,6 @@ import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/viewModel/verification_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -65,8 +64,16 @@ class _VerificationState extends State<Verification> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                SvgPicture.asset(AppAssets.starLogo,),
-                SvgPicture.asset(AppAssets.genWallsLogo,),
+                SvgPicture.asset(
+                  AppAssets.starLogo,
+                  fit: BoxFit.contain,
+                  placeholderBuilder: (context) => const SizedBox.shrink(),
+                ),
+                SvgPicture.asset(
+                  AppAssets.genWallsLogo,
+                  fit: BoxFit.contain,
+                  placeholderBuilder: (context) => const SizedBox.shrink(),
+                ),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
@@ -102,9 +109,15 @@ class _VerificationState extends State<Verification> {
                     titleColor: AppColors.primeryColor,
                     titleAlign: TextAlign.center,
                   ),
-                  SizedBox(height: context.h(32)),
-                 SvgPicture.asset(AppAssets.verifIcon,),
-                  SizedBox(height: context.h(32)),
+                SizedBox(height: context.h(24)),
+                  Center(
+                    child: Image.asset(
+                      AppAssets.verifIcon,
+                      fit: BoxFit.contain,
+                     
+                    ),
+                  ),
+                  SizedBox(height: context.h(24)),
                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     titleText: "Verify Your Account",
@@ -113,7 +126,7 @@ class _VerificationState extends State<Verification> {
                     titleColor: AppColors.whiteColor,
                     titleAlign: TextAlign.start,
                   ),
-                   SizedBox(height: context.h(32)),
+                   SizedBox(height: context.h(24)),
                   NormalText(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     subText:
@@ -123,20 +136,7 @@ class _VerificationState extends State<Verification> {
                     subAlign: TextAlign.center,
                     subSize: context.text(14),
                   ),
-                  SizedBox(height: context.h(24)),
-                  CustomTextField(
-                    controller: verificationViewModel.codeController,
-                    validatorType: "code",
-                    label: "Verification Code",
-                    hintText: 'Enter the 6-digit code',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w400,
-                      fontSize: context.text(12),
-                    ),
-                    enabledBorderColor: AppColors.textFieldIconColor,
-                    prefixIcon: const Icon(Icons.email, size: 20,),
-                  ),
+                 
                   SizedBox(height: context.h(24)),
                   Pinput(
                     length: 6,
@@ -197,13 +197,7 @@ class _VerificationState extends State<Verification> {
                         verificationViewModel.isLoading ? 'Verifying...' : 'Verify Account',
                  
                   ),
-                  if (verificationViewModel.isLoading) ...[
-                    SizedBox(height: context.h(12)),
-                    const Align(
-                      alignment: Alignment.center,
-                      child: CircularProgressIndicator(),
-                    ),
-                  ],
+                 
                  
                 ],
               ),

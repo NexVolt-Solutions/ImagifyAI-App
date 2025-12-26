@@ -22,8 +22,7 @@ class PromptContiner extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          height: context.h(23),
-          decoration: BoxDecoration(
+           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(context.radius(8)),
             border: Border.all(
               color: isSelected ? AppColors.primeryColor : AppColors.whiteColor,

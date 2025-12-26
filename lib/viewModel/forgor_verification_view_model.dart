@@ -14,7 +14,7 @@ class ForgorVerificationViewModel extends ChangeNotifier {
 
   final AuthRepository _authRepository;
 
-  final formKey = GlobalKey<FormState>();
+  // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final codeController = TextEditingController();
 
   bool isLoading = false;

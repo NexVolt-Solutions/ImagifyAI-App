@@ -27,14 +27,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final signInViewModel = context.read<SignInViewModel>();
     final profileViewModel = context.read<ProfileScreenViewModel>();
     
-    // Load user data if not already loaded
-    if (profileViewModel.currentUser == null && !profileViewModel.isLoading) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          profileViewModel.loadCurrentUser(accessToken: signInViewModel.accessToken);
-        }
-      });
-    }
+    // Always try to load user data (will check if reload is needed internally)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        profileViewModel.loadCurrentUser(accessToken: signInViewModel.accessToken);
+      }
+    });
   }
 
   @override

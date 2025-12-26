@@ -70,25 +70,45 @@ class ProfileScreenViewModel extends ChangeNotifier {
 
   Future<void> loadCurrentUser({String? accessToken, bool forceReload = false}) async {
     if (isLoading) return;
-    
-    // Skip if user data already loaded and not forcing reload
-    if (!forceReload && currentUser != null) return;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      // User not logged in, clear cached user
+      if (currentUser != null) {
+        currentUser = null;
+        notifyListeners();
+      }
+      return;
+    }
+
+    // Get userId from storage to check if user changed
+    final userId = await TokenStorageService.getUserId();
+    if (userId == null || userId.isEmpty) {
+      // No user ID means not logged in, clear cached user
+      if (currentUser != null) {
+        currentUser = null;
+        notifyListeners();
+      }
+      return;
+    }
+
+    // Check if the stored userId matches the cached user
+    // If they don't match, clear cache and reload (user changed)
+    if (!forceReload && currentUser != null) {
+      if (currentUser!.id == userId) {
+        // User already loaded and matches stored user ID, skip reload
+        return;
+      } else {
+        // Clear cached user since it's a different user
+        currentUser = null;
+        notifyListeners();
+      }
+    }
 
     isLoading = true;
     errorMessage = null;
     notifyListeners();
 
     try {
-      if (accessToken == null || accessToken.isEmpty) {
-        throw ApiException('Access token is required. Please login again.');
-      }
-
-      // Get userId from TokenStorageService
-      final userId = await TokenStorageService.getUserId();
-      if (userId == null || userId.isEmpty) {
-        throw ApiException('User ID is required. Please login again.');
-      }
-
       currentUser = await _authRepository.getCurrentUser(
         accessToken: accessToken,
         userId: userId,
@@ -96,8 +116,11 @@ class ProfileScreenViewModel extends ChangeNotifier {
       errorMessage = null; // Clear any previous errors on success
     } on ApiException catch (e) {
       errorMessage = e.message;
+      // Set currentUser to null so UI doesn't try to display invalid data
+      currentUser = null;
     } catch (_) {
       errorMessage = 'Failed to load user data';
+      currentUser = null;
     } finally {
       isLoading = false;
       notifyListeners();

@@ -175,66 +175,54 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
               titleColor: AppColors.whiteColor,
               titleAlign: TextAlign.center,
             ),
-             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            
+            Wrap(
+              spacing: context.w(8),
+              runSpacing: context.h(4),
               children: [
-                Flexible(
-                  child: PromptContiner(
-                    text: 'Unicorn usually shopping at Mall',
-                    onTap: () {
-                      setState(() {
-                        selectedPromptIndex = 0;
-                      });
-                      // Set the prompt text in the text field
-                      imageGenerateViewModel.setPromptText('Unicorn usually shopping at Mall');
-                    },
-                    isSelected: selectedPromptIndex == 0,
-                  ),
+                PromptContiner(
+                  text: 'Man stand in front of lake background',
+                  onTap: () {
+                    setState(() {
+                      selectedPromptIndex = 2;
+                    });
+                    // Set the prompt text in the text field
+                    imageGenerateViewModel.setPromptText('Man stand in front of lake background');
+                  },
+                  isSelected: selectedPromptIndex == 2,
                 ),
-                 Flexible(
-                  child: PromptContiner(
-                    text: 'Street View of time square',
-                    onTap: () {
-                      setState(() {
-                        selectedPromptIndex = 1;
-                      });
-                      // Set the prompt text in the text field
-                      imageGenerateViewModel.setPromptText('Street View of time square');
-                    },
-                    isSelected: selectedPromptIndex == 1,
-                  ),
+                PromptContiner(
+                  text: 'Unicorn usually shopping at Mall',
+                  onTap: () {
+                    setState(() {
+                      selectedPromptIndex = 0;
+                    });
+                    // Set the prompt text in the text field
+                    imageGenerateViewModel.setPromptText('Unicorn usually shopping at Mall');
+                  },
+                  isSelected: selectedPromptIndex == 0,
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: PromptContiner(
-                    text: 'Man stand in front of lake background',
-                    onTap: () {
-                      setState(() {
-                        selectedPromptIndex = 2;
-                      });
-                      // Set the prompt text in the text field
-                      imageGenerateViewModel.setPromptText('Man stand in front of lake background');
-                    },
-                    isSelected: selectedPromptIndex == 2,
-                  ),
+                PromptContiner(
+                  text: 'Street View of time square',
+                  onTap: () {
+                    setState(() {
+                      selectedPromptIndex = 1;
+                    });
+                    // Set the prompt text in the text field
+                    imageGenerateViewModel.setPromptText('Street View of time square');
+                  },
+                  isSelected: selectedPromptIndex == 1,
                 ),
-                SizedBox(width: context.w(12)),
-                Flexible(
-                  child: PromptContiner(
-                    text: 'Panda in a lather suit',
-                    onTap: () {
-                      setState(() {
-                        selectedPromptIndex = 3;
-                      });
-                      // Set the prompt text in the text field
-                      imageGenerateViewModel.setPromptText('Panda in a lather suit');
-                    },
-                    isSelected: selectedPromptIndex == 3,
-                  ),
+                PromptContiner(
+                  text: 'Panda in a lather suit',
+                  onTap: () {
+                    setState(() {
+                      selectedPromptIndex = 3;
+                    });
+                    // Set the prompt text in the text field
+                    imageGenerateViewModel.setPromptText('Panda in a lather suit');
+                  },
+                  isSelected: selectedPromptIndex == 3,
                 ),
               ],
             ),
@@ -253,8 +241,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                 for (int i = 0; i < imageGenerateViewModel.sizes.length; i++) ...[
                   Expanded(
                     child: SizeContiner(
-                      text1: imageGenerateViewModel.sizes[i]['text1']!,
-                      text2: imageGenerateViewModel.sizes[i]['text2']!,
+                       text2: imageGenerateViewModel.sizes[i]['text2']!,
                       height1: context.h(40),
                       width1: double.infinity, // Will be constrained by Expanded
                       height2: context.h(20),

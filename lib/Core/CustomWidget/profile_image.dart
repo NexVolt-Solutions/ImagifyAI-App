@@ -17,6 +17,25 @@ class ProfileImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Handle empty image path
+    if (imagePath.isEmpty) {
+      return ClipOval(
+        child: Container(
+          height: height,
+          width: width,
+          decoration: const BoxDecoration(
+            color: Colors.grey,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.person,
+            size: height != null ? height! * 0.6 : 24,
+            color: Colors.white70,
+          ),
+        ),
+      );
+    }
+
     return ClipOval(
       child: isNetworkImage
           ? Image.network(

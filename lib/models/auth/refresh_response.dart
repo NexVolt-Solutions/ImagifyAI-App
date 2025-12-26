@@ -6,6 +6,7 @@ class RefreshResponse {
     this.message,
     this.status,
     this.data,
+    this.userId,
   });
 
   final String? accessToken;
@@ -14,6 +15,7 @@ class RefreshResponse {
   final String? message;
   final bool? status;
   final dynamic data;
+  final String? userId;
 
   factory RefreshResponse.fromJson(Map<String, dynamic> json) {
     return RefreshResponse(
@@ -23,6 +25,7 @@ class RefreshResponse {
       message: json['message']?.toString(),
       status: json['status'] is bool ? json['status'] as bool : _parseStatus(json['status']),
       data: json['data'],
+      userId: json['user_id']?.toString(),
     );
   }
 

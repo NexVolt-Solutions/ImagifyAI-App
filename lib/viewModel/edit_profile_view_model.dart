@@ -15,7 +15,7 @@ class EditProfileViewModel extends ChangeNotifier {
 
   final AuthRepository _authRepository;
 
-  final formKey = GlobalKey<FormState>();
+  // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
   final emailController = TextEditingController();
@@ -202,6 +202,7 @@ class EditProfileViewModel extends ChangeNotifier {
   Future<void> updateProfile({
     required BuildContext context,
     required String accessToken,
+    required GlobalKey<FormState> formKey,
   }) async {
     if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;

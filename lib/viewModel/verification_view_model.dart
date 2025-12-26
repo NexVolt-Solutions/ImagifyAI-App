@@ -83,10 +83,10 @@ class VerificationViewModel extends ChangeNotifier {
 
       final message = response.message ?? 'Verified successfully';
       _showMessage(context, message, isError: false);
-      // Navigate to home screen and clear navigation stack
+      // Navigate to sign in screen so user can log in and get tokens
       Navigator.pushNamedAndRemoveUntil(
         context,
-        RoutesName.BottomNavScreen,
+        RoutesName.SignInScreen,
         (route) => false, // Remove all previous routes
       );
     } on ApiException catch (e) {
