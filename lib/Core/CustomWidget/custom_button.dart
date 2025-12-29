@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class CustomButton extends StatelessWidget {
   final double? height;
@@ -51,7 +50,7 @@ class CustomButton extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: context.w(16)),
           decoration: BoxDecoration(
             gradient: gradient,
-            border: Border.all(color: borderColor ?? AppColors.blackColor),
+            border: Border.all(color: borderColor ?? context.backgroundColor),
             borderRadius: BorderRadius.circular(context.radius(8)),
           ),
           child: Row(
@@ -63,7 +62,7 @@ class CustomButton extends StatelessWidget {
                   icon!,
                   height: iconHeight ?? context.h(20),
                   width: iconWidth ?? context.w(20),
-                  color: AppColors.whiteColor,
+                  color: Colors.white,
                   fit: BoxFit.cover,
                 ),
                 SizedBox(width: context.w(5)),
@@ -71,10 +70,8 @@ class CustomButton extends StatelessWidget {
               Flexible(
                 child: Text(
                   text ?? "",
-                  style: GoogleFonts.poppins(
-                    color: AppColors.whiteColor,
+                  style: (context.appTextStyles?.customButtonText ?? TextStyle()).copyWith(
                     fontSize: fontSize ?? context.text(16),
-                    fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,

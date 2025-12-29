@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class NormalText extends StatelessWidget {
   final String? titleText;
@@ -43,10 +42,15 @@ class NormalText extends StatelessWidget {
         if (titleText != null)
           Text(
             titleText!,
-            style: GoogleFonts.poppins(
-              color: titleColor ?? AppColors.whiteColor,
+            style: (titleColor != null 
+                ? (context.appTextStyles?.normalTextTitle ?? TextStyle()).copyWith(color: titleColor)
+                : context.appTextStyles?.normalTextTitle)?.copyWith(
               fontSize: titleSize ?? context.text(16),
               fontWeight: titleWeight ?? FontWeight.w500,
+            ) ?? TextStyle(
+              fontSize: titleSize ?? context.text(16),
+              fontWeight: titleWeight ?? FontWeight.w500,
+              color: titleColor,
             ),
             textAlign: titleAlign ?? TextAlign.start,
           ),
@@ -54,10 +58,15 @@ class NormalText extends StatelessWidget {
         if (subText != null)
           Text(
             subText!,
-            style: GoogleFonts.poppins(
-              color: subColor ?? AppColors.whiteColor,
+            style: (subColor != null
+                ? (context.appTextStyles?.normalTextSubtitle ?? TextStyle()).copyWith(color: subColor)
+                : context.appTextStyles?.normalTextSubtitle)?.copyWith(
               fontSize: subSize ?? context.text(14),
               fontWeight: subWeight ?? FontWeight.w400,
+            ) ?? TextStyle(
+              fontSize: subSize ?? context.text(14),
+              fontWeight: subWeight ?? FontWeight.w400,
+              color: subColor,
             ),
             textAlign: subAlign ?? TextAlign.start,
           ),

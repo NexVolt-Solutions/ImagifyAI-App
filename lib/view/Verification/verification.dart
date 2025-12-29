@@ -4,9 +4,8 @@ import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/verification_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
@@ -27,9 +26,29 @@ class _VerificationState extends State<Verification> {
     super.didChangeDependencies();
     if (_initialized) return;
 
-    final emailArg = ModalRoute.of(context)?.settings.arguments;
-    if (emailArg is String && emailArg.isNotEmpty) {
-      context.read<VerificationViewModel>().setEmail(emailArg);
+    final args = ModalRoute.of(context)?.settings.arguments;
+    String? email;
+    bool autoResend = false;
+    
+    // Handle both String (email only) and Map (email + autoResend flag)
+    if (args is String && args.isNotEmpty) {
+      email = args;
+    } else if (args is Map) {
+      email = args['email']?.toString();
+      autoResend = args['autoResend'] == true;
+    }
+    
+    if (email != null && email.isNotEmpty) {
+      final verificationViewModel = context.read<VerificationViewModel>();
+      verificationViewModel.setEmail(email);
+      
+      // Auto-resend OTP if flag is set
+      if (autoResend) {
+        // Use a small delay to ensure the screen is fully built
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          verificationViewModel.autoResendCode(context);
+        });
+      }
     }
     _initialized = true;
   }
@@ -41,15 +60,11 @@ class _VerificationState extends State<Verification> {
         final defaultPinTheme = PinTheme(
           width: context.h(45),
           height: context.h(45),
-          textStyle: TextStyle(
-            fontSize: context.text(14),
-            color: AppColors.whiteColor,
-            fontWeight: FontWeight.w500,
-          ),
+          textStyle: context.appTextStyles?.authOTPText,
           decoration: BoxDecoration(
-            color: AppColors.blackColor,
+            color: context.backgroundColor,
             borderRadius: BorderRadius.circular(context.radius(8)),
-            border: Border.all(color: AppColors.grayColor),
+            border: Border.all(color: context.colorScheme.onSurface),
           ),
         );
 
@@ -58,7 +73,7 @@ class _VerificationState extends State<Verification> {
             : 'your email';
 
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
               preferredSize: Size.fromHeight(context.h(64)),
             child: Stack(
@@ -82,7 +97,7 @@ class _VerificationState extends State<Verification> {
                       onPressed: () => Navigator.pop(context),
                       icon: Icon(
                         Icons.arrow_back_ios,
-                        color: AppColors.whiteColor,
+                        color: Theme.of(context).iconTheme.color,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,
@@ -101,13 +116,10 @@ class _VerificationState extends State<Verification> {
                 padding: EdgeInsets.symmetric(horizontal  : context.h(20)),
                 children: [
                   SizedBox(height: context.h(35)),
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    titleText: "Verification",
-                    titleSize: context.text(20),
-                    titleWeight: FontWeight.w600,
-                    titleColor: AppColors.primeryColor,
-                    titleAlign: TextAlign.center,
+                  Text(
+                    "Verification",
+                    style: context.appTextStyles?.authTitlePrimary,
+                    textAlign: TextAlign.center,
                   ),
                 SizedBox(height: context.h(24)),
                   Center(
@@ -118,23 +130,16 @@ class _VerificationState extends State<Verification> {
                     ),
                   ),
                   SizedBox(height: context.h(24)),
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    titleText: "Verify Your Account",
-                    titleSize: context.text(20),
-                    titleWeight: FontWeight.w600,
-                    titleColor: AppColors.whiteColor,
-                    titleAlign: TextAlign.start,
+                  Text(
+                    "Verify Your Account",
+                    style: context.appTextStyles?.authTitleWhite,
+                    textAlign: TextAlign.start,
                   ),
                    SizedBox(height: context.h(24)),
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    subText:
-                        'Enter the 6-digit code that we have sent to $emailDisplay',
-                    subWeight: FontWeight.w400,
-                    subColor: AppColors.whiteColor,
-                    subAlign: TextAlign.center,
-                    subSize: context.text(14),
+                  Text(
+                    'Enter the 6-digit code that we have sent to $emailDisplay',
+                    style: context.appTextStyles?.authBodyRegular,
+                    textAlign: TextAlign.center,
                   ),
                  
                   SizedBox(height: context.h(24)),
@@ -154,11 +159,7 @@ class _VerificationState extends State<Verification> {
                     preFilledWidget: Center(
                       child: Text(
                         "-",
-                        style: TextStyle(
-                          fontSize: context.text(20),
-                          color: AppColors.grayColor,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: context.appTextStyles?.authOTPLarge,
                       ),
                     ),
                   ),
@@ -166,11 +167,7 @@ class _VerificationState extends State<Verification> {
                   if (!verificationViewModel.canResend) ...[
                     Text(
                       verificationViewModel.timerText,
-                      style: GoogleFonts.poppins(
-                        color: AppColors.whiteColor,
-                        fontSize: context.text(16),
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: context.appTextStyles?.authTimerText,
                       textAlign: TextAlign.center,
                     ),
                   ] else ...[
@@ -180,11 +177,7 @@ class _VerificationState extends State<Verification> {
                           : () => verificationViewModel.resendCode(context),
                       child: Text(
                         'Resend Code',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.primeryColor,
-                          fontSize: context.text(16),
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: context.appTextStyles?.authResendText,
                       ),
                     ),
                   ],

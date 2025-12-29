@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class CustomTextField extends StatelessWidget {
   final String validatorType;
@@ -54,11 +53,7 @@ class CustomTextField extends StatelessWidget {
         if (label != null)
           Text(
             label ?? "label",
-            style: GoogleFonts.poppins(
-              color: AppColors.whiteColor,
-              fontSize: context.text(14),
-              fontWeight: FontWeight.w500,
-            ),
+            style: context.appTextStyles?.customTextFieldLabel,
           ),
         SizedBox(height: context.h(8)),
         TextFormField(
@@ -79,19 +74,24 @@ class CustomTextField extends StatelessWidget {
               return "Enter a valid phone number";
             }
         
-            if (validatorType == "email" &&
-                !RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$").hasMatch(value)) {
-              return "Enter a valid email";
+            if (validatorType == "email") {
+              // More comprehensive email validation regex
+              // Allows: letters, numbers, dots, hyphens, underscores, plus signs before @
+              // Allows: letters, numbers, dots, hyphens after @
+              // Allows: TLD of 2-63 characters (supports longer TLDs like .museum, .technology)
+              final emailRegex = RegExp(
+                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+                caseSensitive: false,
+              );
+              if (!emailRegex.hasMatch(value.trim())) {
+                return "Enter a valid email";
+              }
             }
         
             return null;
           },
         
-          style: GoogleFonts.poppins(
-            color: AppColors.whiteColor,
-            fontSize: context.text(14),
-            fontWeight: FontWeight.w500,
-          ),
+          style: context.appTextStyles?.customTextFieldInput,
         
           decoration: InputDecoration(
             prefixIcon: prefixIcon != null
@@ -99,7 +99,7 @@ class CustomTextField extends StatelessWidget {
                     padding: context.padAll(10),
                     child: IconTheme(
                       data: IconThemeData(
-                        color: iconColor ?? AppColors.whiteColor,
+                        color: iconColor ?? Theme.of(context).iconTheme.color,
                       ),
                       child: prefixIcon!,
                     ),
@@ -111,7 +111,7 @@ class CustomTextField extends StatelessWidget {
                     padding: context.padAll(10),
                     child: IconTheme(
                       data: IconThemeData(
-                        color: iconColor ?? AppColors.textFieldIconColor,
+                        color: iconColor ?? context.colorScheme.onSurface,
                       ),
                       child: suffixIcon!,
                     ),
@@ -121,27 +121,24 @@ class CustomTextField extends StatelessWidget {
             hintText: hintText,
             hintStyle:
                 hintStyle ??
-                TextStyle(
-                  color: hintColor ?? AppColors.whiteColor,
-                  fontSize: context.text(14),
-                ),
+                context.appTextStyles?.authHintText,
         
             filled: true,
             fillColor: fillColor ?? Colors.transparent,
         
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: enabledBorderColor ?? AppColors.primeryColor,
+                color: enabledBorderColor ?? context.colorScheme.onSurface,
                 width: borderWidth ?? context.w(1.5),
               ),
               borderRadius: BorderRadius.circular(
                 borderRadius ?? context.radius(8),
               ),
             ),
-        
+
             focusedBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: focusedBorderColor ?? AppColors.primeryColor,
+                color: focusedBorderColor ?? context.colorScheme.primary,
                 width: borderWidth ?? context.radius(1.5),
               ),
               borderRadius: BorderRadius.circular(
@@ -150,7 +147,7 @@ class CustomTextField extends StatelessWidget {
             ),
                 border: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.primeryColor,
+                color: context.colorScheme.primary,
                   width: borderWidth ?? context.w(1.5),
               ),
               borderRadius: BorderRadius.circular(
@@ -159,14 +156,14 @@ class CustomTextField extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.errorColor,
+                color: context.colorScheme.error,
                 width: borderWidth ?? context.w(1.5),
               ),
               borderRadius: BorderRadius.circular(context.radius(8)),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderSide: BorderSide(
-                color: AppColors.errorColor,
+                color: context.colorScheme.error,
                 width: borderWidth ?? context.w(1.5),
               ),
               borderRadius: BorderRadius.circular(context.radius(8)),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class PasswordText extends StatelessWidget {
   final String text;
@@ -25,11 +25,7 @@ class PasswordText extends StatelessWidget {
           SizedBox(width: context.w(8)),
           Text(
             text,
-            style: GoogleFonts.poppins(
-              color: AppColors.whiteColor,
-              fontSize: context.text(10),
-              fontWeight: FontWeight.w400,
-            ),
+            style: context.appTextStyles?.passwordTextStyle,
           ),
         ],
       ),

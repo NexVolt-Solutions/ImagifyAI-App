@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class AlignText extends StatelessWidget {
   final String? text;
@@ -22,8 +22,7 @@ class AlignText extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: context.h(20)),
         child: Text(
           text!,
-          style: GoogleFonts.poppins(
-            color: AppColors.whiteColor,
+          style: context.appTextStyles?.alignTextStyle?.copyWith(
             fontSize: fontSize,
             fontWeight: fontWeight,
           ),

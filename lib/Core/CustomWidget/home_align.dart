@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class HomeAlign extends StatelessWidget {
   final String? text;
@@ -14,15 +14,11 @@ class HomeAlign extends StatelessWidget {
       children: [
         Text(
           text!,
-          style: GoogleFonts.poppins(
-            color: AppColors.whiteColor,
-            fontSize: context.text(16),
-            fontWeight: FontWeight.w500,
-          ),
+          style: context.appTextStyles?.homeAlignText,
         ),
         Icon(
           Icons.arrow_forward_ios_outlined,
-          color: AppColors.whiteColor,
+          color: Theme.of(context).iconTheme.color,
           size: context.h(15),
         ),
       ],

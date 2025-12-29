@@ -83,7 +83,23 @@ class SignUpViewModel extends ChangeNotifier {
 
   Future<void> register(BuildContext context, {required GlobalKey<FormState> formKey}) async {
     if (isLoading) return;
-    if (!(formKey.currentState?.validate() ?? false)) return;
+    
+    // Validate form - if validation fails, stop here
+    if (formKey.currentState == null) {
+      if (kDebugMode) {
+        print('⚠️ Form key state is null');
+      }
+      return;
+    }
+    
+    final isValid = formKey.currentState!.validate();
+    if (!isValid) {
+      if (kDebugMode) {
+        print('❌ Form validation failed - preventing submission');
+        print('Email: ${emailController.text.trim()}');
+      }
+      return;
+    }
 
     if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
       _showMessage(context, 'Password and Confirm Password must match');
@@ -156,12 +172,52 @@ class SignUpViewModel extends ChangeNotifier {
         print('=== REGISTRATION FLOW COMPLETED ===');
       }
     } on ApiException catch (e) {
+      // Backend now allows duplicate usernames and only checks for duplicate emails
+      // Error messages will reflect this (e.g., "Email already exists" instead of "Username already taken")
+      
+      final errorMessageLower = e.message.toLowerCase();
+      final email = emailController.text.trim();
+      
+      // Check if error is about email already registered/exists
+      // This likely means user registered but didn't verify email
+      if (errorMessageLower.contains('email') && 
+          (errorMessageLower.contains('already') || 
+           errorMessageLower.contains('exists') ||
+           errorMessageLower.contains('registered'))) {
+        
+        if (kDebugMode) {
+          print('=== EMAIL ALREADY REGISTERED - LIKELY UNVERIFIED ===');
+          print('Email: $email');
+          print('Navigating to verification screen to resend OTP...');
+        }
+        
+        // Navigate to verification screen and automatically resend OTP
+        // Pass email and autoResend flag in arguments
+        Navigator.pushNamed(
+          context,
+          RoutesName.VerificationScreen,
+          arguments: {
+            'email': email,
+            'autoResend': true, // Flag to auto-resend OTP
+          },
+        );
+        
+        _showMessage(
+          context, 
+          'This email is already registered. Please verify your email to continue.',
+          isError: false,
+        );
+        
+        return; // Exit early - don't show the error message again
+      }
+      
       errorMessage = e.message;
       if (kDebugMode) {
         print('=== API EXCEPTION ===');
         print('Status code: ${e.statusCode}');
         print('Message: ${e.message}');
         print('Full exception: $e');
+        print('Note: Backend checks email uniqueness, not username');
       }
       _showMessage(context, e.message);
     } on SocketException catch (e) {

@@ -4,7 +4,7 @@ import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 
 class AccoundCreated extends StatelessWidget {
@@ -13,9 +13,7 @@ class AccoundCreated extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.blackColor,
-      body: Scaffold(
-        backgroundColor: AppColors.blackColor,
+        backgroundColor: context.backgroundColor,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(64),
           child: Stack(
@@ -31,7 +29,7 @@ class AccoundCreated extends StatelessWidget {
                       onPressed: () => Navigator.pop(context),
                       icon: Icon(
                         Icons.arrow_back_ios,
-                        color: AppColors.whiteColor,
+                        color: Theme.of(context).iconTheme.color,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,
@@ -55,13 +53,10 @@ class AccoundCreated extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
               SizedBox(height: context.h(24)),
-              NormalText(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                titleText: "You are all done!👏🏻",
-                titleSize: context.text(20),
-                titleWeight: FontWeight.w600,
-                titleColor: AppColors.whiteColor,
-                titleAlign: TextAlign.center,
+              Text(
+                "You are all done!👏🏻",
+                style: context.appTextStyles?.authTitleWhite,
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: context.h(253)),
               CustomButton(
@@ -80,7 +75,6 @@ class AccoundCreated extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

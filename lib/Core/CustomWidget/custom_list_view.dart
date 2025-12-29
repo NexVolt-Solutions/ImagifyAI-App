@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class CustomListView extends StatelessWidget {
   final String? image;
@@ -22,7 +23,7 @@ class CustomListView extends StatelessWidget {
               margin: context.padSym(h: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(context.radius(8)),
-                border: Border.all(color: AppColors.whiteColor),
+                border: Border.all(color: context.colorScheme.onSurface),
               ),
               clipBehavior: Clip.hardEdge,
               child: ClipRRect(
@@ -30,10 +31,10 @@ class CustomListView extends StatelessWidget {
                 child: image != null && image!.isNotEmpty
                     ? Image.asset(image!, fit: BoxFit.contain)
                     : Container(
-                        color: Colors.grey[900],
+                        color: context.colorScheme.surface,
                         child: Icon(
                           Icons.image_not_supported,
-                          color: Colors.grey[600],
+                          color: context.colorScheme.onSurface.withOpacity(0.5),
                           size: 40,
                         ),
                       ),

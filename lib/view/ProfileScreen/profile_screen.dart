@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/profile_image.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/profile_screen_view_model.dart';
 import 'package:genwalls/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final user = profileScreenViewModel.currentUser;
         
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           body: SafeArea(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: context.h(20)),
@@ -57,18 +57,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: context.h(12)),
-                NormalText(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  titleText: user?.fullName ?? "User",
-                  titleSize: context.text(16),
-                  titleWeight: FontWeight.w500,
-                  titleColor: AppColors.primeryColor,
-                  titleAlign: TextAlign.center,
-                  subText: user?.email ?? "",
-                  subSize: context.text(12),
-                  subColor: AppColors.whiteColor,
-                  subWeight: FontWeight.w500,
-                  subAlign: TextAlign.center,
+                  children: [
+                    Text(
+                      user?.fullName ?? "User",
+                      style: context.appTextStyles?.profileName,
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: context.h(4)),
+                    Text(
+                      user?.email ?? "",
+                      style: context.appTextStyles?.profileEmail,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
                 if (profileScreenViewModel.isLoading)
                   Padding(
@@ -95,36 +98,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       : const SizedBox.shrink(),
                   title: Text(
                     item['title'] ?? '',
-                    style: TextStyle(
-                      color: AppColors.whiteColor,
-                      fontSize: context.text(14),
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: context.appTextStyles?.profileListItemTitle,
                   ),
                   subtitle: Text(
                     item['subtitle'] ?? '',
-                    style: TextStyle(
-                      color: AppColors.subTitleColor,
-                      fontSize: context.text(13),
-                      fontWeight: FontWeight.w400,
-                    ),
+                    style: context.appTextStyles?.profileListItemSubtitle,
                   ),
                   trailing: item['trailingType'] == 'switch'
                       ? Switch(
-                          inactiveThumbColor: AppColors.textFieldIconColor,
-                          activeTrackColor: AppColors.whiteColor,
-                          activeThumbColor: AppColors.primeryColor,
+                          inactiveThumbColor: context.subtitleColor,
+                          activeTrackColor: context.textColor,
+                          activeThumbColor: context.primaryColor,
                           value: item['switchValue'] ?? false,
                           onChanged: (val) {
                             setState(() {
                               item['switchValue'] = val;
                             });
                           },
-                          activeColor: Colors.white,
+                          activeColor: context.textColor,
                         )
-                      : const Icon(
+                      : Icon(
                           Icons.arrow_forward_ios,
-                          color: Colors.white,
+                          color: context.textColor,
                           size: 16,
                         ),
                 );

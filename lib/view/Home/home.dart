@@ -7,9 +7,9 @@ import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_list_view.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/models/user/user.dart';
 import 'package:genwalls/viewModel/home_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
@@ -57,7 +57,7 @@ class _HomeState extends State<Home> {
     return Consumer<HomeViewModel>(
       builder: (context, homeViewModel, _) {
     return Scaffold(
-      backgroundColor: AppColors.blackColor,
+      backgroundColor: context.backgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -85,14 +85,14 @@ class _HomeState extends State<Home> {
                               return Container(
                                 height: context.h(50),
                                 width: context.h(50),
-                                decoration: const BoxDecoration(
-                                  color: Colors.grey,
+                                decoration: BoxDecoration(
+                                  color: context.subtitleColor.withOpacity(0.3),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   Icons.person,
                                   size: context.h(30),
-                                  color: Colors.white70,
+                                  color: context.textColor.withOpacity(0.7),
                                 ),
                               );
                             },
@@ -101,8 +101,8 @@ class _HomeState extends State<Home> {
                               return Container(
                                 height: context.h(50),
                                 width: context.h(50),
-                                decoration: const BoxDecoration(
-                                  color: AppColors.subTitleColor,
+                                decoration: BoxDecoration(
+                                  color: context.subtitleColor.withOpacity(0.3),
                                   shape: BoxShape.circle,
                                 ),
                                 child: const Center(
@@ -116,32 +116,24 @@ class _HomeState extends State<Home> {
                         : Container(
                             height: context.h(50),
                             width: context.h(50),
-                            decoration: const BoxDecoration(
-                              color: AppColors.subTitleColor,
+                            decoration: BoxDecoration(
+                              color: context.subtitleColor.withOpacity(0.3),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
                               Icons.person,
                               size: context.h(30),
-                              color: Colors.white70,
+                              color: context.textColor.withOpacity(0.7),
                             ),
                           ),
                   ),
                   title: Text(
                     'Hello, ${_getDisplayName(homeViewModel.currentUser)} 👋',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.whiteColor,
-                      fontSize: context.text(20),
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: context.appTextStyles?.homeGreetingTitle,
                   ),
                   subtitle: Text(
                     'Ready to build your perfect wallpaper?',
-                    style: GoogleFonts.poppins(
-                      color: AppColors.textFieldIconColor,
-                      fontSize: context.text(14),
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: context.appTextStyles?.homeGreetingSubtitle,
                   ),
                   ),
                 ),
@@ -163,7 +155,7 @@ class _HomeState extends State<Home> {
                     dashPattern: [10, 5],
                     strokeWidth: context.w(2),
                     radius: Radius.circular(context.radius(12)),
-                    color: AppColors.whiteColor,
+                    color: context.colorScheme.onSurface,
                   ),
                   child: Container(
                     height: context.h(318),
@@ -183,21 +175,13 @@ class _HomeState extends State<Home> {
                         SizedBox(height: context.h(12)),
                         Text(
                           'Create Your Perfect Wallpaper',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.whiteColor,
-                            fontSize: context.text(20),
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.appTextStyles?.homeCardTitle,
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: context.h(12)),
                         Text(
                           'Use AI to generate stunning wallpapers tailored to your style. From abstract art to breathtaking landscapes.',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.whiteColor,
-                            fontSize: context.text(14),
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: context.appTextStyles?.homeCardDescription,
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: context.h(12)),
@@ -328,7 +312,7 @@ class _UserProfileHeaderDelegate extends SliverPersistentHeaderDelegate {
     return SizedBox(
       height: height,
       child: Container(
-        color: AppColors.blackColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: child,
       ),
     );

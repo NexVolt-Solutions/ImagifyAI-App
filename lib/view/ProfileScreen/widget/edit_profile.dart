@@ -5,13 +5,12 @@ import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/align_text.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/password_text.dart';
 import 'package:genwalls/Core/CustomWidget/profile_image.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/edit_profile_view_model.dart';
 import 'package:genwalls/viewModel/profile_screen_view_model.dart';
 import 'package:genwalls/viewModel/sign_in_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -76,7 +75,7 @@ class _EditProfileState extends State<EditProfile> {
         }
 
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
             child: Stack(
@@ -92,7 +91,7 @@ class _EditProfileState extends State<EditProfile> {
                       onTap: () => Navigator.pop(context),
                       child: Icon(
                         Icons.arrow_back_ios,
-                        color: AppColors.whiteColor,
+                        color: Theme.of(context).iconTheme.color,
                       ),
                     ),
                   ),
@@ -109,22 +108,18 @@ class _EditProfileState extends State<EditProfile> {
                   SizedBox(height: context.h(20)),
                   Align(
                     alignment: Alignment.topLeft,
-                    child: NormalText(
-                      titleText: "Edit Profile",
-                      titleSize: context.text(20),
-                      titleWeight: FontWeight.w600,
-                      titleColor: AppColors.whiteColor,
-                      titleAlign: TextAlign.start,
+                    child: Text(
+                      "Edit Profile",
+                      style: context.appTextStyles?.profileScreenTitle,
+                      textAlign: TextAlign.start,
                     ),
                   ),
                   Align(
                     alignment: Alignment.topLeft,
-                    child: NormalText(
-                      subText: "Manage your GENWALLS account settings",
-                      subSize: context.text(14),
-                      subColor: AppColors.textFieldSubTitleColor,
-                      subWeight: FontWeight.w500,
-                      subAlign: TextAlign.start,
+                    child: Text(
+                      "Manage your GENWALLS account settings",
+                      style: context.appTextStyles?.profileScreenSubtitle,
+                      textAlign: TextAlign.start,
                     ),
                   ),
                   SizedBox(height: context.h(20)),
@@ -132,7 +127,7 @@ class _EditProfileState extends State<EditProfile> {
                     height: context.h(167),
                     width: context.w(double.infinity),
                     decoration: BoxDecoration(
-                      color: AppColors.containerColor,
+                      color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(context.radius(12)),
                     ),
                     child: Column(
@@ -168,16 +163,16 @@ class _EditProfileState extends State<EditProfile> {
                                 child: Container(
                                   padding: EdgeInsets.all(context.w(6)),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primeryColor,
+                                    color: context.primaryColor,
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: AppColors.blackColor,
+                                      color: context.backgroundColor,
                                       width: 2,
                                     ),
                                   ),
                                   child: Icon(
                                     Icons.camera_alt,
-                                    color: AppColors.whiteColor,
+                                    color: context.textColor,
                                     size: context.text(16),
                                   ),
                                 ),
@@ -189,11 +184,7 @@ class _EditProfileState extends State<EditProfile> {
                         Center(
                           child: Text(
                             'Click the camera icon to change your photo',
-                            style: GoogleFonts.poppins(
-                              color: AppColors.whiteColor,
-                              fontSize: context.text(12),
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: context.appTextStyles?.profileHelperText,
                           ),
                         ),
                         if (editProfileViewModel.isUpdatingPicture)
@@ -211,7 +202,7 @@ class _EditProfileState extends State<EditProfile> {
                     padding: EdgeInsets.symmetric(vertical: context.w(20)),
                     height: context.h(265),
                     decoration: BoxDecoration(
-                      color: AppColors.containerColor,
+                      color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(context.radius(12)),
                     ),
                     child: ListView(
@@ -221,12 +212,10 @@ class _EditProfileState extends State<EditProfile> {
                       children: [
                         Align(
                           alignment: Alignment.topLeft,
-                          child: NormalText(
-                            titleText: "Persnol Information",
-                            titleSize: context.text(16),
-                            titleWeight: FontWeight.w600,
-                            titleColor: AppColors.whiteColor,
-                            titleAlign: TextAlign.start,
+                          child: Text(
+                            "Persnol Information",
+                            style: context.appTextStyles?.profileSectionTitle,
+                            textAlign: TextAlign.start,
                           ),
                         ),
                         SizedBox(height: context.h(20)),
@@ -240,7 +229,7 @@ class _EditProfileState extends State<EditProfile> {
                                 validatorType: "name",
                                 label: "User name",
                                 enabledBorderColor:
-                                    AppColors.textFieldIconColor,
+                                    context.colorScheme.onSurface,
                               ),
                             ),
                           ],
@@ -250,7 +239,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: editProfileViewModel.emailController,
                           validatorType: "email",
                           label: "Email",
-                          enabledBorderColor: AppColors.textFieldIconColor,
+                          enabledBorderColor: context.colorScheme.onSurface,
                         ),
                       ],
                     ),
@@ -260,7 +249,7 @@ class _EditProfileState extends State<EditProfile> {
                     height: context.h(470),
                     width: context.w(double.infinity),
                     decoration: BoxDecoration(
-                      color: AppColors.containerColor,
+                      color: context.surfaceColor,
                       borderRadius: BorderRadius.circular(context.radius(12)),
                     ),
                     child: ListView(
@@ -273,12 +262,10 @@ class _EditProfileState extends State<EditProfile> {
                       children: [
                         Align(
                           alignment: Alignment.topLeft,
-                          child: NormalText(
-                            titleText: "Change Password",
-                            titleSize: context.text(16),
-                            titleWeight: FontWeight.w600,
-                            titleColor: AppColors.whiteColor,
-                            titleAlign: TextAlign.start,
+                          child: Text(
+                            "Change Password",
+                            style: context.appTextStyles?.profileSectionTitle,
+                            textAlign: TextAlign.start,
                           ),
                         ),
                         SizedBox(height: context.h(20)),
@@ -287,13 +274,9 @@ class _EditProfileState extends State<EditProfile> {
                               editProfileViewModel.oldPasswordController,
                           validatorType: "password",
                           hintText: 'Enter old Password',
-                          hintStyle: TextStyle(
-                            color: AppColors.textFieldSubTitleColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: context.text(12),
-                          ),
+                          hintStyle: context.appTextStyles?.authHintText,
                           label: "Old Password",
-                          enabledBorderColor: AppColors.textFieldIconColor,
+                          enabledBorderColor: context.colorScheme.onSurface,
                         ),
                         SizedBox(height: context.h(16)),
                         CustomTextField(
@@ -301,13 +284,9 @@ class _EditProfileState extends State<EditProfile> {
                               editProfileViewModel.newPasswordController,
                           validatorType: "password",
                           hintText: 'Enter new Password',
-                          hintStyle: TextStyle(
-                            color: AppColors.textFieldSubTitleColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: context.text(12),
-                          ),
+                          hintStyle: context.appTextStyles?.authHintText,
                           label: "New Password",
-                          enabledBorderColor: AppColors.textFieldIconColor,
+                          enabledBorderColor: context.colorScheme.onSurface,
                         ),
                         SizedBox(height: context.h(16)),
                         CustomTextField(
@@ -315,13 +294,9 @@ class _EditProfileState extends State<EditProfile> {
                               editProfileViewModel.confirmPasswordController,
                           validatorType: "password",
                           hintText: 'Enter confirm Password',
-                          hintStyle: TextStyle(
-                            color: AppColors.textFieldSubTitleColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: context.text(12),
-                          ),
+                          hintStyle: context.appTextStyles?.authHintText,
                           label: "Confirm Password",
-                          enabledBorderColor: AppColors.textFieldIconColor,
+                          enabledBorderColor: context.colorScheme.onSurface,
                         ),
                         SizedBox(height: context.h(20)),
                         AlignText(
@@ -390,7 +365,7 @@ class _EditProfileState extends State<EditProfile> {
                               : () => Navigator.pop(context),
                           text: "Cancel",
                           icon: null,
-                          borderColor: AppColors.whiteColor,
+                          borderColor: context.colorScheme.onSurface,
                         ),
                       ),
                     ],

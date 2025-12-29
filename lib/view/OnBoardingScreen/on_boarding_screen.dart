@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/on_boarding_screen_view_model.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +21,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final viewModel = Provider.of<OnBoardingScreenViewModel>(context);
 
     return Scaffold(
-      backgroundColor: AppColors.blackColor,
+      backgroundColor: context.backgroundColor,
 
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(context.h(64)),
@@ -78,11 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       children: [
                         Text(
                           data['title'],
-                          style: TextStyle(
-                            color: AppColors.whiteColor,
-                            fontSize: context.text(22),
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: context.appTextStyles?.onboardingTitle,
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: context.h(10)),
@@ -92,10 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                           child: Text(
                             data['subtitle'],
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: context.text(16),
-                            ),
+                            style: context.appTextStyles?.onboardingSubtitle,
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -115,8 +107,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   controller: viewModel.mainController,
                   count: viewModel.text.length,
                   effect: ExpandingDotsEffect(
-                    activeDotColor: AppColors.whiteColor,
-                    dotColor: AppColors.primeryColor,
+                    activeDotColor: context.textColor,
+                    dotColor: context.primaryColor,
                     dotHeight: 10,
                     dotWidth: 10,
                     expansionFactor: 3,
@@ -140,13 +132,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       );
                     }
                   },
-                  child: NormalText(
-                    titleText:
-                        viewModel.text[viewModel.currentPage]['buttonText'] ??
-                        '',
-                    titleSize: context.text(16),
-                    titleWeight: FontWeight.w500,
-                    titleColor: AppColors.whiteColor,
+                  child: Text(
+                    viewModel.text[viewModel.currentPage]['buttonText'] ?? '',
+                    style: context.appTextStyles?.onboardingButton,
                   ),
                 ),
                 SizedBox(width: context.w(20)),

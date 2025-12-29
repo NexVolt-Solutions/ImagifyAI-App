@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -36,11 +37,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.blackColor,
+      backgroundColor: context.backgroundColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(55),
         child: Container(
-          color: AppColors.blackColor,
+          color: context.backgroundColor,
           child: Align(
             alignment: Alignment.center,
             child: Stack(
@@ -76,7 +77,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                     vertical: context.h(11),
                   ),
                     decoration: BoxDecoration(
-                      color: AppColors.bottomBarColor,
+                      color: context.theme.bottomNavigationBarTheme.backgroundColor,
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(context.radius(68)),
                         topLeft: Radius.circular(context.radius(68)),
@@ -111,22 +112,15 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                                         bottomNavScreenViewModel
                                             .bottomData[index]['image'],
                                 
-                                        color: AppColors.bottomBarIconColor,
+                                        color: context.theme.bottomNavigationBarTheme.unselectedItemColor,
                                       ),
                                 SizedBox(height: context.h(4)),
                                 Text(
                                   bottomNavScreenViewModel
                                       .bottomData[index]['name'],
-                                  style: TextStyle(
-                                    fontFamily: 'Manrope',
-                                    color:
-                                        bottomNavScreenViewModel.currentIndex ==
-                                            index
-                                        ? AppColors.primeryColor
-                                        : AppColors.bottomBarIconColor,
-                                    fontSize: context.text(10),
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: bottomNavScreenViewModel.currentIndex == index
+                                      ? context.appTextStyles?.bottomNavLabelSelected
+                                      : context.appTextStyles?.bottomNavLabelUnselected,
                                 ),
                               ],
                             ),

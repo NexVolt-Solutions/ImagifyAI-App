@@ -4,11 +4,10 @@ import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/prompt_continer.dart';
 import 'package:genwalls/Core/CustomWidget/size_continer.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/image_generate_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class ImageGenerateScreen extends StatefulWidget {
@@ -25,7 +24,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
   Widget build(BuildContext context) {
     final imageGenerateViewModel = Provider.of<ImageGenerateViewModel>(context);
     return Scaffold(
-      backgroundColor: AppColors.blackColor,
+      backgroundColor: context.backgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
@@ -33,21 +32,19 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
           padding: context.padSym(h: 20),
           children: [
             SizedBox(height: context.h(20)),
-            NormalText(
-              titleText: "Describe Your Vision",
-              titleSize: context.text(16),
-              titleWeight: FontWeight.w500,
-              titleColor: AppColors.whiteColor,
-              titleAlign: TextAlign.center,
+            Text(
+              "Describe Your Vision",
+              style: context.appTextStyles?.imageGenerateSectionTitle,
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: context.h(12)),
             Container(
               width: context.w(double.infinity),
               decoration: BoxDecoration(
-                color: AppColors.blackColor,
+                color: context.backgroundColor,
                 borderRadius: BorderRadius.circular(context.radius(8)),
                 border: Border.all(
-                  color: AppColors.whiteColor,
+                  color: context.colorScheme.onSurface,
                   width: context.h(1.5),
                 ),
               ),
@@ -60,18 +57,10 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                     minLines: 1,
                     enabled: true,
                     readOnly: false,
-                    style: GoogleFonts.poppins(
-                      color: AppColors.whiteColor,
-                      fontSize: context.text(12),
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: context.appTextStyles?.imageGeneratePromptText,
                     decoration: InputDecoration(
                       hintText: 'Describe the wallpaper you want to create...',
-                      hintStyle: GoogleFonts.poppins(
-                        color: AppColors.textFieldIconColor,
-                        fontSize: context.text(12),
-                        fontWeight: FontWeight.w500,
-                      ),
+                      hintStyle: context.appTextStyles?.imageGeneratePromptHint,
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.only(
                         bottom: context.h(45),
@@ -94,7 +83,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                         height: context.h(32),
                         width: context.w(123),
                         decoration: BoxDecoration(
-                          color: Colors.black,
+                          color: context.backgroundColor,
                           borderRadius: BorderRadius.circular(
                             context.radius(8),
                           ),
@@ -110,7 +99,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                                 context.radius(8),
                               ),
                               border: Border.all(
-                                color: AppColors.whiteColor,
+                                color: context.colorScheme.onSurface,
                                 width: context.w(1.5),
                               ),
                             ),
@@ -124,7 +113,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.whiteColor,
+                                        context.textColor,
                                       ),
                                     ),
                                   )
@@ -150,11 +139,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                                     imageGenerateViewModel.isGettingSuggestion
                                         ? 'Loading...'
                                         : 'AI Suggestion',
-                                    style: GoogleFonts.poppins(
-                                      color: AppColors.whiteColor,
-                                      fontSize: context.text(12),
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                    style: context.appTextStyles?.imageGenerateAISuggestion,
                                   ),
                                 ),
                               ],
@@ -168,12 +153,10 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
               ),
             ),
             SizedBox(height: context.h(20)),
-            NormalText(
-              titleText: "Inspiration Gallery",
-              titleSize: context.text(16),
-              titleWeight: FontWeight.w500,
-              titleColor: AppColors.whiteColor,
-              titleAlign: TextAlign.center,
+            Text(
+              "Inspiration Gallery",
+              style: context.appTextStyles?.imageGenerateSectionTitle,
+              textAlign: TextAlign.center,
             ),
             
             Wrap(
@@ -227,12 +210,10 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
               ],
             ),
             SizedBox(height: context.h(20)),
-            NormalText(
-              titleText: "Choose Your Size",
-              titleSize: context.text(16),
-              titleWeight: FontWeight.w500,
-              titleColor: AppColors.whiteColor,
-              titleAlign: TextAlign.center,
+            Text(
+              "Choose Your Size",
+              style: context.appTextStyles?.imageGenerateSectionTitle,
+              textAlign: TextAlign.center,
             ),
             SizedBox(height: context.h(12)),
             Row(
@@ -375,7 +356,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
     final progressPercent = (widget.progress * 100).toInt().clamp(0, 100);
     
     return Container(
-      color: Colors.black.withOpacity(0.9),
+      color: context.backgroundColor.withOpacity(0.9),
       child: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: context.w(40)),
@@ -397,7 +378,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                         value: 1.0,
                         strokeWidth: context.w(20),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white.withOpacity(0.3),
+                          context.textColor.withOpacity(0.3),
                         ),
                         backgroundColor: Colors.transparent,
                       ),
@@ -410,7 +391,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                         value: widget.progress,
                         strokeWidth: context.w(20),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          AppColors.primeryColor,
+                          context.primaryColor,
                         ),
                         backgroundColor: Colors.transparent,
                         strokeCap: StrokeCap.round,
@@ -419,11 +400,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                     // Percentage text
                     Text(
                       '$progressPercent%',
-                      style: GoogleFonts.poppins(
-                        color: AppColors.whiteColor,
-                        fontSize: context.text(48),
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: context.appTextStyles?.imageGenerateLoadingPercent,
                     ),
                   ],
                 ),
@@ -432,11 +409,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
               // Main title
               Text(
                 'Generating your wallpaper...',
-                style: GoogleFonts.poppins(
-                  color: AppColors.whiteColor,
-                  fontSize: context.text(20),
-                  fontWeight: FontWeight.w600,
-                ),
+                style: context.appTextStyles?.imageGenerateLoadingTitle,
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: context.h(16)),
@@ -445,11 +418,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                 opacity: _fadeController,
                 child: Text(
                   _displayedStage,
-                  style: GoogleFonts.poppins(
-                    color: AppColors.primeryColor,
-                    fontSize: context.text(16),
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: context.appTextStyles?.imageGenerateLoadingStage,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -458,11 +427,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                 SizedBox(height: context.h(8)),
                 Text(
                   'Elapsed: ${widget.elapsedTime}',
-                  style: GoogleFonts.poppins(
-                    color: AppColors.whiteColor.withOpacity(0.7),
-                    fontSize: context.text(12),
-                    fontWeight: FontWeight.w400,
-                  ),
+                  style: context.appTextStyles?.imageGenerateLoadingTime,
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -510,12 +475,12 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isActive
-                ? AppColors.primeryColor
-                : Colors.white.withOpacity(0.3),
+                ? context.primaryColor
+                : context.textColor.withOpacity(0.3),
             border: Border.all(
               color: isActive
-                  ? AppColors.primeryColor
-                  : Colors.white.withOpacity(0.5),
+                  ? context.primaryColor
+                  : context.textColor.withOpacity(0.5),
               width: 2,
             ),
           ),
@@ -523,11 +488,10 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
         SizedBox(height: context.h(4)),
         Text(
           label,
-          style: GoogleFonts.poppins(
+          style: (context.appTextStyles?.imageGenerateStageLabel)?.copyWith(
             color: isActive
-                ? AppColors.primeryColor
-                : Colors.white.withOpacity(0.5),
-            fontSize: context.text(10),
+                ? context.primaryColor
+                : context.textColor.withOpacity(0.5),
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -541,8 +505,8 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
       height: context.h(2),
       decoration: BoxDecoration(
         color: isActive
-            ? AppColors.primeryColor
-            : Colors.white.withOpacity(0.3),
+            ? context.primaryColor
+            : context.textColor.withOpacity(0.3),
         borderRadius: BorderRadius.circular(1),
       ),
     );

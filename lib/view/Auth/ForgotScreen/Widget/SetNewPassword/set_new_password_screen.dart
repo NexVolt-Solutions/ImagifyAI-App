@@ -5,8 +5,8 @@ import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/password_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/set_new_password_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -32,7 +32,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
     return Consumer<SetNewPasswordViewModel>(
       builder: (context, viewModel, _) {
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
             child: Stack(
@@ -48,7 +48,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                       onPressed: () => Navigator.pop(context),
                       icon: Icon(
                         Icons.arrow_back_ios,
-                        color: AppColors.whiteColor,
+                        color: Theme.of(context).iconTheme.color,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,
@@ -67,13 +67,10 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
                   SizedBox(height: context.h(35)),
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    titleText: "Set New Password",
-                    titleSize: context.text(20),
-                    titleWeight: FontWeight.w600,
-                    titleColor: AppColors.primeryColor,
-                    titleAlign: TextAlign.center,
+                  Text(
+                    "Set New Password",
+                    style: context.appTextStyles?.authTitlePrimary,
+                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: context.h(24)),
                   CustomTextField(
@@ -81,13 +78,9 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                     prefixIcon: const Icon(Icons.lock),
                     validatorType: "password",
                     hintText: 'Enter new password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
+                    hintStyle: context.appTextStyles?.authHintText,
                     label: "New Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
+                    enabledBorderColor: context.colorScheme.onSurface,
                   ),
                   SizedBox(height: context.h(24)),
                   CustomTextField(
@@ -95,22 +88,15 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                     prefixIcon: const Icon(Icons.lock),
                     validatorType: "password",
                     hintText: 'Confirm new password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
+                    hintStyle: context.appTextStyles?.authHintText,
                     label: "Confirm Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
+                    enabledBorderColor: context.colorScheme.onSurface,
                   ),
                     SizedBox(height: context.h(24)),
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    titleText: "Password must contain",
-                    titleSize: context.text(16),
-                    titleWeight: FontWeight.w500,
-                    titleColor: AppColors.whiteColor,
-                    titleAlign: TextAlign.center,
+                  Text(
+                    "Password must contain",
+                    style: context.appTextStyles?.authPasswordTitle,
+                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: context.h(4)),
                   Column(
@@ -119,7 +105,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                       (index) => PasswordText(
                         text: items[index],
                         icon: Icons.check_circle,
-                        iconColor: AppColors.grayColor,
+                        iconColor: context.textColor,
                       ),
                     ),
                   ),

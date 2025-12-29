@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/splash_screen_view_model.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -21,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: context.backgroundColor,
       body: Center(child: Image.asset(AppAssets.splashLogo)),
     );
   }

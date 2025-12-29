@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class PromptContiner extends StatelessWidget {
   final String text;
@@ -25,7 +24,7 @@ class PromptContiner extends StatelessWidget {
            decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(context.radius(8)),
             border: Border.all(
-              color: isSelected ? AppColors.primeryColor : AppColors.whiteColor,
+              color: isSelected ? context.colorScheme.primary : context.colorScheme.onSurface,
               width: context.w(1.5),
             ),
           ),
@@ -33,11 +32,7 @@ class PromptContiner extends StatelessWidget {
 
           child: Text(
             text,
-            style: GoogleFonts.poppins(
-              color: AppColors.whiteColor,
-              fontSize: context.text(10),
-              fontWeight: FontWeight.w400,
-            ),
+            style: context.appTextStyles?.promptContainerText,
             textAlign: TextAlign.center,
           ),
         ),

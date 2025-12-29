@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class ProfileImage extends StatelessWidget {
   final String imagePath;
@@ -23,14 +24,14 @@ class ProfileImage extends StatelessWidget {
         child: Container(
           height: height,
           width: width,
-          decoration: const BoxDecoration(
-            color: Colors.grey,
+          decoration: BoxDecoration(
+            color: context.colorScheme.surface,
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.person,
             size: height != null ? height! * 0.6 : 24,
-            color: Colors.white70,
+            color: context.colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
       );
@@ -47,14 +48,14 @@ class ProfileImage extends StatelessWidget {
                 return Container(
                   height: height,
                   width: width,
-                  decoration: const BoxDecoration(
-                    color: Colors.grey,
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.surface,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.person,
                     size: height != null ? height! * 0.6 : 24,
-                    color: Colors.white70,
+                    color: context.colorScheme.onSurface.withOpacity(0.7),
                   ),
                 );
               },

@@ -5,8 +5,7 @@ import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -27,7 +26,7 @@ class _ContactUsState extends State<ContactUs> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.blackColor,
+      backgroundColor: context.backgroundColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: Stack(
@@ -43,7 +42,7 @@ class _ContactUsState extends State<ContactUs> {
                   onTap: () => Navigator.pop(context),
                   child: Icon(
                     Icons.arrow_back_ios,
-                    color: AppColors.whiteColor,
+                    color: Theme.of(context).iconTheme.color,
                   ),
                 ),
               ),
@@ -58,16 +57,21 @@ class _ContactUsState extends State<ContactUs> {
             SizedBox(height: context.h(20)),
             Align(
               alignment: Alignment.center,
-              child: NormalText(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                titleText: "Contact Us",
-                titleSize: context.text(20),
-                titleWeight: FontWeight.w600,
-                titleColor: AppColors.whiteColor,
-                subText: "Manage your GENWALLS account settings",
-                subSize: context.text(14),
-                subColor: AppColors.textFieldSubTitleColor,
-                subWeight: FontWeight.w500,
+                children: [
+                  Text(
+                    "Contact Us",
+                    style: context.appTextStyles?.profileScreenTitle,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: context.h(4)),
+                  Text(
+                    "Manage your GENWALLS account settings",
+                    style: context.appTextStyles?.profileScreenSubtitle,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
             SizedBox(height: context.h(24)),
@@ -84,11 +88,7 @@ class _ContactUsState extends State<ContactUs> {
                     SizedBox(height: context.h(11)),
                     Text(
                       '+1012 3456 789',
-                      style: GoogleFonts.poppins(
-                        color: AppColors.whiteColor,
-                        fontSize: context.text(12),
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: context.appTextStyles?.profileContactInfo,
                     ),
                   ],
                 ),
@@ -102,11 +102,7 @@ class _ContactUsState extends State<ContactUs> {
                     SizedBox(height: context.h(11)),
                     Text(
                       'demo@gmail.com',
-                      style: GoogleFonts.poppins(
-                        color: AppColors.whiteColor,
-                        fontSize: context.text(12),
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: context.appTextStyles?.profileContactInfo,
                     ),
                   ],
                 ),
@@ -116,47 +112,33 @@ class _ContactUsState extends State<ContactUs> {
             CustomTextField(
               validatorType: "name",
               hintText: 'Enter your first name',
-              hintStyle: TextStyle(
-                color: AppColors.textFieldSubTitleColor,
-                fontWeight: FontWeight.w500,
-                fontSize: context.text(12),
-              ),
+              hintStyle: context.appTextStyles?.authHintText,
               label: "First Name",
-              enabledBorderColor: AppColors.textFieldIconColor,
+              enabledBorderColor: context.colorScheme.onSurface,
             ),
             SizedBox(height: context.h(16)),
             CustomTextField(
               validatorType: "name",
               hintText: 'Enter your last name',
-              hintStyle: TextStyle(
-                color: AppColors.textFieldSubTitleColor,
-                fontWeight: FontWeight.w500,
-                fontSize: context.text(12),
-              ),
+              hintStyle: context.appTextStyles?.authHintText,
               label: "Last Name",
-              enabledBorderColor: AppColors.textFieldIconColor,
+              enabledBorderColor: context.colorScheme.onSurface,
             ),
             SizedBox(height: context.h(16)),
             CustomTextField(
               validatorType: "email",
               hintText: 'Enter your email name',
-              hintStyle: TextStyle(
-                color: AppColors.textFieldSubTitleColor,
-                fontWeight: FontWeight.w500,
-                fontSize: context.text(12),
-              ),
+              hintStyle: context.appTextStyles?.authHintText,
               label: "Email",
-              enabledBorderColor: AppColors.textFieldIconColor,
+              enabledBorderColor: context.colorScheme.onSurface,
             ),
             SizedBox(height: context.h(20)),
             Align(
               alignment: Alignment.topLeft,
-              child: NormalText(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                titleText: "Select Subject",
-                titleSize: context.text(20),
-                titleWeight: FontWeight.w600,
-                titleColor: AppColors.whiteColor,
+              child: Text(
+                "Select Subject",
+                style: context.appTextStyles?.profileScreenTitle,
+                textAlign: TextAlign.start,
               ),
             ),
             SizedBox(height: context.h(20)),
@@ -177,20 +159,16 @@ class _ContactUsState extends State<ContactUs> {
                       CircleAvatar(
                         radius: context.radius(10),
                         backgroundColor: isSelected
-                            ? const Color(0xFF9B4DFF)
-                            : Colors.grey,
+                            ? context.primaryColor
+                            : context.subtitleColor,
                         child: isSelected
-                            ? Icon(Icons.check, color: Colors.white, size: 12)
+                            ? Icon(Icons.check, color: context.textColor, size: 12)
                             : null,
                       ),
                       SizedBox(width: context.w(3.5)),
                       Text(
                         subjects[index],
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: context.text(12),
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: context.appTextStyles?.profileContactInfo,
                       ),
                     ],
                   ),
@@ -201,13 +179,9 @@ class _ContactUsState extends State<ContactUs> {
             CustomTextField(
               validatorType: "name",
               hintText: 'Write your message...',
-              hintStyle: TextStyle(
-                color: AppColors.textFieldSubTitleColor,
-                fontWeight: FontWeight.w500,
-                fontSize: context.text(12),
-              ),
+              hintStyle: context.appTextStyles?.authHintText,
               label: "Message",
-              enabledBorderColor: AppColors.textFieldIconColor,
+              enabledBorderColor: context.colorScheme.onSurface,
             ),
             SizedBox(height: context.h(100)),
             CustomButton(

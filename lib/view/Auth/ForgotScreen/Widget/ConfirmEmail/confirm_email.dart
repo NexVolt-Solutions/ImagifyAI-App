@@ -5,7 +5,7 @@ import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 
 class ConfirmEmail extends StatefulWidget {
@@ -18,10 +18,8 @@ class ConfirmEmail extends StatefulWidget {
 class _ConfirmEmailState extends State<ConfirmEmail> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.blackColor,
-      body: Scaffold(
-        backgroundColor: AppColors.blackColor,
+     return Scaffold(
+      backgroundColor: context.backgroundColor,
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(64),
           child: Stack(
@@ -39,26 +37,19 @@ class _ConfirmEmailState extends State<ConfirmEmail> {
             padding: EdgeInsets.symmetric(horizontal: context.h(20)),
             children: [
               SizedBox(height: context.h(242)),
-              NormalText(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                titleText: "Your Email",
-                titleSize: context.text(20),
-                titleWeight: FontWeight.w600,
-                titleColor: AppColors.primeryColor,
-                titleAlign: TextAlign.center,
+              Text(
+                "Your Email",
+                style: context.appTextStyles?.authTitlePrimary,
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: context.h(24)),
               CustomTextField(
                 prefixIcon: Icon(Icons.email),
                 validatorType: "email",
                 hintText: 'Enter your email',
-                hintStyle: TextStyle(
-                  color: AppColors.textFieldSubTitleColor,
-                  fontWeight: FontWeight.w500,
-                  fontSize: context.text(12),
-                ),
+                hintStyle: context.appTextStyles?.authHintText,
                 label: "Email",
-                enabledBorderColor: AppColors.textFieldIconColor,
+                enabledBorderColor: context.colorScheme.onSurface,
               ),
               SizedBox(height: context.h(285)),
               CustomButton(
@@ -79,7 +70,6 @@ class _ConfirmEmailState extends State<ConfirmEmail> {
               ),
             ],
           ),
-        ),
       ),
     );
   }

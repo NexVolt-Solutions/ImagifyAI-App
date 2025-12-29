@@ -5,9 +5,8 @@ import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/forgot_password_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class ForgotScreen extends StatefulWidget {
@@ -26,7 +25,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
     return Consumer<ForgotPasswordViewModel>(
       builder: (context, forgotPasswordViewModel, _) {
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(context.h(64)),
             child: Stack(
@@ -43,7 +42,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                       onPressed: () => Navigator.pop(context),
                       icon: Icon(
                         Icons.arrow_back_ios,
-                        color: AppColors.whiteColor,
+                        color: Theme.of(context).iconTheme.color,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,
@@ -66,22 +65,15 @@ class _ForgotScreenState extends State<ForgotScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(height: context.h(60)),
-                      NormalText(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        titleText: "Forgot Password",
-                        titleSize: context.text(20),
-                        titleWeight: FontWeight.w600,
-                        titleColor: AppColors.primeryColor,
-                        titleAlign: TextAlign.center,
+                      Text(
+                        "Forgot Password",
+                        style: context.appTextStyles?.authTitlePrimary,
+                        textAlign: TextAlign.center,
                       ),
                       SizedBox(height: context.h(16)),
                       Text(
                         'Enter your email address and we\'ll send you a verification code to reset your password.',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.whiteColor.withOpacity(0.7),
-                          fontSize: context.text(14),
-                          fontWeight: FontWeight.w400,
-                        ),
+                        style: context.appTextStyles?.authBodyRegular,
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: context.h(24)),
@@ -90,13 +82,9 @@ class _ForgotScreenState extends State<ForgotScreen> {
                         prefixIcon: Icon(Icons.email),
                         validatorType: "email",
                         hintText: 'Enter your email',
-                        hintStyle: TextStyle(
-                          color: AppColors.textFieldSubTitleColor,
-                          fontWeight: FontWeight.w500,
-                          fontSize: context.text(12),
-                        ),
+                        hintStyle: context.appTextStyles?.authHintText,
                         label: "Email",
-                        enabledBorderColor: AppColors.textFieldIconColor,
+                        enabledBorderColor: context.colorScheme.onSurface,
                       ),
                       SizedBox(height: context.h(24)),
                       CustomButton(

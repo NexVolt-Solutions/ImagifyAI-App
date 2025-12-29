@@ -8,11 +8,10 @@ import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
 import 'package:genwalls/Core/CustomWidget/password_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/sign_up_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class SignUp extends StatefulWidget {
@@ -30,7 +29,7 @@ class _SignUpState extends State<SignUp> {
     return Consumer<SignUpViewModel>(
       builder: (context, signUpViewModel, _) {
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
             preferredSize: Size.fromHeight(context.h(64)),
             child: Padding(
@@ -47,7 +46,7 @@ class _SignUpState extends State<SignUp> {
                       onPressed: () => Navigator.pop(context),
                       icon: Icon(
                         Icons.arrow_back_ios,
-                        color: AppColors.whiteColor,
+                        color: Theme.of(context).iconTheme.color,
                         size: 20,
                       ),
                       padding: EdgeInsets.zero,
@@ -66,13 +65,10 @@ class _SignUpState extends State<SignUp> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    titleText: "Sign Up",
-                    titleSize: context.text(20),
-                    titleWeight: FontWeight.w600,
-                    titleColor: AppColors.primeryColor,
-                    titleAlign: TextAlign.center,
+                  Text(
+                    "Sign Up",
+                    style: context.appTextStyles?.authTitlePrimary,
+                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: context.h(16)),
                   Center(
@@ -82,8 +78,8 @@ class _SignUpState extends State<SignUp> {
                         height: context.h(180),
                         width: context.h(180),
                         decoration: BoxDecoration(  
-                          color: AppColors.containerColor,
-                          border: Border.all(color: AppColors.whiteColor),
+                          color: ThemeColors.containerColor(context),
+                          border: Border.all(color: context.colorScheme.onSurface),
                           shape: BoxShape.circle,
                         ),
                         child: signUpViewModel.profileImage != null
@@ -106,10 +102,7 @@ class _SignUpState extends State<SignUp> {
                                   SizedBox(height: context.h(8)),
                                   Text(
                                     'Add profile image',
-                                    style: GoogleFonts.poppins(
-                                      color: AppColors.textFieldSubTitleColor,
-                                      fontSize: context.text(12),
-                                    ),
+                                    style: context.appTextStyles?.authHintText,
                                   ),
                                 ],
                               ),
@@ -122,13 +115,9 @@ class _SignUpState extends State<SignUp> {
                     prefixIcon: Icon(Icons.person),
                     validatorType: "name",
                     hintText: 'Create your username',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
+                    hintStyle: context.appTextStyles?.authHintText,
                     label: "User Name",
-                    enabledBorderColor: AppColors.textFieldIconColor,
+                    enabledBorderColor: context.colorScheme.onSurface,
                   ),
                   SizedBox(height: context.h(24)),
                   CustomTextField(
@@ -136,13 +125,9 @@ class _SignUpState extends State<SignUp> {
                     prefixIcon: Icon(Icons.email),
                     validatorType: "email",
                     hintText: 'Enter your email',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
+                    hintStyle: context.appTextStyles?.authHintText,
                     label: "Email",
-                    enabledBorderColor: AppColors.textFieldIconColor,
+                    enabledBorderColor: context.colorScheme.onSurface,
                   ),
                   SizedBox(height: context.h(24)),
                   CustomTextField(
@@ -150,13 +135,9 @@ class _SignUpState extends State<SignUp> {
                     prefixIcon: Icon(Icons.lock),
                     validatorType: "password",
                     hintText: 'create your password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
+                    hintStyle: context.appTextStyles?.authHintText,
                     label: "Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
+                    enabledBorderColor: context.colorScheme.onSurface,
                     onChanged: (value) {
                       signUpViewModel.validatePassword();
                     },
@@ -167,22 +148,15 @@ class _SignUpState extends State<SignUp> {
                     prefixIcon: Icon(Icons.lock),
                     validatorType: "password",
                     hintText: 'confirm your password',
-                    hintStyle: TextStyle(
-                      color: AppColors.textFieldSubTitleColor,
-                      fontWeight: FontWeight.w500,
-                      fontSize: context.text(12),
-                    ),
+                    hintStyle: context.appTextStyles?.authHintText,
                     label: "Confirm Password",
-                    enabledBorderColor: AppColors.textFieldIconColor,
+                    enabledBorderColor: context.colorScheme.onSurface,
                   ),
                   SizedBox(height: context.h(20)),
-                  NormalText(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    titleText: "Password must contain",
-                    titleSize: context.text(16),
-                    titleWeight: FontWeight.w500,
-                    titleColor: AppColors.whiteColor,
-                    titleAlign: TextAlign.center,
+                  Text(
+                    "Password must contain",
+                    style: context.appTextStyles?.authPasswordTitle,
+                    textAlign: TextAlign.center,
                   ),
                   SizedBox(height: context.h(4)),
                   Column(
@@ -205,23 +179,20 @@ class _SignUpState extends State<SignUp> {
                       Expanded(
                         child: Divider(
                           thickness: 1,
-                          color: AppColors.grayColor,
+                          color: context.theme.dividerColor,
                           indent: 62,
                           endIndent: 10,
                         ),
                       ),
-                      NormalText(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        titleText: "or Continue ",
-                        titleSize: context.text(14),
-                        titleWeight: FontWeight.w500,
-                        titleColor: AppColors.primeryColor,
-                        titleAlign: TextAlign.center,
+                      Text(
+                        "or Continue ",
+                        style: context.appTextStyles?.authSubtitlePrimary,
+                        textAlign: TextAlign.center,
                       ),
                       Expanded(
                         child: Divider(
                           thickness: 1,
-                          color: AppColors.grayColor,
+                          color: context.theme.dividerColor,
                           indent: 10,
                           endIndent: 62,
                         ),
@@ -233,7 +204,7 @@ class _SignUpState extends State<SignUp> {
                     height: context.h(47.9),
                     width: context.w(350),
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.whiteColor),
+                      border: Border.all(color: context.colorScheme.onSurface),
                       borderRadius: BorderRadius.circular(
                         context.radius(context.radius(8)),
                       ),
@@ -249,11 +220,7 @@ class _SignUpState extends State<SignUp> {
                         SizedBox(width: context.w(8)),
                         Text(
                           'Continue with Google',
-                          style: GoogleFonts.poppins(
-                            color: AppColors.grayColor,
-                            fontSize: context.text(14),
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: context.appTextStyles?.authGoogleButton,
                         ),
                       ],
                     ),
@@ -281,7 +248,7 @@ class _SignUpState extends State<SignUp> {
                   ],
                     SizedBox(height: context.h(16)),
                   CustomTextRich(
-                    text1: 'Already Have an Account? ',
+                    text1: 'Already Have an Account?',
                     text2: 'SignIn',
                     textSize1: context.text(14),
                     textSize2: context.text(14),

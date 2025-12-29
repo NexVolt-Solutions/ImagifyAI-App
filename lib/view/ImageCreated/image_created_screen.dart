@@ -7,10 +7,9 @@ import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/models/wallpaper/wallpaper.dart';
 import 'package:genwalls/viewModel/image_created_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 class ImageCreatedScreen extends StatefulWidget {
   const ImageCreatedScreen({super.key});
@@ -169,19 +168,30 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
         }
 
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                  Align(alignment: Alignment.centerLeft, child: IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back_ios, color: AppColors.whiteColor,))),
-                Positioned(
-                  child:  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                ),
-                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-               
-              ],
+            child: Container(
+              color: context.backgroundColor,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  ),
+                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                ],
+              ),
             ),
           ),
           body: SafeArea(
@@ -189,19 +199,17 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
               shrinkWrap: true,
               padding: context.padSym(h: 20),
               children: [
-                NormalText(
-                  titleText: "Your Creation",
-                  titleSize: context.text(16),
-                  titleWeight: FontWeight.w500,
-                  titleColor: AppColors.whiteColor,
-                  titleAlign: TextAlign.center,
+                Text(
+                  "Your Creation",
+                  style: context.appTextStyles?.imageCreatedTitle,
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: context.h(20)),
                 Container(
                   height: context.h(410),
                   width: context.w(350),
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: context.backgroundColor,
                     borderRadius: BorderRadius.circular(context.radius(12)),
                   ),
                   child: ClipRRect(
@@ -209,12 +217,12 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                     child: imageUrl.isNotEmpty && imageUrl != 'null'
                         ? (_imageLoadError
                             ? Container(
-                                color: Colors.black,
+                                color: context.backgroundColor,
                                 child: Center(
                                   child: Container(
                                     padding: context.padAll(15),
                                     decoration: BoxDecoration(
-                                      color: Colors.black54,
+                                      color: context.backgroundColor.withOpacity(0.7),
                                       borderRadius: BorderRadius.circular(context.radius(8)),
                                     ),
                                     child: Column(
@@ -232,11 +240,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                         SizedBox(height: context.h(10)),
                                         Text(
                                           _errorMessage ?? 'Failed to load image',
-                                          style: GoogleFonts.poppins(
-                                            color: AppColors.whiteColor,
-                                            fontSize: context.text(12),
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          style: context.appTextStyles?.imageCreatedError,
                                           textAlign: TextAlign.center,
                                         ),
                                         SizedBox(height: context.h(10)),
@@ -251,10 +255,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                           height: context.h(36),
                                           width: context.w(120),
                                           gradient: AppColors.gradient,
-                                          text: 'Try Again',
-                                          iconWidth: null,
-                                          iconHeight: null,
-                                          icon: null,
+                                          text: 'Try Again',                                      
                                         ),
                                       ],
                                     ),
@@ -274,7 +275,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                       ? loadingProgress.cumulativeBytesLoaded /
                                           loadingProgress.expectedTotalBytes!
                                       : null,
-                                  color: AppColors.primeryColor,
+                                  color: context.primaryColor,
                                 ),
                               );
                             },
@@ -336,23 +337,19 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                             },
                           ))
                         : Container(
-                            color: Colors.black,
+                            color: context.backgroundColor,
                             child: imageCreatedViewModel.isPolling
                                 ? Center(
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         CircularProgressIndicator(
-                                          color: AppColors.primeryColor,
+                                          color: context.primaryColor,
                                         ),
                                         SizedBox(height: context.h(10)),
                                         Text(
                                           'Crafting Your Masterpiece...',
-                                          style: GoogleFonts.poppins(
-                                            color: AppColors.whiteColor,
-                                            fontSize: context.text(14),
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          style: context.appTextStyles?.imageCreatedPollingTitle,
                                         ),
                                         SizedBox(height: context.h(5)),
                                         StreamBuilder<int>(
@@ -370,22 +367,14 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                             }
                                             return Text(
                                               'Time elapsed: $formatted',
-                                              style: GoogleFonts.poppins(
-                                                color: AppColors.textFieldIconColor,
-                                                fontSize: context.text(12),
-                                                fontWeight: FontWeight.w400,
-                                              ),
+                                              style: context.appTextStyles?.imageCreatedPollingTime,
                                             );
                                           },
                                         ),
                                         SizedBox(height: context.h(5)),
                                         Text(
                                           'Great art takes time',
-                                          style: GoogleFonts.poppins(
-                                            color: AppColors.textFieldIconColor,
-                                            fontSize: context.text(10),
-                                            fontWeight: FontWeight.w400,
-                                          ),
+                                          style: context.appTextStyles?.imageCreatedPollingSubtitle,
                                         ),
                                       ],
                                     ),
@@ -398,7 +387,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                 Container(
                   padding: context.padAll(20),
                   decoration: BoxDecoration(
-                    color: Color(0xFF17171D),
+                    color: context.surfaceColor,
                     borderRadius: BorderRadius.circular(context.radius(12)),
                   ),
                   child: Stack(
@@ -409,20 +398,12 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                         minLines: 1,
                         enabled: true,
                         readOnly: false,
-                        style: GoogleFonts.poppins(
-                          color: AppColors.whiteColor,
-                          fontSize: context.text(14),
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: context.appTextStyles?.imageCreatedPromptText,
                         textAlign: TextAlign.center,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Enter your prompt...',
-                          hintStyle: GoogleFonts.poppins(
-                            color: AppColors.textFieldIconColor,
-                            fontSize: context.text(14),
-                            fontWeight: FontWeight.w500,
-                          ),
+                          hintStyle: context.appTextStyles?.imageCreatedPromptHint,
                           contentPadding: EdgeInsets.only(
                             bottom: context.h(30),
                             right: context.w(40),
@@ -442,21 +423,20 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                             Clipboard.setData(ClipboardData(text: _promptController.text));
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Prompt copied to clipboard'),
-                                duration: Duration(seconds: 2),
-                                backgroundColor: AppColors.primeryColor,
-                              ),
-                            );
-                          },
-                          child: Icon(
-                            Icons.copy,
-                            color: AppColors.whiteColor,
-                            size: 20,
+                                content: Text(
+                                  'Prompt copied to clipboard',
+                                  style: context.appTextStyles?.imageCreatedPromptText,
+                                ),
+                                  duration: Duration(seconds: 2),
+                                  backgroundColor: context.primaryColor,
+                                ),
+                              );
+                            },
+                            child: Icon(Icons.copy, color: context.textColor, size: 20),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
                 ),
                 SizedBox(height: context.h(16)),
                 Row(

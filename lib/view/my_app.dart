@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/utils/Routes/routes.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:genwalls/Core/theme/app_theme.dart';
 import 'package:genwalls/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:genwalls/viewModel/edit_profile_view_model.dart';
 import 'package:genwalls/viewModel/library_view_model.dart';
@@ -13,6 +14,7 @@ import 'package:genwalls/viewModel/profile_screen_view_model.dart';
 import 'package:genwalls/viewModel/sign_in_view_model.dart';
 import 'package:genwalls/viewModel/sign_up_view_model.dart';
 import 'package:genwalls/viewModel/splash_screen_view_model.dart';
+import 'package:genwalls/viewModel/theme_provider.dart';
 import 'package:genwalls/viewModel/verification_view_model.dart';
 import 'package:genwalls/viewModel/forgor_verification_view_model.dart';
 import 'package:genwalls/viewModel/set_new_password_view_model.dart';
@@ -30,6 +32,8 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // Theme Provider - should be first to be available to all other providers
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => SplashScreenViewModel()),
         ChangeNotifierProvider(
           create: (context) => OnBoardingScreenViewModel(),
@@ -48,10 +52,18 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (context) => ProfileScreenViewModel()),
         ChangeNotifierProvider(create: (context) => EditProfileViewModel()),
       ],
-      child: MaterialApp(
-        initialRoute: RoutesName.SplashScreen,
-        onGenerateRoute: Routes.generateRoute,
-        debugShowCheckedModeBanner: false,
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) {
+          return MaterialApp(
+            title: 'Genwalls',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            initialRoute: RoutesName.SplashScreen,
+            onGenerateRoute: Routes.generateRoute,
+          );
+        },
       ),
     );
   }

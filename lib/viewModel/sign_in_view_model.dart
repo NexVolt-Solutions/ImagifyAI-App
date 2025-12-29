@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/Core/services/token_storage_service.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
@@ -194,7 +195,23 @@ class SignInViewModel extends ChangeNotifier {
 
   Future<void> login(BuildContext context, {required GlobalKey<FormState> formKey}) async {
     if (isLoading) return;
-    if (!(formKey.currentState?.validate() ?? false)) return;
+    
+    // Validate form - if validation fails, stop here
+    if (formKey.currentState == null) {
+      if (kDebugMode) {
+        print('⚠️ Form key state is null');
+      }
+      return;
+    }
+    
+    final isValid = formKey.currentState!.validate();
+    if (!isValid) {
+      if (kDebugMode) {
+        print('❌ Form validation failed - preventing submission');
+        print('Email: ${emailController.text.trim()}');
+      }
+      return;
+    }
 
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -430,10 +447,55 @@ class SignInViewModel extends ChangeNotifier {
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);
+    } on PlatformException catch (e) {
+      // Handle Google Sign-In specific errors
+      String userMessage;
+      
+      // Check for Google Sign-In API error codes
+      if (e.code == 'sign_in_failed' || e.code == 'sign_in_canceled') {
+        final errorDetails = e.message ?? '';
+        
+        // Check for specific Google API error codes
+        if (errorDetails.contains('ApiException: 10')) {
+          // Error code 10 = DEVELOPER_ERROR
+          userMessage = 'Google Sign-In configuration error. Please contact support or try again later.';
+          if (kDebugMode) {
+            print('❌ Google Sign-In DEVELOPER_ERROR (10): $errorDetails');
+            print('   This usually means:');
+            print('   - SHA-1 fingerprint not configured in Firebase/Google Cloud Console');
+            print('   - OAuth client ID is incorrect');
+            print('   - Package name mismatch');
+          }
+        } else if (errorDetails.contains('ApiException: 7')) {
+          // Error code 7 = NETWORK_ERROR
+          userMessage = 'Network error. Please check your internet connection and try again.';
+        } else if (errorDetails.contains('ApiException: 8')) {
+          // Error code 8 = INTERNAL_ERROR
+          userMessage = 'An internal error occurred. Please try again later.';
+        } else if (errorDetails.contains('ApiException: 12500')) {
+          // Error code 12500 = SIGN_IN_CANCELLED
+          userMessage = 'Sign-in was cancelled.';
+        } else {
+          // Generic Google Sign-In error
+          userMessage = 'Failed to sign in with Google. Please try again.';
+        }
+      } else {
+        userMessage = 'An error occurred during Google Sign-In. Please try again.';
+      }
+      
+      errorMessage = userMessage;
+      if (kDebugMode) {
+        print('❌ Google Sign-In PlatformException:');
+        print('   Code: ${e.code}');
+        print('   Message: ${e.message}');
+        print('   Details: ${e.details}');
+      }
+      _showMessage(context, userMessage);
     } catch (e) {
       errorMessage = 'Failed to sign in with Google. Please try again.';
       if (kDebugMode) {
         print('❌ Google Sign-In Error: $e');
+        print('   Error type: ${e.runtimeType}');
       }
       _showMessage(context, errorMessage!);
     } finally {

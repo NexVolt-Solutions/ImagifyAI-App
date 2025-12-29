@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart'; // path sahi laga lena
+import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class SizeContiner extends StatelessWidget {
   final double height1;
@@ -36,7 +36,7 @@ class SizeContiner extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(context.radius(8)),
           border: Border.all(
-            color: isSelected ? AppColors.primeryColor : AppColors.whiteColor,
+            color: isSelected ? context.colorScheme.primary : context.colorScheme.onSurface,
             width: context.w(1.5),
           ),
         ),
@@ -45,11 +45,7 @@ class SizeContiner extends StatelessWidget {
           child: Center(
             child: Text(
               text2,
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: context.text(11), // Slightly smaller font
-                fontWeight: FontWeight.w500,
-              ),
+              style: context.appTextStyles?.sizeContainerText,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
               textAlign: TextAlign.center,

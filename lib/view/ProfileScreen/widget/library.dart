@@ -4,7 +4,7 @@ import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/snackbar_util.dart';
 import 'package:genwalls/viewModel/library_view_model.dart';
 import 'package:provider/provider.dart';
@@ -36,7 +36,7 @@ class _LibraryState extends State<Library> {
         final items = libraryViewModel.wallpapers;
         final isLoading = libraryViewModel.isLoading;
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
             child: Stack(
@@ -52,7 +52,7 @@ class _LibraryState extends State<Library> {
                       onTap: () => Navigator.pop(context),
                       child: Icon(
                         Icons.arrow_back_ios,
-                        color: AppColors.whiteColor,
+                        color: Theme.of(context).iconTheme.color,
                       ),
                     ),
                   ),
@@ -64,12 +64,10 @@ class _LibraryState extends State<Library> {
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: context.h(20)),
               children: [
-                NormalText(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  titleText: "Explore Prompt",
-                  titleSize: context.text(20),
-                  titleWeight: FontWeight.w600,
-                  titleColor: AppColors.whiteColor,
+                Text(
+                  "Explore Prompt",
+                  style: context.appTextStyles?.profileScreenTitle,
+                  textAlign: TextAlign.center,
                 ),
                 SizedBox(height: context.h(10)),
                 if (isLoading)
@@ -79,11 +77,7 @@ class _LibraryState extends State<Library> {
                     padding: EdgeInsets.symmetric(vertical: context.h(40)),
                     child: Text(
                       'No wallpapers found.',
-                      style: TextStyle(
-                        color: AppColors.whiteColor,
-                        fontSize: context.text(14),
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: context.appTextStyles?.profileListItemTitle,
                       textAlign: TextAlign.center,
                     ),
                   )
@@ -110,7 +104,7 @@ class _LibraryState extends State<Library> {
                           Container(
                             padding: context.padAll(7),
                             decoration: BoxDecoration(
-                              color: AppColors.blackColor,
+                              color: context.backgroundColor,
                               borderRadius: BorderRadius.circular(context.radius(12)),
                             ),
                             child: ClipRRect(
@@ -120,19 +114,19 @@ class _LibraryState extends State<Library> {
                                       imageUrl,
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, __, ___) => Container(
-                                        color: Colors.grey[900],
+                                        color: context.surfaceColor,
                                         child: Icon(
                                           Icons.image_not_supported,
-                                          color: Colors.grey[600],
+                                          color: context.subtitleColor,
                                           size: 40,
                                         ),
                                       ),
                                     )
                                   : Container(
-                                      color: Colors.grey[900],
+                                      color: context.surfaceColor,
                                       child: Icon(
                                         Icons.image_not_supported,
-                                        color: Colors.grey[600],
+                                        color: context.subtitleColor,
                                         size: 40,
                                       ),
                                     ),
@@ -140,15 +134,12 @@ class _LibraryState extends State<Library> {
                           ),
 
                           SizedBox(height: context.h(8)),
-                          NormalText(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            titleText: item.title.isNotEmpty
+                          Text(
+                            item.title.isNotEmpty
                                 ? item.title
                                 : (item.prompt.isNotEmpty ? item.prompt : 'Wallpaper'),
-                            titleSize: context.text(11),
-                            titleWeight: FontWeight.w700,
-                            titleColor: AppColors.whiteColor,
-                            titleAlign: TextAlign.center,
+                            style: context.appTextStyles?.profileCardTitle,
+                            textAlign: TextAlign.center,
                           ),
                           SizedBox(height: context.h(6)),
                           SizedBox(

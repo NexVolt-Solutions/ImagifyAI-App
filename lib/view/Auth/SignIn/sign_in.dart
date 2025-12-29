@@ -6,10 +6,9 @@ import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
-import 'package:genwalls/Core/CustomWidget/normal_text.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
 import 'package:genwalls/viewModel/sign_in_view_model.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
@@ -28,7 +27,7 @@ class _SignInState extends State<SignIn> {
     return Consumer<SignInViewModel>(
       builder: (context, signInViewModel, _) {
         return Scaffold(
-          backgroundColor: AppColors.blackColor,
+          backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(64),
             child: Stack(
@@ -60,13 +59,10 @@ class _SignInState extends State<SignIn> {
                             Column(
                               children: [
                                 SizedBox(height: context.h(25)),
-                                NormalText(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  titleText: "Sign In",
-                                  titleSize: context.text(20),
-                                  titleWeight: FontWeight.w600,
-                                  titleColor: AppColors.primeryColor,
-                                  titleAlign: TextAlign.center,
+                                Text(
+                                  "Sign In",
+                                  style: context.appTextStyles?.authTitlePrimary,
+                                  textAlign: TextAlign.center,
                                 ),
                                 SizedBox(height: context.h(24)),
                                 CustomTextField(
@@ -74,13 +70,9 @@ class _SignInState extends State<SignIn> {
                                   prefixIcon: Icon(Icons.email),
                                   validatorType: "email",
                                   hintText: 'Enter your email',
-                                  hintStyle: TextStyle(
-                                    color: AppColors.textFieldSubTitleColor,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: context.text(12),
-                                  ),
+                                  hintStyle: context.appTextStyles?.authHintText,
                                   label: "Email",
-                                  enabledBorderColor: AppColors.textFieldIconColor,
+                                  enabledBorderColor: context.colorScheme.onSurface,
                                 ),
                                 SizedBox(height: context.h(24)),
                                 CustomTextField(
@@ -88,13 +80,9 @@ class _SignInState extends State<SignIn> {
                                   prefixIcon: Icon(Icons.lock),
                                   validatorType: "password",
                                   hintText: 'Enter your password',
-                                  hintStyle: TextStyle(
-                                    color: AppColors.textFieldSubTitleColor,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: context.text(12),
-                                  ),
+                                  hintStyle: context.appTextStyles?.authHintText,
                                   label: "Password",
-                                  enabledBorderColor: AppColors.textFieldIconColor,
+                                  enabledBorderColor: context.colorScheme.onSurface,
                                 ),
                                 SizedBox(height: context.h(8)),
                                 Row(
@@ -108,16 +96,12 @@ class _SignInState extends State<SignIn> {
                                           visualDensity: VisualDensity.compact,
                                           activeColor: AppColors.greenColor,
                                           value: signInViewModel.rememberMe,
-                                          side: BorderSide(color: AppColors.whiteColor),
+                                          side: BorderSide(color: context.colorScheme.onSurface),
                                           onChanged: signInViewModel.toggleRemember,
                                         ),
                                         Text(
                                           'Remember me',
-                                          style: GoogleFonts.poppins(
-                                            color: Colors.white,
-                                            fontSize: context.text(14),
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          style: context.appTextStyles?.authBodyMedium,
                                         ),
                                       ],
                                     ),
@@ -159,7 +143,7 @@ class _SignInState extends State<SignIn> {
                                     height: context.h(47.9),
                                     width: context.w(350),
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: AppColors.whiteColor),
+                                      border: Border.all(color: context.colorScheme.onSurface),
                                       borderRadius: BorderRadius.circular(
                                         context.radius(8),
                                       ),
@@ -175,11 +159,7 @@ class _SignInState extends State<SignIn> {
                                         SizedBox(width: context.w(8)),
                                         Text(
                                           'Continue with Google',
-                                          style: GoogleFonts.poppins(
-                                            color: AppColors.whiteColor,
-                                            fontSize: context.text(14),
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                          style: context.appTextStyles?.authGoogleButton,
                                         ),
                                       ],
                                     ),
