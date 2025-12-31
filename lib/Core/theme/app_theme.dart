@@ -398,7 +398,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
   final TextStyle authOTPLarge;        // 20px, w600, gray
   final TextStyle authTimerText;       // 16px, w500, white
   final TextStyle authResendText;      // 16px, w600, primary color
-  final TextStyle authPasswordTitle;   // 16px, w500, white
+  final TextStyle authPasswordTitle;   // 16px, w500, primary color
   final TextStyle authGoogleButton;    // 14px, w500, gray/white
   final TextStyle bottomNavLabelSelected; // 10px, w600, primary color (Manrope)
   final TextStyle bottomNavLabelUnselected; // 10px, w600, bottomBarIconColor (Manrope)
@@ -587,7 +587,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
         color: AppColors.primeryColor,
       ),
       authPasswordTitle: GoogleFonts.poppins(
-        fontSize: 16,
+        fontSize: 14  ,
         fontWeight: FontWeight.w500,
         color: AppColors.lightTextPrimary,
       ),
@@ -916,7 +916,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
         color: AppColors.primeryColor,
       ),
       authPasswordTitle: GoogleFonts.poppins(
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: FontWeight.w500,
         color: Colors.white,
       ),

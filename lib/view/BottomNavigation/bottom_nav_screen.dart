@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
@@ -30,13 +31,67 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Exit App',
+          style: TextStyle(
+            color: context.textColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: TextStyle(color: context.textColor),
+        ),
+        backgroundColor: context.backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(context.radius(12)),
+          side: BorderSide(
+            color: context.primaryColor,
+            width: 2,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.subtitleColor),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'Exit',
+              style: TextStyle(
+                color: context.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldExit == true) {
+      SystemNavigator.pop();
+      return false; // Prevent default back behavior since we're exiting
+    }
+    return false; // Prevent back navigation
+  }
+
   @override
   Widget build(BuildContext context) {
     final bottomNavScreenViewModel = Provider.of<BottomNavScreenViewModel>(
       context,
     );
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(65),
@@ -141,6 +196,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

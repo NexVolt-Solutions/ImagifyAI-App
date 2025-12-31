@@ -194,7 +194,7 @@ class _LibraryState extends State<Library> {
                           SizedBox(height: context.h(6)),
                           CustomButton(
                             height: context.h(24),
-                            width: context.w(130),
+                            width: context.w(120),
                             fontSize: context.text(11),
                             gradient: AppColors.gradient,
                             text: "Use This Prompt",

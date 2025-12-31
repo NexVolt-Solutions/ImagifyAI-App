@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/full_screen_image_viewer.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/models/wallpaper/wallpaper.dart';
 
@@ -33,55 +34,73 @@ class CustomListView extends StatelessWidget {
                   ? wallpaper.imageUrl 
                   : (wallpaper.thumbnailUrl.isNotEmpty ? wallpaper.thumbnailUrl : null);
               
-              return Container(
-                height: context.h(131),
-                width: context.w(100),
-                margin: context.padSym(h: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(context.radius(8)),
-                  border: Border.all(color: context.colorScheme.onSurface),
-                ),
-                clipBehavior: Clip.hardEdge,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(context.radius(8)),
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: context.colorScheme.surface,
-                              child: Icon(
-                                Icons.image_not_supported,
-                                color: context.colorScheme.onSurface.withOpacity(0.5),
-                                size: 40,
-                              ),
-                            );
-                          },
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              color: context.colorScheme.surface,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            );
-                          },
-                        )
-                      : Container(
-                          color: context.colorScheme.surface,
-                          child: Icon(
-                            Icons.image_not_supported,
-                            color: context.colorScheme.onSurface.withOpacity(0.5),
-                            size: 40,
-                          ),
+              return GestureDetector(
+                onTap: () {
+                  if (imageUrl != null && imageUrl.isNotEmpty) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => FullScreenImageViewer(
+                          imageUrl: imageUrl,
+                          heroTag: 'wallpaper_${wallpaper.id}_$index',
                         ),
+                        fullscreenDialog: true,
+                      ),
+                    );
+                  }
+                },
+                child: Container(
+                  height: context.h(131),
+                  width: context.w(100),
+                  margin: context.padSym(h: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(context.radius(8)),
+                    border: Border.all(color: context.colorScheme.onSurface),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(context.radius(8)),
+                    child: imageUrl != null && imageUrl.isNotEmpty
+                        ? Hero(
+                            tag: 'wallpaper_${wallpaper.id}_$index',
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: context.colorScheme.surface,
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    color: context.colorScheme.onSurface.withOpacity(0.5),
+                                    size: 40,
+                                  ),
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  color: context.colorScheme.surface,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded /
+                                              loadingProgress.expectedTotalBytes!
+                                          : null,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                        : Container(
+                            color: context.colorScheme.surface,
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: context.colorScheme.onSurface.withOpacity(0.5),
+                              size: 40,
+                            ),
+                          ),
+                  ),
                 ),
               );
             }

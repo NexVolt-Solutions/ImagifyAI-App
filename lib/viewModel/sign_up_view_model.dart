@@ -87,6 +87,17 @@ class SignUpViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearForm() {
+    usernameController.clear();
+    emailController.clear();
+    passwordController.clear();
+    confirmPasswordController.clear();
+    profileImage = null;
+    selectedIndex = -1;
+    errorMessage = null;
+    notifyListeners();
+  }
+
   Future<void> register(BuildContext context, {required GlobalKey<FormState> formKey}) async {
     if (isLoading) return;
     
@@ -160,18 +171,32 @@ class SignUpViewModel extends ChangeNotifier {
 
       // Registration successful (status is null/true or we have success message)
       final message = response.message ?? 'Registered successfully';
+      final email = emailController.text.trim();
+      
       if (kDebugMode) {
         print('=== REGISTRATION SUCCESSFUL ===');
         print('Status: ${response.status ?? "null (success by 200 status code)"}');
         print('Message: $message');
         print('Navigating to verification screen...');
-        print('Email for verification: ${emailController.text.trim()}');
+        print('Email for verification: $email');
       }
+      
       _showMessage(context, message, isError: false);
+      
+      // Clear all form fields before navigating (save email first for verification screen)
+      usernameController.clear();
+      emailController.clear(); // Clear email field too
+      passwordController.clear();
+      confirmPasswordController.clear();
+      profileImage = null;
+      selectedIndex = -1;
+      errorMessage = null;
+      notifyListeners();
+      
       Navigator.pushNamed(
         context,
         RoutesName.VerificationScreen,
-        arguments: emailController.text.trim(),
+        arguments: email, // Use saved email value
       );
       
       if (kDebugMode) {
@@ -185,36 +210,60 @@ class SignUpViewModel extends ChangeNotifier {
       final email = emailController.text.trim();
       
       // Check if error is about email already registered/exists
-      // This likely means user registered but didn't verify email
       if (errorMessageLower.contains('email') && 
           (errorMessageLower.contains('already') || 
            errorMessageLower.contains('exists') ||
            errorMessageLower.contains('registered'))) {
         
-        if (kDebugMode) {
-          print('=== EMAIL ALREADY REGISTERED - LIKELY UNVERIFIED ===');
-          print('Email: $email');
-          print('Navigating to verification screen to resend OTP...');
+        // Check if email is already verified
+        if (errorMessageLower.contains('verified')) {
+          // Email is already registered AND verified - redirect to sign in
+          if (kDebugMode) {
+            print('=== EMAIL ALREADY REGISTERED AND VERIFIED ===');
+            print('Email: $email');
+            print('Navigating to sign in screen...');
+          }
+          
+          _showMessage(
+            context, 
+            'This email is already registered and verified. Please sign in instead.',
+            isError: false,
+          );
+          
+          // Clear form fields before navigating
+          clearForm();
+          
+          // Navigate to sign in screen
+          Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
+          
+          return; // Exit early - don't show the error message again
+        } else {
+          // Email is registered but NOT verified - navigate to verification screen
+          if (kDebugMode) {
+            print('=== EMAIL ALREADY REGISTERED - NOT VERIFIED ===');
+            print('Email: $email');
+            print('Navigating to verification screen to resend OTP...');
+          }
+          
+          // Navigate to verification screen and automatically resend OTP
+          // Pass email and autoResend flag in arguments
+          Navigator.pushNamed(
+            context,
+            RoutesName.VerificationScreen,
+            arguments: {
+              'email': email,
+              'autoResend': true, // Flag to auto-resend OTP
+            },
+          );
+          
+          _showMessage(
+            context, 
+            'This email is already registered. Please verify your email to continue.',
+            isError: false,
+          );
+          
+          return; // Exit early - don't show the error message again
         }
-        
-        // Navigate to verification screen and automatically resend OTP
-        // Pass email and autoResend flag in arguments
-        Navigator.pushNamed(
-          context,
-          RoutesName.VerificationScreen,
-          arguments: {
-            'email': email,
-            'autoResend': true, // Flag to auto-resend OTP
-          },
-        );
-        
-        _showMessage(
-          context, 
-          'This email is already registered. Please verify your email to continue.',
-          isError: false,
-        );
-        
-        return; // Exit early - don't show the error message again
       }
       
       errorMessage = e.message;

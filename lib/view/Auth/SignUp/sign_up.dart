@@ -62,6 +62,7 @@ class _SignUpState extends State<SignUp> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
+                  SizedBox(height: context.h(20)),
                   Text(
                     "Sign Up",
                     style: context.appTextStyles?.authTitlePrimary,
@@ -72,12 +73,14 @@ class _SignUpState extends State<SignUp> {
                     child: GestureDetector(
                       onTap: () => signUpViewModel.pickImage(),
                       child: Container(
-                        height: context.h(180),
-                        width: context.h(180),
+                        height: context.h(120),
+                        width: context.h(120),
                         decoration: BoxDecoration(
                           color: ThemeColors.containerColor(context),
                           border: Border.all(
-                            color: context.colorScheme.onSurface,
+                            color: signUpViewModel.profileImage != null
+                                ? context.colorScheme.primary
+                                : context.colorScheme.onSurface,
                           ),
                           shape: BoxShape.circle,
                         ),
@@ -85,24 +88,22 @@ class _SignUpState extends State<SignUp> {
                             ? ClipOval(
                                 child: Image.file(
                                   File(signUpViewModel.profileImage!.path),
-                                  fit: BoxFit.cover,
-                                  width: context.h(180),
-                                  height: context.h(180),
+                                  fit: BoxFit.scaleDown,
+                                  width: context.h(220),
+                                  height: context.h(220),
                                 ),
                               )
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Image.asset(
-                                    AppAssets.cameraIconPlus,
-                                    height: context.h(42),
-                                    width: context.w(42),
-                                  ),
-                                  SizedBox(height: context.h(8)),
-                                  Text(
-                                    'Add profile image',
-                                    style: context.appTextStyles?.authHintText,
-                                  ),
+                                Icon(Icons.camera_alt_outlined, size: context.h(40), color: context.colorScheme.onSurface,),
+                                  // SizedBox(height: context.h(8)),
+                                  // Text(
+                                  //   'Add profile image',
+                                  //   style: context.appTextStyles?.authBodyMedium,
+                                  //   textAlign: TextAlign.center,
+                                  // ),
+                                  
                                 ],
                               ),
                       ),
@@ -113,9 +114,9 @@ class _SignUpState extends State<SignUp> {
                     controller: signUpViewModel.usernameController,
                     prefixIcon: Icon(Icons.person),
                     validatorType: "name",
-                    hintText: 'Create your username',
+                        hintText: 'Create your username',
                     hintStyle: context.appTextStyles?.authHintText,
-                    label: "User Name",
+                      label: "User Name",
                     enabledBorderColor: context.colorScheme.onSurface,
                   ),
                   SizedBox(height: context.h(24)),
@@ -152,10 +153,12 @@ class _SignUpState extends State<SignUp> {
                     enabledBorderColor: context.colorScheme.onSurface,
                   ),
                   SizedBox(height: context.h(20)),
-                  Text(
-                    "Password must contain",
-                    style: context.appTextStyles?.authPasswordTitle,
-                    textAlign: TextAlign.center,
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Password must contain",
+                      style: context.appTextStyles?.authPasswordTitle,
+                    ),
                   ),
                   SizedBox(height: context.h(4)),
                   Column(
@@ -253,7 +256,7 @@ class _SignUpState extends State<SignUp> {
                     textSize1: context.text(14),
                     textSize2: context.text(14),
                     onTap2: () {
-                      Navigator.pushNamed(context, RoutesName.SignInScreen);
+                      Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
                     },
                   ),
                   SizedBox(height: context.h(20)),

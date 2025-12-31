@@ -10,6 +10,7 @@ import 'package:genwalls/Core/CustomWidget/custom_list_view.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/models/user/user.dart';
+import 'package:genwalls/view/CategoryDetails/category_details_screen.dart';
 import 'package:genwalls/viewModel/home_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -71,8 +72,12 @@ class _HomeState extends State<Home> {
         return Scaffold(
           backgroundColor: context.backgroundColor,
           body: SafeArea(
-            child: CustomScrollView(
-              slivers: [
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await homeViewModel.refreshHomeData(context);
+              },
+              child: CustomScrollView(
+                slivers: [
                 // User Profile Section - Pinned
                 SliverPersistentHeader(
                   // floating: true,
@@ -249,7 +254,19 @@ class _HomeState extends State<Home> {
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-                          child: HomeAlign(text: categoryName),
+                          child: HomeAlign(
+                            text: categoryName,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => CategoryDetailsScreen(
+                                    categoryName: categoryName,
+                                    wallpapers: wallpapers,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                       SliverToBoxAdapter(child: SizedBox(height: context.h(12))),
@@ -263,6 +280,7 @@ class _HomeState extends State<Home> {
                 // Bottom Padding
                 SliverToBoxAdapter(child: SizedBox(height: context.h(100))),
               ],
+              ),
             ),
           ),
         );

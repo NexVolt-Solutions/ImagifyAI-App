@@ -32,6 +32,12 @@ class ImageCreatedViewModel extends ChangeNotifier {
   DateTime? _pollingStartTime;
   int _pollingAttempts = 0;
   static const int _maxPollingAttempts = 120; // 10 minutes max (120 attempts * 5 seconds)
+  
+  // Progress tracking for overlay
+  double creationProgress = 0.0;
+  Timer? _progressTimer;
+  String _currentStage = 'Preparing prompt...';
+  String get currentStage => _currentStage;
 
   void setWallpaper(Wallpaper? data) {
     wallpaper = data;
@@ -44,6 +50,9 @@ class ImageCreatedViewModel extends ChangeNotifier {
     // If image is already available, stop polling
     if (wallpaper!.imageUrl.isNotEmpty && wallpaper!.imageUrl != 'null') {
       isPolling = false;
+      _stopProgressAnimation();
+      creationProgress = 1.0;
+      _currentStage = 'Complete!';
       _pollingStartTime = null;
       _pollingAttempts = 0;
       notifyListeners();
@@ -53,11 +62,14 @@ class ImageCreatedViewModel extends ChangeNotifier {
     // Initialize polling start time on first attempt
     if (_pollingStartTime == null) {
       _pollingStartTime = DateTime.now();
+      // Start progress animation when polling begins
+      _startProgressAnimation();
     }
     
     // Check timeout (10 minutes max)
     if (_pollingAttempts >= _maxPollingAttempts) {
       isPolling = false;
+      _stopProgressAnimation();
       errorMessage = 'Your masterpiece is taking a bit longer than usual. Feel free to try again!';
       if (kDebugMode) {
         print('⏱️ Polling timeout after $_pollingAttempts attempts');
@@ -92,6 +104,9 @@ class ImageCreatedViewModel extends ChangeNotifier {
           // Image is ready!
           wallpaper = updatedWallpaper;
           isPolling = false;
+          _stopProgressAnimation();
+          creationProgress = 1.0;
+          _currentStage = 'Complete!';
           _pollingStartTime = null;
           _pollingAttempts = 0;
           
@@ -134,6 +149,34 @@ class ImageCreatedViewModel extends ChangeNotifier {
     }
   }
   
+  void _startProgressAnimation() {
+    _progressTimer?.cancel();
+    creationProgress = 0.0;
+    _currentStage = 'Generating your masterpiece...';
+    
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      if (!isPolling) {
+        timer.cancel();
+        return;
+      }
+      
+      // Simple progress animation from 0 to 99%
+      // Will reach 100% only when image is ready
+      if (creationProgress < 0.99) {
+        creationProgress += 0.01; // Increase by 1% every 50ms
+      } else {
+        creationProgress = 0.99; // Cap at 99% until image is ready
+      }
+      
+      notifyListeners();
+    });
+  }
+  
+  void _stopProgressAnimation() {
+    _progressTimer?.cancel();
+    _progressTimer = null;
+  }
+  
   // Get elapsed time in seconds
   int get elapsedPollingTime {
     if (_pollingStartTime == null) return 0;
@@ -174,6 +217,11 @@ class ImageCreatedViewModel extends ChangeNotifier {
       
       // Reset polling state and start checking for the new image
       isPolling = true;
+      _pollingStartTime = DateTime.now(); // Reset polling start time for new generation
+      _pollingAttempts = 0; // Reset polling attempts counter
+      
+      // Start progress animation
+      _startProgressAnimation();
       
       if (kDebugMode) {
         print('✅ Wallpaper recreated with new ID: ${wallpaper!.id}');

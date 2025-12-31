@@ -536,6 +536,23 @@ class HomeViewModel extends ChangeNotifier {
     bottomNavViewModel.updateIndex(1);
   }
 
+  /// Refresh home screen data (user and grouped wallpapers)
+  Future<void> refreshHomeData(BuildContext context) async {
+    if (kDebugMode) {
+      print('🔄 Refreshing home data...');
+    }
+    
+    // Reload user data with force reload
+    await loadCurrentUser(context, forceReload: true);
+    
+    // Reload grouped wallpapers
+    await loadGroupedWallpapers(context);
+    
+    if (kDebugMode) {
+      print('✅ Home data refreshed');
+    }
+  }
+
   /// Load grouped wallpapers from the API
   Future<void> loadGroupedWallpapers(BuildContext context) async {
     if (isLoadingGroupedWallpapers) return;

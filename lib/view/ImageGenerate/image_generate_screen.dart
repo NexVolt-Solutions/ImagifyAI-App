@@ -282,34 +282,6 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                            },
                            isSelected: imageGenerateViewModel.selectedPromptIndex == 3,
                          ),
-                         PromptContiner(
-                           text: 'Tropical beach paradise scene',
-                           onTap: () {
-                             // Set prompt, auto-select Square size, and Photorealistic style
-                             imageGenerateViewModel.setPromptWithDefaults(
-                               'Tropical beach paradise scene',
-                               3, // Photorealistic style index
-                               4, // Prompt index
-                             );
-                             // Scroll to the selected style
-                             _scrollToSelectedStyle(3, context);
-                           },
-                           isSelected: imageGenerateViewModel.selectedPromptIndex == 4,
-                         ),
-                         PromptContiner(
-                           text: 'Cyberpunk futuristic city',
-                           onTap: () {
-                             // Set prompt, auto-select Square size, and Cyberpunk style
-                             imageGenerateViewModel.setPromptWithDefaults(
-                               'Cyberpunk futuristic city',
-                               7, // Cyberpunk style index
-                               5, // Prompt index
-                             );
-                             // Scroll to the selected style
-                             _scrollToSelectedStyle(7, context);
-                           },
-                           isSelected: imageGenerateViewModel.selectedPromptIndex == 5,
-                         ),
                       ],
                     ),
                     SizedBox(height: context.h(20)),
@@ -501,18 +473,24 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                         backgroundColor: Colors.transparent,
                       ),
                     ),
-                    // Progress circle (purple/primary color)
+                    // Progress circle (gradient color)
                     SizedBox(
                       width: context.w(200),
                       height: context.h(200),
-                      child: CircularProgressIndicator(
-                        value: widget.progress,
-                        strokeWidth: context.w(20),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          context.primaryColor,
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return AppColors.gradient.createShader(bounds);
+                        },
+                        blendMode: BlendMode.srcIn,
+                        child: CircularProgressIndicator(
+                          value: widget.progress,
+                          strokeWidth: context.w(20),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.transparent, // This will be masked by the gradient
+                          ),
+                          backgroundColor: Colors.transparent,
+                          strokeCap: StrokeCap.round,
                         ),
-                        backgroundColor: Colors.transparent,
-                        strokeCap: StrokeCap.round,
                       ),
                     ),
                     // Percentage text
@@ -524,14 +502,8 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                 ),
               ),
               SizedBox(height: context.h(32)),
-              // Main title
-              Text(
-                'Generating your wallpaper...',
-                style: context.appTextStyles?.imageGenerateLoadingTitle,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: context.h(16)),
-              // Current stage with fade animation
+            
+              
               FadeTransition(
                 opacity: _fadeController,
                 child: Text(
@@ -540,15 +512,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                   textAlign: TextAlign.center,
                 ),
               ),
-              // Elapsed time (only show if polling)
-              if (widget.elapsedTime.isNotEmpty) ...[
-                SizedBox(height: context.h(8)),
-                Text(
-                  'Elapsed: ${widget.elapsedTime}',
-                  style: context.appTextStyles?.imageGenerateLoadingTime,
-                  textAlign: TextAlign.center,
-                ),
-              ],
+          
               SizedBox(height: context.h(40)),
               // Progress stages indicator
               Row(

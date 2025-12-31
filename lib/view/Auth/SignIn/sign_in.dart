@@ -63,6 +63,7 @@ class _SignInState extends State<SignIn> {
                           children: [
                             Column(
                               children: [
+                                SizedBox(height: context.h(20)),
                                 Text(
                                   "Sign In",
                                   style:

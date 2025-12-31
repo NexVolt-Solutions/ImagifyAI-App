@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
+import 'package:genwalls/Core/CustomWidget/full_screen_image_viewer.dart';
 import 'package:genwalls/Core/CustomWidget/profile_image.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/profile_screen_view_model.dart';
@@ -51,11 +52,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 SizedBox(height: context.h(20)),
                 Center(
-                  child: ProfileImage(
-                    imagePath: user?.profileImageUrl ?? '',
-                    height: context.h(100),
-                    width: context.h(100),
-                    fit: BoxFit.cover,
+                  child: GestureDetector(
+                    onTap: () {
+                      final imageUrl = user?.profileImageUrl ?? '';
+                      if (imageUrl.isNotEmpty) {
+                        final heroTag = 'profile_image_${user?.id ?? 'default'}';
+                        FullScreenImageViewer.show(
+                          context,
+                          imageUrl,
+                          heroTag: heroTag,
+                        );
+                      }
+                    },
+                    child: Hero(
+                      tag: 'profile_image_${user?.id ?? 'default'}',
+                      child: ProfileImage(
+                        imagePath: user?.profileImageUrl ?? '',
+                        height: context.h(100),
+                        width: context.h(100),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(height: context.h(12)),

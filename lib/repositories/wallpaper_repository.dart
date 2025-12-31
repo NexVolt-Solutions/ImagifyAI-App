@@ -326,11 +326,7 @@ class WallpaperRepository {
       headers: headers,
     );
   }
-
-  /// Fetch wallpapers grouped by style/category
-  /// Returns a map where keys are category names (e.g., "Trending", "Nature") 
-  /// and values are lists of wallpapers in that category
-  Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
+ Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
     required String accessToken,
   }) async {
     if (accessToken.isEmpty) {
@@ -342,14 +338,27 @@ class WallpaperRepository {
       print('=== FETCH GROUPED WALLPAPERS API: START ===');
       print('═══════════════════════════════════════════════════════════');
       print('Endpoint: GET ${ApiConstants.groupedWallpapers}');
+      print('Note: This should return general/public wallpapers, not user-specific');
     }
 
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
+    
+    // Add query parameter to exclude user-specific wallpapers
+    // The backend should return general wallpapers for all users
+    final queryParams = <String, String>{
+      'public': 'true', // Request public/general wallpapers only
+    };
+    
+    if (kDebugMode) {
+      print('Query parameters: $queryParams');
+      print('Requesting public/general wallpapers (excluding user-specific)');
+    }
 
     try {
       final json = await _apiService.get(
         ApiConstants.groupedWallpapers,
         headers: headers,
+        query: queryParams,
       );
 
       if (kDebugMode) {
