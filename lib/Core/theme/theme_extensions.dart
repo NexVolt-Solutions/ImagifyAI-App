@@ -31,7 +31,7 @@ extension ThemeExtension on BuildContext {
   
   /// Get subtitle text color based on theme
   Color get subtitleColor => Theme.of(this).textTheme.bodySmall?.color ?? 
-                             (isDarkMode ? AppColors.subTitleColor : Colors.black54);
+                             (isDarkMode ? AppColors.subTitleColor : AppColors.lightTextTertiary);
   
   /// Get AppTextStyles extension from theme
   AppTextStyles? get appTextStyles => Theme.of(this).extension<AppTextStyles>();
@@ -62,7 +62,7 @@ class ThemeColors {
     final brightness = Theme.of(context).brightness;
     return brightness == Brightness.dark 
         ? AppColors.subTitleColor 
-        : Colors.black54;
+        : AppColors.lightTextTertiary;
   }
   
   /// Get container color based on theme brightness
@@ -70,7 +70,7 @@ class ThemeColors {
     final brightness = Theme.of(context).brightness;
     return brightness == Brightness.dark 
         ? AppColors.containerColor 
-        : Colors.grey[50]!;
+        : AppColors.lightContainer;
   }
   
   /// Get border color based on theme brightness
@@ -78,7 +78,7 @@ class ThemeColors {
     final brightness = Theme.of(context).brightness;
     return brightness == Brightness.dark 
         ? AppColors.textFieldBoderColor 
-        : AppColors.textFieldBoderColor;
+        : AppColors.lightTextFieldBorder;
   }
   
   /// Get AppTextStyles extension from theme

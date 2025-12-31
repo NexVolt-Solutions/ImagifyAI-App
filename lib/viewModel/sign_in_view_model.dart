@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:genwalls/Core/Constants/api_constants.dart';
 import 'package:genwalls/Core/services/api_service.dart';
 import 'package:genwalls/Core/services/token_storage_service.dart';
 import 'package:genwalls/Core/utils/Routes/routes_name.dart';
@@ -174,8 +175,7 @@ class SignInViewModel extends ChangeNotifier {
       if (kDebugMode) {
         print('❌ Unexpected error refreshing token silently: $e');
       }
-      // For unexpected errors, don't clear tokens - might be network issues
-      // Only clear if it's clearly an authentication issue
+ 
       return false;
     }
   }
@@ -333,9 +333,13 @@ class SignInViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // Initialize Google Sign-In
+      // Initialize Google Sign-In with server client ID for ID token generation
+      // The serverClientId (Web Client ID) is required to get ID tokens for server-side verification
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
+        scopes: ['email', 'profile', 'openid'],
+        // serverClientId is the Web Client ID from Google Cloud Console
+        // This is REQUIRED to get ID tokens for server-side verification
+        serverClientId: ApiConstants.googleWebClientId,
       );
 
       // Sign in with Google
@@ -349,10 +353,48 @@ class SignInViewModel extends ChangeNotifier {
       }
 
       // Get authentication details
+      // Note: ID token will only be available if serverClientId is provided
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
+      if (kDebugMode) {
+        print('=== GOOGLE AUTH DETAILS ===');
+        print('ID Token: ${googleAuth.idToken != null ? "Present" : "NULL"}');
+        print('Access Token: ${googleAuth.accessToken != null ? "Present" : "NULL"}');
+        print('Email: ${googleUser.email}');
+        print('Display Name: ${googleUser.displayName}');
+        print('Server Client ID configured: ${ApiConstants.googleWebClientId != null}');
+      }
+
       if (googleAuth.idToken == null) {
-        throw Exception('Failed to get ID token from Google');
+        if (kDebugMode) {
+          print('❌ ID Token is NULL. Common causes:');
+          print('   1. Web Client ID (serverClientId) not configured in ApiConstants.googleWebClientId');
+          print('   2. OAuth consent screen not properly configured');
+          print('   3. App is in testing mode and user not added as test user');
+          print('   4. Scopes not properly configured in OAuth consent screen');
+          print('');
+          print('📋 SOLUTION:');
+          print('   1. Go to Google Cloud Console: https://console.cloud.google.com/apis/credentials');
+          print('   2. Create OAuth client ID → Application type: "Web application"');
+          print('   3. Copy the Client ID');
+          print('   4. Add it to lib/Core/Constants/api_constants.dart as googleWebClientId');
+          print('   5. Also ensure OAuth consent screen is configured with:');
+          print('      - User type: External');
+          print('      - Scopes: email, profile, openid');
+          print('      - Test users: Add your email (${googleUser.email})');
+        }
+        
+        String errorMessage = 'Failed to get ID token from Google.\n\n';
+        if (ApiConstants.googleWebClientId == null) {
+          errorMessage += 'Web Client ID is not configured. Please add it in api_constants.dart';
+        } else {
+          errorMessage += 'Please check:\n';
+          errorMessage += '1. OAuth consent screen configuration\n';
+          errorMessage += '2. User added as test user (if in testing mode)\n';
+          errorMessage += '3. Scopes configured correctly';
+        }
+        
+        throw Exception(errorMessage);
       }
 
       if (kDebugMode) {
@@ -360,6 +402,32 @@ class SignInViewModel extends ChangeNotifier {
         print('User: ${googleUser.displayName}');
         print('Email: ${googleUser.email}');
         print('ID Token received: ${googleAuth.idToken != null}');
+        
+        // Decode and log ID token payload for backend debugging
+        if (googleAuth.idToken != null) {
+          try {
+            final decodedToken = JwtDecoder.decode(googleAuth.idToken!);
+            if (decodedToken != null) {
+              print('=== GOOGLE ID TOKEN PAYLOAD ===');
+              print('Token audience (aud): ${decodedToken['aud']}');
+              print('Token issuer (iss): ${decodedToken['iss']}');
+              print('Token subject (sub): ${decodedToken['sub']}');
+              print('Token email: ${decodedToken['email']}');
+              print('Token email_verified: ${decodedToken['email_verified']}');
+              print('Token name: ${decodedToken['name']}');
+              print('Token picture: ${decodedToken['picture']}');
+              print('Token issued at (iat): ${decodedToken['iat']}');
+              print('Token expires (exp): ${decodedToken['exp']}');
+              print('All token keys: ${decodedToken.keys.toList()}');
+              print('');
+              print('⚠️  Backend must verify this token using Web Client ID:');
+              print('   ${ApiConstants.googleWebClientId}');
+              print('   Expected audience (aud) should match the Web Client ID above');
+            }
+          } catch (e) {
+            print('⚠️  Could not decode ID token for debugging: $e');
+          }
+        }
       }
 
       // Call backend API with Google credentials

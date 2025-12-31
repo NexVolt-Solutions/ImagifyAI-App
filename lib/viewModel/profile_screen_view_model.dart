@@ -8,7 +8,7 @@ import 'package:genwalls/repositories/auth_repository.dart';
 
 class ProfileScreenViewModel extends ChangeNotifier {
   ProfileScreenViewModel({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository();
+    : _authRepository = authRepository ?? AuthRepository();
 
   final AuthRepository _authRepository;
 
@@ -19,56 +19,59 @@ class ProfileScreenViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> profileData = [
     {
       'leading': AppAssets.profileIcon,
-      'title': 'My profile',
-      'subtitle': 'Edit Profile',
+      'title': 'My Profile',
+      'subtitle': 'View and edit your profile information',
       'trailingType': 'arrow',
       'switchValue': false,
     },
     {
       'leading': AppAssets.profileIcon,
       'title': 'Library',
-      'subtitle': 'Edit Profile',
+      'subtitle': 'Browse your generated wallpapers',
       'trailingType': 'arrow',
       'switchValue': false,
     },
     {
       'leading': AppAssets.themeIcon,
       'title': 'Theme',
-      'subtitle': 'Light Mode',
+      'subtitle': 'Dark Mode', // Will be updated dynamically based on theme
       'trailingType': 'switch',
-      'switchValue': true,
+      'switchValue': true, // Will be synced with ThemeProvider
     },
     {
       'leading': AppAssets.bellIcon,
-      'title': 'Notification',
-      'subtitle': 'Push Notifcation enabled',
+      'title': 'Notifications',
+      'subtitle': 'Enable push notifications',
       'trailingType': 'switch',
       'switchValue': true,
     },
     {
       'leading': AppAssets.shieldIcon,
       'title': 'Privacy Policy',
-      'subtitle': 'Read how we collect and protect your data',
+      'subtitle': 'Learn how we protect your privacy',
       'trailingType': 'arrow',
       'switchValue': false,
     },
     {
       'leading': AppAssets.termIcon,
       'title': 'Terms of Service',
-      'subtitle': 'Read our terms of services',
+      'subtitle': 'Read our terms and conditions',
       'trailingType': 'arrow',
       'switchValue': false,
     },
     {
       'leading': AppAssets.contactIcon,
       'title': 'Contact Us',
-      'subtitle': 'Contact us from your phone',
-      'trailingType': 'arrow',
+      'subtitle': 'Get help or share feedback',
+       'trailingType': 'arrow',
       'switchValue': false,
     },
   ];
 
-  Future<void> loadCurrentUser({String? accessToken, bool forceReload = false}) async {
+  Future<void> loadCurrentUser({
+    String? accessToken,
+    bool forceReload = false,
+  }) async {
     if (isLoading) return;
 
     if (accessToken == null || accessToken.isEmpty) {
@@ -93,7 +96,12 @@ class ProfileScreenViewModel extends ChangeNotifier {
 
     // Check if the stored userId matches the cached user
     // If they don't match, clear cache and reload (user changed)
-    if (!forceReload && currentUser != null) {
+    // If forceReload is true, always clear cache and reload
+    if (forceReload && currentUser != null) {
+      // Force reload requested, clear cache
+      currentUser = null;
+      notifyListeners();
+    } else if (!forceReload && currentUser != null) {
       if (currentUser!.id == userId) {
         // User already loaded and matches stored user ID, skip reload
         return;

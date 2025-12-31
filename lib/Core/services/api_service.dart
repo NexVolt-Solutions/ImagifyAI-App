@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:genwalls/Core/Constants/api_constants.dart';
 import 'package:http/http.dart' as http;
@@ -21,14 +19,48 @@ class ApiService {
 
   final http.Client _client;
 
+  // Token refresh callback - should return new access token or null if refresh failed
+  static Future<String?> Function()? _onTokenExpired;
+
+  // Getter to check if callback is set (for debugging)
+  static bool get hasTokenRefreshCallback => _onTokenExpired != null;
+
+  // Set the token refresh callback
+  static void setTokenRefreshCallback(Future<String?> Function() callback) {
+    _onTokenExpired = callback;
+    if (kDebugMode) {
+      print('✅ ApiService: Token refresh callback has been set');
+      print('   Callback is null: ${_onTokenExpired == null}');
+    }
+  }
+
   Future<Map<String, dynamic>> get(
     String path, {
     Map<String, String>? headers,
     Map<String, String>? query,
+    bool retryOnTokenExpiry = true,
   }) async {
-    final uri = _buildUri(path, query);
-    final response = await _client.get(uri, headers: _withDefaultHeaders(headers));
-    return _handleResponse(response);
+    return _executeWithTokenRefresh(
+      () async {
+        final uri = _buildUri(path, query);
+        final response = await _client.get(
+          uri,
+          headers: _withDefaultHeaders(headers),
+        );
+        return response;
+      },
+      retryOnTokenExpiry: retryOnTokenExpiry,
+      originalHeaders: headers,
+      retryCallback: (newToken) async {
+        final updatedHeaders = Map<String, String>.from(headers ?? {});
+        updatedHeaders['Authorization'] = 'Bearer $newToken';
+        final uri = _buildUri(path, query);
+        return await _client.get(
+          uri,
+          headers: _withDefaultHeaders(updatedHeaders),
+        );
+      },
+    );
   }
 
   // Get raw bytes (for image downloads)
@@ -38,25 +70,29 @@ class ApiService {
     Map<String, String>? query,
   }) async {
     final uri = _buildUri(path, query);
-    final response = await _client.get(uri, headers: _withDefaultHeaders(headers));
-    
+    final response = await _client.get(
+      uri,
+      headers: _withDefaultHeaders(headers),
+    );
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return response.bodyBytes;
     }
-    
+
     // If error, parse as JSON for error message
     final decoded = jsonDecode(response.body);
-    final errorMessage = decoded['message']?.toString() ?? 
-                        decoded['msg']?.toString() ?? 
-                        decoded['error']?.toString();
-    
+    final errorMessage =
+        decoded['message']?.toString() ??
+        decoded['msg']?.toString() ??
+        decoded['error']?.toString();
+
     if (errorMessage == null || errorMessage.isEmpty) {
       throw ApiException(
         'Failed to download wallpaper',
         statusCode: response.statusCode,
       );
     }
-    
+
     throw ApiException(errorMessage, statusCode: response.statusCode);
   }
 
@@ -65,15 +101,33 @@ class ApiService {
     Map<String, String>? headers,
     Object? body,
     Map<String, String>? query,
+    bool retryOnTokenExpiry = true,
   }) async {
-    final uri = _buildUri(path, query);
-    final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
-    final response = await _client.post(
-      uri,
-      headers: mergedHeaders,
-      body: body != null ? jsonEncode(body) : null,
+    return _executeWithTokenRefresh(
+      () async {
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
+        final response = await _client.post(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
+        return response;
+      },
+      retryOnTokenExpiry: retryOnTokenExpiry,
+      originalHeaders: headers,
+      retryCallback: (newToken) async {
+        final updatedHeaders = Map<String, String>.from(headers ?? {});
+        updatedHeaders['Authorization'] = 'Bearer $newToken';
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(updatedHeaders, isJson: true);
+        return await _client.post(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
+      },
     );
-    return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> put(
@@ -81,15 +135,72 @@ class ApiService {
     Map<String, String>? headers,
     Object? body,
     Map<String, String>? query,
+    bool retryOnTokenExpiry = true,
   }) async {
-    final uri = _buildUri(path, query);
-    final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
-    final response = await _client.put(
-      uri,
-      headers: mergedHeaders,
-      body: body != null ? jsonEncode(body) : null,
+    return _executeWithTokenRefresh(
+      () async {
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
+        final response = await _client.put(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
+        return response;
+      },
+      retryOnTokenExpiry: retryOnTokenExpiry,
+      originalHeaders: headers,
+      retryCallback: (newToken) async {
+        final updatedHeaders = Map<String, String>.from(headers ?? {});
+        updatedHeaders['Authorization'] = 'Bearer $newToken';
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(updatedHeaders, isJson: true);
+        return await _client.put(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
+      },
     );
-    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> patch(
+    String path, {
+    Map<String, String>? headers,
+    Object? body,
+    Map<String, String>? query,
+    bool retryOnTokenExpiry = true,
+  }) async {
+    return _executeWithTokenRefresh(
+      () async {
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
+        final request = http.Request('PATCH', uri);
+        request.headers.addAll(mergedHeaders);
+        if (body != null) {
+          request.body = jsonEncode(body);
+        }
+        final streamedResponse = await _client.send(request);
+        final response = await http.Response.fromStream(streamedResponse);
+        return response;
+      },
+      retryOnTokenExpiry: retryOnTokenExpiry,
+      originalHeaders: headers,
+      retryCallback: (newToken) async {
+        final updatedHeaders = Map<String, String>.from(headers ?? {});
+        updatedHeaders['Authorization'] = 'Bearer $newToken';
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(updatedHeaders, isJson: true);
+        final request = http.Request('PATCH', uri);
+        request.headers.addAll(mergedHeaders);
+        if (body != null) {
+          request.body = jsonEncode(body);
+        }
+        final streamedResponse = await _client.send(request);
+        final response = await http.Response.fromStream(streamedResponse);
+        return response;
+      },
+    );
   }
 
   Future<Map<String, dynamic>> delete(
@@ -97,15 +208,39 @@ class ApiService {
     Map<String, String>? headers,
     Object? body,
     Map<String, String>? query,
+    bool retryOnTokenExpiry = true,
   }) async {
-    final uri = _buildUri(path, query);
-    final mergedHeaders = _withDefaultHeaders(headers, isJson: body != null);
-    final response = await _client.delete(
-      uri,
-      headers: mergedHeaders,
-      body: body != null ? jsonEncode(body) : null,
+    return _executeWithTokenRefresh(
+      () async {
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(
+          headers,
+          isJson: body != null,
+        );
+        final response = await _client.delete(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
+        return response;
+      },
+      retryOnTokenExpiry: retryOnTokenExpiry,
+      originalHeaders: headers,
+      retryCallback: (newToken) async {
+        final updatedHeaders = Map<String, String>.from(headers ?? {});
+        updatedHeaders['Authorization'] = 'Bearer $newToken';
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(
+          updatedHeaders,
+          isJson: body != null,
+        );
+        return await _client.delete(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
+      },
     );
-    return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> postMultipart({
@@ -125,14 +260,11 @@ class ApiService {
       print('File field name: $fileFieldName');
     }
 
-    final request = http.MultipartRequest('POST', uri)
-      ..fields.addAll(fields);
+    final request = http.MultipartRequest('POST', uri)..fields.addAll(fields);
 
     // For multipart requests, only add non-content-type headers
     // The Content-Type with boundary will be set automatically by http package
-    final defaultHeaders = <String, String>{
-      'accept': 'application/json',
-    };
+    final defaultHeaders = <String, String>{'accept': 'application/json'};
     if (headers != null && headers.isNotEmpty) {
       defaultHeaders.addAll(headers);
     }
@@ -147,25 +279,27 @@ class ApiService {
       try {
         // Extract filename from path
         final filename = file.path.split('/').last;
-        final fileExtension = filename.split('.').last;
+        final fileExtension = filename.split('.').last.toLowerCase();
         final contentType = _getContentType(fileExtension);
-        
+
         if (kDebugMode) {
           print('Filename: $filename');
           print('Content-Type: $contentType');
         }
-        
+
         // Read file bytes and create MultipartFile with explicit content-type
         // Some servers require explicit content-type in the multipart file
         final fileBytes = await file.readAsBytes();
         final mediaType = http.MediaType.parse(contentType);
-        request.files.add(http.MultipartFile.fromBytes(
-          fileFieldName,
-          fileBytes,
-          filename: filename,
-          contentType: mediaType,
-        ));
-        
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            fileFieldName,
+            fileBytes,
+            filename: filename,
+            contentType: mediaType,
+          ),
+        );
+
         if (kDebugMode) {
           print('File added successfully');
           print('File bytes length: ${fileBytes.length}');
@@ -185,7 +319,9 @@ class ApiService {
       print('Request fields: ${request.fields}');
       if (request.files.isNotEmpty) {
         for (var file in request.files) {
-          print('File in request: field=${file.field}, filename=${file.filename}, length=${file.length}, contentType=${file.contentType}');
+          print(
+            'File in request: field=${file.field}, filename=${file.filename}, length=${file.length}, contentType=${file.contentType}',
+          );
         }
       }
       if (file != null) {
@@ -201,17 +337,45 @@ class ApiService {
       if (kDebugMode) {
         print('Sending multipart request...');
       }
-    final streamedResponse = await _client.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-      
-      if (kDebugMode) {
-        print('=== HTTP RESPONSE ===');
-        print('Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        print('Response headers: ${response.headers}');
-      }
-      
-    return _handleResponse(response);
+      return _executeWithTokenRefresh(
+        () async {
+          final streamedResponse = await _client.send(request);
+          return await http.Response.fromStream(streamedResponse);
+        },
+        retryOnTokenExpiry: true,
+        originalHeaders: headers,
+        retryCallback: (newToken) async {
+          // Rebuild the request with updated headers for multipart
+          final retryRequest = http.MultipartRequest('POST', uri)
+            ..fields.addAll(fields);
+          final retryHeaders = <String, String>{'accept': 'application/json'};
+          if (headers != null && headers.isNotEmpty) {
+            retryHeaders.addAll(headers);
+          }
+          retryHeaders['Authorization'] = 'Bearer $newToken';
+          retryHeaders.remove('content-type');
+          retryRequest.headers.addAll(retryHeaders);
+
+          if (file != null) {
+            final filename = file.path.split('/').last;
+            final fileExtension = filename.split('.').last;
+            final contentType = _getContentType(fileExtension);
+            final fileBytes = await file.readAsBytes();
+            final mediaType = http.MediaType.parse(contentType);
+            retryRequest.files.add(
+              http.MultipartFile.fromBytes(
+                fileFieldName,
+                fileBytes,
+                filename: filename,
+                contentType: mediaType,
+              ),
+            );
+          }
+
+          final streamedResponse = await _client.send(retryRequest);
+          return await http.Response.fromStream(streamedResponse);
+        },
+      );
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('=== ERROR IN POST MULTIPART ===');
@@ -228,23 +392,23 @@ class ApiService {
     File? file,
     String fileFieldName = 'profile_image',
     Map<String, String>? headers,
+    Map<String, String>? query,
   }) async {
-    final uri = _buildUri(path);
+    final uri = _buildUri(path, query);
 
     if (kDebugMode) {
-      print('=== API SERVICE: PUT MULTIPART ===');
+      print('=== API SERVICE: PATCH MULTIPART ===');
       print('URL: $uri');
+      print('Query parameters: $query');
       print('File: ${file?.path}');
       print('File field name: $fileFieldName');
     }
 
-    final request = http.MultipartRequest('PUT', uri);
+    final request = http.MultipartRequest('PATCH', uri);
 
     // For multipart requests, only add non-content-type headers
     // The Content-Type with boundary will be set automatically by http package
-    final defaultHeaders = <String, String>{
-      'accept': 'application/json',
-    };
+    final defaultHeaders = <String, String>{'accept': 'application/json'};
     if (headers != null && headers.isNotEmpty) {
       defaultHeaders.addAll(headers);
     }
@@ -259,22 +423,27 @@ class ApiService {
       try {
         // Extract filename from path
         final filename = file.path.split('/').last;
-        final fileExtension = filename.split('.').last;
+        final fileExtension = filename.split('.').last.toLowerCase();
         final contentType = _getContentType(fileExtension);
-        
+
         if (kDebugMode) {
           print('Filename: $filename');
           print('Content-Type: $contentType');
         }
-        
-        // Use fromPath - it's more efficient and http package auto-detects content-type
-        // The content-type will be automatically set based on file extension
-        request.files.add(await http.MultipartFile.fromPath(
-          fileFieldName,
-          file.path,
-          filename: filename,
-        ));
-        
+
+        // Read file bytes and create MultipartFile with explicit content-type
+        // Some servers require explicit content-type in the multipart file
+        final fileBytes = await file.readAsBytes();
+        final mediaType = http.MediaType.parse(contentType);
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            fileFieldName,
+            fileBytes,
+            filename: filename,
+            contentType: mediaType,
+          ),
+        );
+
         if (kDebugMode) {
           print('File added successfully');
         }
@@ -294,17 +463,73 @@ class ApiService {
       if (kDebugMode) {
         print('Sending multipart request...');
       }
-    final streamedResponse = await _client.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-      
-      if (kDebugMode) {
-        print('=== HTTP RESPONSE ===');
-        print('Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        print('Response headers: ${response.headers}');
-      }
-      
-    return _handleResponse(response);
+
+      return _executeWithTokenRefresh(
+        () async {
+          final streamedResponse = await _client.send(request);
+          final response = await http.Response.fromStream(streamedResponse);
+
+          if (kDebugMode) {
+            print('=== HTTP RESPONSE ===');
+            print('Status code: ${response.statusCode}');
+            print('Response body: ${response.body}');
+            print('Response headers: ${response.headers}');
+          }
+
+          return response;
+        },
+        retryOnTokenExpiry: true,
+        originalHeaders: headers,
+        retryCallback: (newToken) async {
+          // Rebuild the request with updated headers for multipart
+          final retryRequest = http.MultipartRequest('PATCH', uri);
+          final retryHeaders = <String, String>{'accept': 'application/json'};
+          if (headers != null && headers.isNotEmpty) {
+            retryHeaders.addAll(headers);
+          }
+          retryHeaders['Authorization'] = 'Bearer $newToken';
+          retryHeaders.remove('content-type');
+          retryRequest.headers.addAll(retryHeaders);
+
+          if (file != null) {
+            final filename = file.path.split('/').last;
+            final fileExtension = filename.split('.').last.toLowerCase();
+            final contentType = _getContentType(fileExtension);
+            final fileBytes = await file.readAsBytes();
+            final mediaType = http.MediaType.parse(contentType);
+            
+            if (kDebugMode) {
+              print('=== RETRY: Adding file ===');
+              print('Filename: $filename');
+              print('File extension: $fileExtension');
+              print('Content-Type: $contentType');
+              print('File bytes length: ${fileBytes.length}');
+            }
+            
+            retryRequest.files.add(
+              http.MultipartFile.fromBytes(
+                fileFieldName,
+                fileBytes,
+                filename: filename,
+                contentType: mediaType,
+              ),
+            );
+          }
+
+          final streamedResponse = await _client.send(retryRequest);
+          final retryResponse = await http.Response.fromStream(
+            streamedResponse,
+          );
+
+          if (kDebugMode) {
+            print('=== RETRY HTTP RESPONSE ===');
+            print('Status code: ${retryResponse.statusCode}');
+            print('Response body: ${retryResponse.body}');
+          }
+
+          return retryResponse;
+        },
+      );
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('=== ERROR IN PUT MULTIPART ===');
@@ -316,15 +541,96 @@ class ApiService {
     }
   }
 
-  Uri _buildUri(String path, [Map<String, String>? query]) {
-    return Uri.parse('${ApiConstants.baseUrl}$path').replace(queryParameters: query);
+  /// Execute a request with automatic token refresh on 401 errors
+  Future<Map<String, dynamic>> _executeWithTokenRefresh(
+    Future<http.Response> Function() requestFn, {
+    required bool retryOnTokenExpiry,
+    Map<String, String>? originalHeaders,
+    Future<http.Response> Function(String newToken)? retryCallback,
+  }) async {
+    try {
+      final response = await requestFn();
+
+      // Check if token expired
+      if (retryOnTokenExpiry &&
+          response.statusCode == 401 &&
+          _isTokenExpiredError(response)) {
+        if (kDebugMode) {
+          print('🔄 Token expired (401), attempting to refresh...');
+        }
+
+        // Try to refresh token
+        if (kDebugMode) {
+          print('   Checking token refresh callback...');
+          print('   Callback is null: ${_onTokenExpired == null}');
+        }
+        if (_onTokenExpired != null) {
+          final newToken = await _onTokenExpired!();
+
+          if (newToken != null && newToken.isNotEmpty) {
+            if (kDebugMode) {
+              print('✅ Token refreshed, retrying request...');
+            }
+
+            // Retry the request with new token
+            if (retryCallback != null) {
+              final retryResponse = await retryCallback(newToken);
+              return _handleResponse(retryResponse);
+            } else {
+              if (kDebugMode) {
+                print('⚠️  No retry callback provided, cannot retry request');
+              }
+            }
+          } else {
+            if (kDebugMode) {
+              print('❌ Token refresh failed or returned null');
+            }
+          }
+        } else {
+          if (kDebugMode) {
+            print('⚠️  No token refresh callback set');
+            print('   Attempting to set callback again...');
+            // Try to set it again - might have been reset by hot reload
+            // This is a fallback, but the callback should be set in main() and initState()
+          }
+        }
+      }
+
+      return _handleResponse(response);
+    } on ApiException {
+      rethrow;
+    }
   }
 
-  Map<String, String> _withDefaultHeaders(Map<String, String>? headers,
-      {bool isJson = false}) {
-    final defaultHeaders = <String, String>{
-      'accept': 'application/json',
-    };
+  /// Check if the error response indicates token expiration
+  bool _isTokenExpiredError(http.Response response) {
+    try {
+      if (response.body.isEmpty) return false;
+      final decoded = jsonDecode(response.body);
+      final errorMessage =
+          (decoded['msg'] ?? decoded['message'] ?? decoded['error'] ?? '')
+              .toString()
+              .toLowerCase();
+      return errorMessage.contains('token has expired') ||
+          errorMessage.contains('token expired') ||
+          errorMessage.contains('expired token') ||
+          errorMessage.contains('invalid token');
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Uri _buildUri(String path, [Map<String, String>? query]) {
+    return Uri.parse(
+      '${ApiConstants.baseUrl}$path',
+    ).replace(queryParameters: query);
+  }
+
+  Map<String, String> _withDefaultHeaders(
+    Map<String, String>? headers, {
+    bool isJson = false,
+  }) {
+    final defaultHeaders = <String, String>{'accept': 'application/json'};
     if (isJson) {
       defaultHeaders['content-type'] = 'application/json';
     }
@@ -356,13 +662,13 @@ class ApiService {
       print('Status code: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
-    
+
     final decoded = _decodeResponseBody(response);
-    
+
     if (kDebugMode) {
       print('Decoded response: $decoded');
     }
-    
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (kDebugMode) {
         print('Status code is success (200-299), returning decoded response');
@@ -372,7 +678,7 @@ class ApiService {
 
     // Extract error message - check multiple possible fields
     String? errorMessage;
-    
+
     // Check 'detail' field first (can be string or array)
     if (decoded.containsKey('detail')) {
       final detail = decoded['detail'];
@@ -380,7 +686,9 @@ class ApiService {
         // Handle array format: [{"loc": ["field"], "msg": "Error message", "type": "value_error"}]
         final firstError = detail[0];
         if (firstError is Map) {
-          errorMessage = firstError['msg']?.toString() ?? firstError['message']?.toString();
+          errorMessage =
+              firstError['msg']?.toString() ??
+              firstError['message']?.toString();
         }
         if (errorMessage == null || errorMessage.isEmpty) {
           errorMessage = detail.toString();
@@ -390,22 +698,25 @@ class ApiService {
         errorMessage = detail?.toString();
       }
     }
-    
+
     // Check 'msg' field (used by some APIs)
-    if ((errorMessage == null || errorMessage.isEmpty) && decoded.containsKey('msg')) {
+    if ((errorMessage == null || errorMessage.isEmpty) &&
+        decoded.containsKey('msg')) {
       errorMessage = decoded['msg']?.toString();
     }
-    
+
     // Check 'message' field
-    if ((errorMessage == null || errorMessage.isEmpty) && decoded.containsKey('message')) {
+    if ((errorMessage == null || errorMessage.isEmpty) &&
+        decoded.containsKey('message')) {
       errorMessage = decoded['message']?.toString();
     }
-    
+
     // Check 'error' field
-    if ((errorMessage == null || errorMessage.isEmpty) && decoded.containsKey('error')) {
+    if ((errorMessage == null || errorMessage.isEmpty) &&
+        decoded.containsKey('error')) {
       errorMessage = decoded['error']?.toString();
     }
-    
+
     // If no error message found, throw with status code only
     if (errorMessage == null || errorMessage.isEmpty) {
       if (kDebugMode) {
@@ -418,7 +729,7 @@ class ApiService {
         statusCode: response.statusCode,
       );
     }
-    
+
     if (kDebugMode) {
       print('=== THROWING API EXCEPTION ===');
       print('Status code: ${response.statusCode}');
@@ -426,10 +737,7 @@ class ApiService {
       print('Error message found: $errorMessage');
     }
 
-    throw ApiException(
-      errorMessage,
-      statusCode: response.statusCode,
-    );
+    throw ApiException(errorMessage, statusCode: response.statusCode);
   }
 
   Map<String, dynamic> _decodeResponseBody(http.Response response) {
@@ -438,25 +746,25 @@ class ApiService {
       print('Body length: ${response.body.length}');
       print('Body empty: ${response.body.isEmpty}');
     }
-    
+
     if (response.body.isEmpty) {
       if (kDebugMode) {
         print('Response body is empty, returning empty map');
       }
       return {};
     }
-    
+
     try {
       if (kDebugMode) {
         print('Attempting to JSON decode response body...');
       }
       final dynamic decoded = jsonDecode(response.body);
-      
+
       if (kDebugMode) {
         print('JSON decoded successfully');
         print('Decoded type: ${decoded.runtimeType}');
       }
-      
+
       if (decoded is Map<String, dynamic>) {
         if (kDebugMode) {
           print('Decoded is Map, returning as-is');
@@ -480,7 +788,7 @@ class ApiService {
         print('Stack trace: $stackTrace');
         print('Response body: ${response.body}');
       }
-      
+
       // If JSON parsing fails, try to extract error message from response
       final body = response.body;
       if (body.isNotEmpty) {
@@ -492,7 +800,7 @@ class ApiService {
           return {'message': body, 'status': false};
         }
       }
-      
+
       if (kDebugMode) {
         print('Throwing ApiException for JSON parse error');
       }
@@ -503,4 +811,3 @@ class ApiService {
     }
   }
 }
-

@@ -28,19 +28,22 @@ class _SignInState extends State<SignIn> {
       builder: (context, signInViewModel, _) {
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(64),
+          appBar:PreferredSize(
+        preferredSize: const Size.fromHeight(65),
+        child: Container(
+          color: context.backgroundColor,
+          child: Align(
+            alignment: Alignment.bottomCenter,
             child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Align(
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(AppAssets.starLogo),
-                ),
-                SvgPicture.asset(AppAssets.genWallsLogo),
-              ],
-            ),
+                      alignment: Alignment.center,
+                      children: [
+                        SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                        SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                      ],
+                    ),
           ),
+        ),
+      ),
           body: SafeArea(
             child: Form(
               key: _formKey,
@@ -52,16 +55,18 @@ class _SignInState extends State<SignIn> {
                         minHeight: constraints.maxHeight,
                       ),
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.h(20),
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
                               children: [
-                                SizedBox(height: context.h(25)),
                                 Text(
                                   "Sign In",
-                                  style: context.appTextStyles?.authTitlePrimary,
+                                  style:
+                                      context.appTextStyles?.authTitlePrimary,
                                   textAlign: TextAlign.center,
                                 ),
                                 SizedBox(height: context.h(24)),
@@ -70,38 +75,52 @@ class _SignInState extends State<SignIn> {
                                   prefixIcon: Icon(Icons.email),
                                   validatorType: "email",
                                   hintText: 'Enter your email',
-                                  hintStyle: context.appTextStyles?.authHintText,
+                                  hintStyle:
+                                      context.appTextStyles?.authHintText,
                                   label: "Email",
-                                  enabledBorderColor: context.colorScheme.onSurface,
+                                  enabledBorderColor:
+                                      context.colorScheme.onSurface,
                                 ),
                                 SizedBox(height: context.h(24)),
                                 CustomTextField(
-                                  controller: signInViewModel.passwordController,
+                                  controller:
+                                      signInViewModel.passwordController,
                                   prefixIcon: Icon(Icons.lock),
                                   validatorType: "password",
                                   hintText: 'Enter your password',
-                                  hintStyle: context.appTextStyles?.authHintText,
+                                  hintStyle:
+                                      context.appTextStyles?.authHintText,
                                   label: "Password",
-                                  enabledBorderColor: context.colorScheme.onSurface,
+                                  enabledBorderColor:
+                                      context.colorScheme.onSurface,
                                 ),
                                 SizedBox(height: context.h(8)),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Row(    
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         Checkbox(
                                           visualDensity: VisualDensity.compact,
                                           activeColor: AppColors.greenColor,
                                           value: signInViewModel.rememberMe,
-                                          side: BorderSide(color: context.colorScheme.onSurface),
-                                          onChanged: signInViewModel.toggleRemember,
+                                          side: BorderSide(
+                                            color:
+                                                context.colorScheme.onSurface,
+                                          ),
+                                          onChanged:
+                                              signInViewModel.toggleRemember,
                                         ),
                                         Text(
                                           'Remember me',
-                                          style: context.appTextStyles?.authBodyMedium,
+                                          style: context
+                                              .appTextStyles
+                                              ?.authBodyMedium,
                                         ),
                                       ],
                                     ),
@@ -124,7 +143,10 @@ class _SignInState extends State<SignIn> {
                                 CustomButton(
                                   onPressed: signInViewModel.isLoading
                                       ? null
-                                      : () => signInViewModel.login(context, formKey: _formKey),
+                                      : () => signInViewModel.login(
+                                          context,
+                                          formKey: _formKey,
+                                        ),
                                   width: context.w(350),
                                   gradient: AppColors.gradient,
                                   text: signInViewModel.isLoading
@@ -138,18 +160,23 @@ class _SignInState extends State<SignIn> {
                                 GestureDetector(
                                   onTap: signInViewModel.isLoading
                                       ? null
-                                      : () => signInViewModel.signInWithGoogle(context),
+                                      : () => signInViewModel.signInWithGoogle(
+                                          context,
+                                        ),
                                   child: Container(
                                     height: context.h(47.9),
                                     width: context.w(350),
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: context.colorScheme.onSurface),
+                                      border: Border.all(
+                                        color: context.colorScheme.onSurface,
+                                      ),
                                       borderRadius: BorderRadius.circular(
                                         context.radius(8),
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Image.asset(
                                           AppAssets.googleIcon,
@@ -159,7 +186,9 @@ class _SignInState extends State<SignIn> {
                                         SizedBox(width: context.w(8)),
                                         Text(
                                           'Continue with Google',
-                                          style: context.appTextStyles?.authGoogleButton,
+                                          style: context
+                                              .appTextStyles
+                                              ?.authGoogleButton,
                                         ),
                                       ],
                                     ),
@@ -172,7 +201,10 @@ class _SignInState extends State<SignIn> {
                                   textSize1: context.text(14),
                                   textSize2: context.text(14),
                                   onTap2: () {
-                                    Navigator.pushNamed(context, RoutesName.SignUpScreen);
+                                    Navigator.pushNamed(
+                                      context,
+                                      RoutesName.SignUpScreen,
+                                    );
                                   },
                                 ),
                                 SizedBox(height: context.h(20)),

@@ -6,6 +6,7 @@ import 'package:genwalls/Core/CustomWidget/profile_image.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/profile_screen_view_model.dart';
 import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:genwalls/viewModel/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -43,6 +44,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         
         return Scaffold(
           backgroundColor: context.backgroundColor,
+          
           body: SafeArea(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: context.h(20)),
@@ -73,56 +75,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-                if (profileScreenViewModel.isLoading)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: context.h(20)),
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                SizedBox(height: context.h(20)),
-                ListView.builder(
+            
+                 ListView.builder(
                   itemCount: profileScreenViewModel.profileData.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final item = profileScreenViewModel.profileData[index];
-                return ListTile(
-                  onTap: () => profileScreenViewModel.onTapFun(context, index),
-                  contentPadding: EdgeInsets.zero,
-                  leading: item['leading'] != null
-                      ? Image.asset(
-                          item['leading'],
-                          height: context.h(26),
-                          width: context.w(26),
-                          fit: BoxFit.contain,
-                        )
-                      : const SizedBox.shrink(),
-                  title: Text(
-                    item['title'] ?? '',
-                    style: context.appTextStyles?.profileListItemTitle,
-                  ),
-                  subtitle: Text(
-                    item['subtitle'] ?? '',
-                    style: context.appTextStyles?.profileListItemSubtitle,
-                  ),
-                  trailing: item['trailingType'] == 'switch'
-                      ? Switch(
-                          inactiveThumbColor: context.subtitleColor,
-                          activeTrackColor: context.textColor,
-                          activeThumbColor: context.primaryColor,
-                          value: item['switchValue'] ?? false,
-                          onChanged: (val) {
-                            setState(() {
-                              item['switchValue'] = val;
-                            });
-                          },
-                          activeColor: context.textColor,
-                        )
-                      : Icon(
-                          Icons.arrow_forward_ios,
-                          color: context.textColor,
-                          size: 16,
-                        ),
-                );
+                    final isThemeItem = item['title'] == 'Theme';
+                    
+                    // Get theme provider for theme toggle
+                    final themeProvider = isThemeItem 
+                        ? Provider.of<ThemeProvider>(context)
+                        : null;
+                    final isDarkMode = themeProvider?.isDarkMode ?? false;
+                    
+                    return ListTile(
+                      onTap: () => profileScreenViewModel.onTapFun(context, index),
+                      contentPadding: EdgeInsets.zero,
+                      leading: item['leading'] != null
+                          ? Image.asset(
+                              item['leading'],
+                              height: context.h(26),
+                              width: context.w(26),
+                              fit: BoxFit.contain,
+                            )
+                          : const SizedBox.shrink(),
+                      title: Text(
+                        item['title'] ?? '',
+                        style: context.appTextStyles?.profileListItemTitle,
+                      ),
+                      subtitle: Text(
+                        isThemeItem 
+                            ? (isDarkMode ? 'Dark Mode' : 'Light Mode')
+                            : (item['subtitle'] ?? ''),
+                        style: context.appTextStyles?.profileListItemSubtitle,
+                      ),
+                      trailing: item['trailingType'] == 'switch'
+                          ? Switch(
+                              inactiveThumbColor: context.subtitleColor,
+                              activeTrackColor: context.textColor,
+                              activeThumbColor: context.primaryColor,
+                              value: isThemeItem 
+                                  ? isDarkMode 
+                                  : (item['switchValue'] ?? false),
+                              onChanged: (val) {
+                                if (isThemeItem) {
+                                  // Toggle theme using ThemeProvider
+                                  themeProvider?.toggleTheme();
+                                } else {
+                                  // Handle other switches
+                                  setState(() {
+                                    item['switchValue'] = val;
+                                  });
+                                }
+                              },
+                              activeColor: context.textColor,
+                            )
+                          : Icon(
+                              Icons.arrow_forward_ios,
+                              color: context.textColor,
+                              size: 16,
+                            ),
+                    );
               },
             ),
                 SizedBox(height: context.h(20)),
@@ -132,9 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: context.w(350),
                   gradient: AppColors.gradient,
                   text: 'Sign out',
-                  iconWidth: null,
-                  iconHeight: null,
-                  icon: null,
+              
                 ),SizedBox(height: context.h(100)),
               ],
             ),

@@ -24,16 +24,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       backgroundColor: context.backgroundColor,
 
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(context.h(64)),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: context.h(20)),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SvgPicture.asset(AppAssets.starLogo),
-
-              SvgPicture.asset(AppAssets.genWallsLogo),
-            ],
+        preferredSize: const Size.fromHeight(65),
+        child: Container(
+          color: context.backgroundColor,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+              ],
+            ),
           ),
         ),
       ),

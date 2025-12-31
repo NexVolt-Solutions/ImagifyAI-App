@@ -22,7 +22,7 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-    late final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -30,36 +30,33 @@ class _SignUpState extends State<SignUp> {
       builder: (context, signUpViewModel, _) {
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(context.h(64)),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: context.h(20)),
+          //with arrow 
+        appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(65),
+
+            child: Align(
+              alignment: Alignment.bottomCenter,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
+                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
                   SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),  Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: context.h(8)),
-                    child: IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
+                  Positioned(
+                    left: 0,
+                     child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(
                         Icons.arrow_back_ios,
                         color: Theme.of(context).iconTheme.color,
                         size: 20,
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      splashRadius: 20,
                     ),
                   ),
-                ),
                 ],
               ),
             ),
           ),
-          body: SafeArea(
+           body: SafeArea(
             child: Form(
               key: _formKey,
               child: ListView(
@@ -77,9 +74,11 @@ class _SignUpState extends State<SignUp> {
                       child: Container(
                         height: context.h(180),
                         width: context.h(180),
-                        decoration: BoxDecoration(  
+                        decoration: BoxDecoration(
                           color: ThemeColors.containerColor(context),
-                          border: Border.all(color: context.colorScheme.onSurface),
+                          border: Border.all(
+                            color: context.colorScheme.onSurface,
+                          ),
                           shape: BoxShape.circle,
                         ),
                         child: signUpViewModel.profileImage != null
@@ -142,7 +141,7 @@ class _SignUpState extends State<SignUp> {
                       signUpViewModel.validatePassword();
                     },
                   ),
-                  SizedBox(height: context.h(24)),    
+                  SizedBox(height: context.h(24)),
                   CustomTextField(
                     controller: signUpViewModel.confirmPasswordController,
                     prefixIcon: Icon(Icons.lock),
@@ -163,13 +162,17 @@ class _SignUpState extends State<SignUp> {
                     children: List.generate(signUpViewModel.items.length, (
                       index,
                     ) {
-                      final isRequirementMet = signUpViewModel.isRequirementMet(index);
+                      final isRequirementMet = signUpViewModel.isRequirementMet(
+                        index,
+                      );
                       return PasswordText(
-                          text: signUpViewModel.items[index],
-                        icon: isRequirementMet ? Icons.check_circle : Icons.cancel,
+                        text: signUpViewModel.items[index],
+                        icon: isRequirementMet
+                            ? Icons.check_circle
+                            : Icons.cancel,
                         iconColor: isRequirementMet
-                              ? AppColors.greenColor
-                              : AppColors.grayColor,
+                            ? AppColors.greenColor
+                            : AppColors.grayColor,
                       );
                     }),
                   ),
@@ -200,63 +203,60 @@ class _SignUpState extends State<SignUp> {
                     ],
                   ),
                   SizedBox(height: context.h(24)),
-                  Container(
-                    height: context.h(47.9),
-                    width: context.w(350),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: context.colorScheme.onSurface),
-                      borderRadius: BorderRadius.circular(
-                        context.radius(context.radius(8)),
+                  GestureDetector(
+                    onTap: signUpViewModel.isLoading
+                        ? null
+                        : () => signUpViewModel.signInWithGoogle(context),
+                    child: Container(
+                      height: context.h(47.9),
+                      width: context.w(350),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: context.colorScheme.onSurface,
+                        ),
+                        borderRadius: BorderRadius.circular(context.radius(8)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            AppAssets.googleIcon,
+                            height: context.h(23.94),
+                            width: context.w(23.94),
+                          ),
+                          SizedBox(width: context.w(8)),
+                          Text(
+                            'Continue with Google',
+                            style: context.appTextStyles?.authGoogleButton,
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          AppAssets.googleIcon,
-                          height: context.h(23.94),
-                          width: context.w(23.94),
-                        ),
-                        SizedBox(width: context.w(8)),
-                        Text(
-                          'Continue with Google',
-                          style: context.appTextStyles?.authGoogleButton,
-                        ),
-                      ],
-                    ),
                   ),
-                
-                   SizedBox(height: context.h(20)),
+
+                  SizedBox(height: context.h(20)),
                   CustomButton(
-                    onPressed: () => signUpViewModel.register(context, formKey: _formKey),
-                     
+                    onPressed: () =>
+                        signUpViewModel.register(context, formKey: _formKey),
+
                     width: context.w(350),
                     gradient: AppColors.gradient,
                     text: signUpViewModel.isLoading
                         ? 'Creating your account...'
                         : 'Create Account',
-                    iconWidth: null,
-                    iconHeight: null,
-                    icon: null,
                   ),
-                  if (signUpViewModel.isLoading) ...[
-                    SizedBox(height: context.h(12)),
-                    const Align(
-                      alignment: Alignment.center,
-                      child: CircularProgressIndicator(),
-                    ),
-                  ],
-                    SizedBox(height: context.h(16)),
+
+                  SizedBox(height: context.h(16)),
                   CustomTextRich(
                     text1: 'Already Have an Account?',
                     text2: 'SignIn',
                     textSize1: context.text(14),
                     textSize2: context.text(14),
-                    onTap2: () {  
+                    onTap2: () {
                       Navigator.pushNamed(context, RoutesName.SignInScreen);
                     },
-                  ),                   SizedBox(height: context.h(20)),
-
+                  ),
+                  SizedBox(height: context.h(20)),
                 ],
               ),
             ),

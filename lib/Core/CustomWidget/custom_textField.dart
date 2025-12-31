@@ -14,7 +14,7 @@ class CustomTextField extends StatelessWidget {
   final Color? fillColor;
   final Color? hintColor;
   final TextStyle? hintStyle;
-
+  final bool? enabled;
   final double? borderRadius;
   final Color? enabledBorderColor;
   final Color? focusedBorderColor;
@@ -34,6 +34,7 @@ class CustomTextField extends StatelessWidget {
     this.fillColor,
     this.hintColor,
     this.hintStyle,
+    this.enabled,
     this.borderRadius,
     this.enabledBorderColor,
     this.focusedBorderColor,
@@ -60,7 +61,20 @@ class CustomTextField extends StatelessWidget {
           controller: controller,
           keyboardType: keyboard ?? TextInputType.text,
           onChanged: onChanged,
+          enabled: enabled ?? true,
           validator: (value) {
+            // Password fields are optional - only validate if they have content
+            if (validatorType == "password") {
+              // If password field is empty, it's valid (optional field)
+              if (value == null || value.trim().isEmpty) {
+                return null;
+              }
+              // If password field has content, validate it (you can add password strength validation here if needed)
+              // For now, just return null if it has content (validation happens in view model)
+              return null;
+            }
+            
+            // For all other fields, check if they're required
             if (value == null || value.trim().isEmpty) {
               return "This field is required";
             }

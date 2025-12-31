@@ -5,46 +5,46 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   AppTheme._();
 
-  /// Light Theme
+  /// Light Theme (Golden/Warm Theme)
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       primaryColor: AppColors.primeryColor,
-      scaffoldBackgroundColor: Colors.white,
+      scaffoldBackgroundColor: AppColors.lightBackground,
       colorScheme: const ColorScheme.light(
-        primary: AppColors.primeryColor,
-        secondary: AppColors.lightPurple,
-        surface: Colors.white,
-        background: Colors.white,
+        primary: AppColors.primeryColor, // Golden
+        secondary: AppColors.lightGoldenAccent, // Brighter gold
+        surface: AppColors.lightSurface, // Warm cream
+        background: AppColors.lightBackground, // Warm ivory
         error: AppColors.errorColor,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: Colors.black,
-        onBackground: Colors.black,
+        onSurface: AppColors.lightTextPrimary, // Dark brown
+        onBackground: AppColors.lightTextPrimary, // Dark brown
         onError: Colors.white,
       ),
       
       // AppBar Theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: AppColors.lightBackground,
+        foregroundColor: AppColors.lightTextPrimary,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
       ),
       
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.grey[100],
+        fillColor: AppColors.lightTextFieldBackground,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.textFieldBoderColor),
+          borderSide: const BorderSide(color: AppColors.lightTextFieldBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.textFieldBoderColor),
+          borderSide: const BorderSide(color: AppColors.lightTextFieldBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -58,13 +58,13 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.errorColor, width: 2),
         ),
-        labelStyle: const TextStyle(color: AppColors.textFieldSubTitleColor),
-        hintStyle: const TextStyle(color: AppColors.textFieldSubTitleColor),
+        labelStyle: const TextStyle(color: AppColors.lightTextTertiary),
+        hintStyle: const TextStyle(color: AppColors.lightTextTertiary),
       ),
       
       // Card Theme
       cardTheme: CardThemeData(
-        color: Colors.grey[50],
+        color: AppColors.lightCardBackground,
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -93,80 +93,80 @@ class AppTheme {
       
       // Icon Theme
       iconTheme: const IconThemeData(
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       
-      // Text Theme with Google Fonts Poppins
+      // Text Theme with Google Fonts Poppins (Golden/Warm Theme)
       textTheme: TextTheme(
         // Display styles
-        displayLarge: GoogleFonts.poppins(color: Colors.black),
-        displayMedium: GoogleFonts.poppins(color: Colors.black),
-        displaySmall: GoogleFonts.poppins(color: Colors.black),
+        displayLarge: GoogleFonts.poppins(color: AppColors.lightTextPrimary),
+        displayMedium: GoogleFonts.poppins(color: AppColors.lightTextPrimary),
+        displaySmall: GoogleFonts.poppins(color: AppColors.lightTextPrimary),
         
         // Headline styles
         headlineLarge: GoogleFonts.poppins(
-          color: Colors.black,
+          color: AppColors.lightTextPrimary,
           fontSize: 24,
           fontWeight: FontWeight.w600,
         ),
         headlineMedium: GoogleFonts.poppins(
-          color: Colors.black,
+          color: AppColors.lightTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
         headlineSmall: GoogleFonts.poppins(
-          color: Colors.black,
+          color: AppColors.lightTextPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
         
         // Title styles
         titleLarge: GoogleFonts.poppins(
-          color: Colors.black,
+          color: AppColors.lightTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
         titleMedium: GoogleFonts.poppins(
-          color: Colors.black,
+          color: AppColors.lightTextPrimary,
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
         titleSmall: GoogleFonts.poppins(
-          color: Colors.black,
+          color: AppColors.lightTextPrimary,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
         
         // Body styles
         bodyLarge: GoogleFonts.poppins(
-          color: Colors.black87,
+          color: AppColors.lightTextPrimary,
           fontSize: 16,
           fontWeight: FontWeight.w400,
         ),
         bodyMedium: GoogleFonts.poppins(
-          color: Colors.black87,
+          color: AppColors.lightTextSecondary,
           fontSize: 14,
           fontWeight: FontWeight.w400,
         ),
         bodySmall: GoogleFonts.poppins(
-          color: Colors.black54,
+          color: AppColors.lightTextTertiary,
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
         
         // Label styles
         labelLarge: GoogleFonts.poppins(
-          color: Colors.black87,
+          color: AppColors.lightTextPrimary,
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
         labelMedium: GoogleFonts.poppins(
-          color: Colors.black87,
+          color: AppColors.lightTextSecondary,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
         labelSmall: GoogleFonts.poppins(
-          color: Colors.black54,
+          color: AppColors.lightTextTertiary,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -529,7 +529,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       authTitleWhite: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: Colors.black,
+        color: AppColors.lightTextPrimary,
       ),
       authSubtitlePrimary: GoogleFonts.poppins(
         fontSize: 14,
@@ -539,22 +539,22 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       authSubtitleWhite: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       authBodyRegular: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: Colors.black54,
+        color: AppColors.lightTextTertiary,
       ),
       authBodyMedium: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       authBodyGray: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: AppColors.grayColor,
+        color: AppColors.lightTextTertiary,
       ),
       authBodyPrimary: GoogleFonts.poppins(
         fontSize: 14,
@@ -564,22 +564,22 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       authHintText: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: AppColors.textFieldSubTitleColor,
+        color: AppColors.lightTextTertiary,
       ),
       authOTPText: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       authOTPLarge: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: AppColors.grayColor,
+        color: AppColors.lightTextSecondary,
       ),
       authTimerText: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       authResendText: GoogleFonts.poppins(
         fontSize: 16,
@@ -589,12 +589,12 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       authPasswordTitle: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       authGoogleButton: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: AppColors.grayColor,
+        color: AppColors.lightTextSecondary,
       ),
       bottomNavLabelSelected: const TextStyle(
         fontFamily: 'Manrope',

@@ -28,24 +28,57 @@ class WallpaperRepository {
     return SuggestResponse.fromJson(json);
   }
 
-  Future<List<Wallpaper>> fetchWallpapers({required String accessToken}) async {
+  Future<List<Wallpaper>> fetchWallpapers({
+    required String accessToken,
+    int page = 1,
+    int limit = 10,
+  }) async {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
+    }
+
+    if (kDebugMode) {
+      print('═══════════════════════════════════════════════════════════');
+      print('=== FETCH WALLPAPERS API: START ===');
+      print('═══════════════════════════════════════════════════════════');
+      print('Endpoint: GET ${ApiConstants.wallpapers}');
+      print('Page: $page, Limit: $limit');
     }
     
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
     
+    // Build query parameters for pagination
+    final queryParams = <String, String>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    
     final json = await _apiService.get(
       ApiConstants.wallpapers,
       headers: headers,
+      query: queryParams,
     );
     
     if (!json.containsKey('wallpapers')) {
+      if (kDebugMode) {
+        print('❌ Invalid response: wallpapers field missing');
+        print('Response keys: ${json.keys.toList()}');
+      }
       throw ApiException('Invalid response: wallpapers field missing', statusCode: 500);
     }
     
     final list = json['wallpapers'] as List;
-    return list.map((e) => Wallpaper.fromJson(e as Map<String, dynamic>)).toList();
+    final wallpapers = list.map((e) => Wallpaper.fromJson(e as Map<String, dynamic>)).toList();
+    
+    if (kDebugMode) {
+      print('✅ Wallpapers fetched successfully');
+      print('Count: ${wallpapers.length}');
+      print('═══════════════════════════════════════════════════════════');
+      print('=== FETCH WALLPAPERS API: SUCCESS ===');
+      print('═══════════════════════════════════════════════════════════');
+    }
+    
+    return wallpapers;
   }
 
   Future<Wallpaper> createWallpaper({
@@ -292,6 +325,79 @@ class WallpaperRepository {
       '${ApiConstants.deleteWallpaper}/$wallpaperId',
       headers: headers,
     );
+  }
+
+  /// Fetch wallpapers grouped by style/category
+  /// Returns a map where keys are category names (e.g., "Trending", "Nature") 
+  /// and values are lists of wallpapers in that category
+  Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
+    required String accessToken,
+  }) async {
+    if (accessToken.isEmpty) {
+      throw ApiException('Access token is required', statusCode: 401);
+    }
+
+    if (kDebugMode) {
+      print('═══════════════════════════════════════════════════════════');
+      print('=== FETCH GROUPED WALLPAPERS API: START ===');
+      print('═══════════════════════════════════════════════════════════');
+      print('Endpoint: GET ${ApiConstants.groupedWallpapers}');
+    }
+
+    final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
+
+    try {
+      final json = await _apiService.get(
+        ApiConstants.groupedWallpapers,
+        headers: headers,
+      );
+
+      if (kDebugMode) {
+        print('✅ Response received successfully');
+        print('Response type: ${json.runtimeType}');
+        print('Response keys: ${json.keys.toList()}');
+      }
+
+      // The response is a map where keys are category names and values are lists of wallpapers
+      final Map<String, List<Wallpaper>> groupedWallpapers = {};
+
+      json.forEach((categoryName, wallpapersList) {
+        if (wallpapersList is List) {
+          groupedWallpapers[categoryName] = wallpapersList
+              .map((e) => Wallpaper.fromJson(e as Map<String, dynamic>))
+              .toList();
+          
+          if (kDebugMode) {
+            print('Category: $categoryName, Count: ${groupedWallpapers[categoryName]!.length}');
+          }
+        }
+      });
+
+      if (kDebugMode) {
+        print('Total categories: ${groupedWallpapers.length}');
+        print('═══════════════════════════════════════════════════════════');
+        print('=== FETCH GROUPED WALLPAPERS API: SUCCESS ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+
+      return groupedWallpapers;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('❌ Error in fetchGroupedWallpapers API call');
+        print('Error: $e');
+        print('Error type: ${e.runtimeType}');
+        if (e is ApiException) {
+          print('Status code: ${e.statusCode}');
+          print('Message: ${e.message}');
+        }
+        print('--- Stack Trace ---');
+        print(stackTrace);
+        print('═══════════════════════════════════════════════════════════');
+        print('=== FETCH GROUPED WALLPAPERS API: ERROR ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+      rethrow;
+    }
   }
 }
 

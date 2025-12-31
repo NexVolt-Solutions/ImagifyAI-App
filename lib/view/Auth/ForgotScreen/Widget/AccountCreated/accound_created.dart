@@ -15,7 +15,7 @@ class AccoundCreated extends StatelessWidget {
     return Scaffold(
         backgroundColor: context.backgroundColor,
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(64),
+          preferredSize: const Size.fromHeight(90),
           child: Stack(
             alignment: Alignment.center,
             children: [

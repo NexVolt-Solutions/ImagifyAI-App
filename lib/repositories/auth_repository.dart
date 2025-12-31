@@ -371,6 +371,12 @@ class AuthRepository {
     // Construct path: /users/{user_id}
     final path = '${ApiConstants.updateUser}/$userId';
 
+    if (kDebugMode) {
+      print('=== UPDATE USER API ===');
+      print('Endpoint: PATCH $path');
+      print('User ID: $userId');
+    }
+
     final body = <String, String>{};
     if (firstName != null && firstName.isNotEmpty) {
       body['first_name'] = firstName;
@@ -383,6 +389,10 @@ class AuthRepository {
     }
     if (username != null && username.isNotEmpty) {
       body['username'] = username;
+    }
+
+    if (kDebugMode) {
+      print('Body: $body');
     }
 
     final json = await _apiService.put(
@@ -418,9 +428,22 @@ class AuthRepository {
     // Construct path: /users/{user_id}/profile
     final path = '${ApiConstants.updateUserProfile}/$userId/profile';
 
-    final fields = <String, String>{};
+    if (kDebugMode) {
+      print('=== UPDATE USER PROFILE API ===');
+      print('Endpoint: PUT $path');
+      print('User ID: $userId');
+      print('Has username: ${username != null && username.isNotEmpty}');
+      print('Has profile image: ${profileImage != null}');
+    }
+
+    // Username should be sent as a query parameter, not in multipart form
+    final query = <String, String>{};
     if (username != null && username.isNotEmpty) {
-      fields['username'] = username;
+      query['username'] = username;
+    }
+
+    if (kDebugMode) {
+      print('Query parameters: $query');
     }
 
     final json = await _apiService.putMultipart(
@@ -428,6 +451,7 @@ class AuthRepository {
       file: profileImage,
       fileFieldName: 'profile_image',
       headers: headers,
+      query: query.isNotEmpty ? query : null,
     );
 
     return UpdateUserResponse.fromJson(json);
@@ -453,6 +477,12 @@ class AuthRepository {
     
     // Construct path: /users/{user_id}/profile (as per updated API docs)
     final path = '${ApiConstants.updateUserProfile}/$userId/profile';
+
+    if (kDebugMode) {
+      print('=== UPDATE PROFILE PICTURE API ===');
+      print('Endpoint: PUT $path');
+      print('User ID: $userId');
+    }
 
     final json = await _apiService.putMultipart(
       path: path,
@@ -487,7 +517,7 @@ class AuthRepository {
     // Construct path: /users/{user_id}/password
     final path = '${ApiConstants.updatePassword}/$userId/password';
 
-    final json = await _apiService.put(
+    final json = await _apiService.patch(
       path,
       headers: headers,
       body: {
@@ -561,6 +591,16 @@ class AuthRepository {
     };
     if (picture != null && picture.isNotEmpty) {
       body['picture'] = picture;
+    }
+
+    if (kDebugMode) {
+      print('=== GOOGLE SIGN-IN REQUEST ===');
+      print('Endpoint: ${ApiConstants.googleSignIn}');
+      print('ID Token length: ${idToken.length}');
+      print('ID Token preview: ${idToken.substring(0, 20)}...');
+      print('Name: $name');
+      print('Picture: ${picture ?? "null"}');
+      print('Request body keys: ${body.keys.toList()}');
     }
 
     final json = await _apiService.post(

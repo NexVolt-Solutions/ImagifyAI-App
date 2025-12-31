@@ -17,6 +17,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
 
   int selectedIndex = -1;
   int selectedStyleIndex = -1;
+  int selectedPromptIndex = -1; // Track which prompt is selected
   bool isCreating = false;
   double creationProgress = 0.0;
   Timer? _progressTimer;
@@ -101,6 +102,27 @@ class ImageGenerateViewModel extends ChangeNotifier {
   // Method to set prompt text when a predefined prompt is selected
   void setPromptText(String text) {
     promptController.text = text;
+    notifyListeners();
+  }
+
+  // Method to set prompt, size, and style when a predefined prompt is selected
+  void setPromptWithDefaults(String promptText, int styleIndex, int promptIndex) {
+    promptController.text = promptText;
+    selectedIndex = 0; // Always set to Square (1:1)
+    selectedStyleIndex = styleIndex;
+    selectedPromptIndex = promptIndex;
+    notifyListeners();
+  }
+
+  // Method to update selected size
+  void setSelectedSize(int index) {
+    selectedIndex = index;
+    notifyListeners();
+  }
+
+  // Method to update selected style
+  void setSelectedStyle(int index) {
+    selectedStyleIndex = index == selectedStyleIndex ? -1 : index;
     notifyListeners();
   }
   

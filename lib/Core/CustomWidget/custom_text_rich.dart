@@ -1,9 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+ import 'package:genwalls/Core/Constants/size_extension.dart';
+ import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class CustomTextRich extends StatelessWidget {
   const CustomTextRich({
@@ -30,13 +28,13 @@ class CustomTextRich extends StatelessWidget {
             children: [
               TextSpan(
                 text: text1,
-                style: context.appTextStyles?.customTextRichText1?.copyWith(
+                style: context.appTextStyles?.customTextRichText1 .copyWith(
                   fontSize: textSize1 ?? textSize2 ?? context.text(14),
                 ),
               ),
               TextSpan(
                 text: text2,
-                style: context.appTextStyles?.customTextRichText2?.copyWith(
+                style: context.appTextStyles?.customTextRichText2.copyWith(
                   fontSize: textSize2 ?? context.text(14),
                 ),
                 recognizer: TapGestureRecognizer()

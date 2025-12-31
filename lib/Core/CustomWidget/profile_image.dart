@@ -6,15 +6,26 @@ class ProfileImage extends StatelessWidget {
   final double? height;
   final double? width;
   final BoxFit? fit;
+  final bool forceRefresh;
   const ProfileImage({
     super.key,
     required this.imagePath,
     this.height,
     this.width,
     this.fit,
+    this.forceRefresh = false,
   });
 
   bool get isNetworkImage => imagePath.startsWith('http://') || imagePath.startsWith('https://');
+  
+  /// Add cache-busting parameter to URL if forceRefresh is true
+  String get imageUrl {
+    if (!isNetworkImage || !forceRefresh) return imagePath;
+    final uri = Uri.parse(imagePath);
+    final queryParams = Map<String, String>.from(uri.queryParameters);
+    queryParams['_t'] = DateTime.now().millisecondsSinceEpoch.toString();
+    return uri.replace(queryParameters: queryParams).toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +51,13 @@ class ProfileImage extends StatelessWidget {
     return ClipOval(
       child: isNetworkImage
           ? Image.network(
-              imagePath,
+              imageUrl, // Use imageUrl which may include cache-busting
               height: height,
               width: width,
               fit: fit,
+              key: ValueKey(imagePath), // Force reload when URL changes
+              cacheWidth: width?.toInt(),
+              cacheHeight: height?.toInt(),
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   height: height,

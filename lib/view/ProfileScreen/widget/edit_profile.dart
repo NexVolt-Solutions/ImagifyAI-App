@@ -76,27 +76,30 @@ class _EditProfileState extends State<EditProfile> {
 
         return Scaffold(
           backgroundColor: context.backgroundColor,
+
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(64),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-                    child: GestureDetector(
+            preferredSize: const Size.fromHeight(65),
+
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  Positioned(
+                    left: 0,
+                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(
                         Icons.arrow_back_ios,
                         color: Theme.of(context).iconTheme.color,
+                        size: 20,
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           body: SafeArea(
@@ -105,8 +108,7 @@ class _EditProfileState extends State<EditProfile> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                  SizedBox(height: context.h(20)),
-                  Align(
+                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
                       "Edit Profile",
@@ -239,6 +241,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: editProfileViewModel.emailController,
                           validatorType: "email",
                           label: "Email",
+                          enabled: false,
                           enabledBorderColor: context.colorScheme.onSurface,
                         ),
                       ],
@@ -331,53 +334,53 @@ class _EditProfileState extends State<EditProfile> {
                       ],
                     ),
                   ),
-                  SizedBox(height: context.h(24)),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CustomButton(
-                          onPressed: editProfileViewModel.isLoading
-                              ? null
-                              : () {
-                                  final signInViewModel = context
-                                      .read<SignInViewModel>();
-                                  final accessToken = signInViewModel.accessToken;
-                                  if (accessToken != null &&
-                                      accessToken.isNotEmpty) {
-                                    editProfileViewModel.updateProfile(
-                                      context: context,
-                                      accessToken: accessToken,
-                                      formKey: _formKey,
-                                    );
-                                  }
-                                },
-                          text: editProfileViewModel.isLoading
-                              ? "Saving..."
-                              : "Save Changes",
-                          gradient: AppColors.gradient,
-                        ),
-                      ),
-                      SizedBox(width: context.w(12)),
-                      Expanded(
-                        child: CustomButton(
-                          onPressed: editProfileViewModel.isLoading
-                              ? null
-                              : () => Navigator.pop(context),
-                          text: "Cancel",
-                          icon: null,
-                          borderColor: context.colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (editProfileViewModel.isLoading)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: context.h(12)),
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
+
                   SizedBox(height: context.h(50)),
                 ],
               ),
+            ),
+          ),
+          bottomNavigationBar: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: context.h(20),
+              vertical: context.w(20),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    onPressed: editProfileViewModel.isLoading
+                        ? null
+                        : () {
+                            final signInViewModel = context
+                                .read<SignInViewModel>();
+                            final accessToken = signInViewModel.accessToken;
+                            if (accessToken != null && accessToken.isNotEmpty) {
+                              editProfileViewModel.updateProfile(
+                                context: context,
+                                accessToken: accessToken,
+                                formKey: _formKey,
+                              );
+                            }
+                          },
+                    text: editProfileViewModel.isLoading
+                        ? "Saving..."
+                        : "Save Changes",
+                    gradient: AppColors.gradient,
+                  ),
+                ),
+                SizedBox(width: context.w(12)),
+                Expanded(
+                  child: CustomButton(
+                    onPressed: editProfileViewModel.isLoading
+                        ? null
+                        : () => Navigator.pop(context),
+                    text: "Cancel",
+                    icon: null,
+                    borderColor: context.colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
           ),
         );

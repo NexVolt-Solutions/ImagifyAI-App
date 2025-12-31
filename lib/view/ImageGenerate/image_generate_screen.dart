@@ -18,268 +18,386 @@ class ImageGenerateScreen extends StatefulWidget {
 }
 
 class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
-  int selectedPromptIndex = -1;
-  int selectedSizeIndex = -1;
+  final ScrollController _styleScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _styleScrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToSelectedStyle(int styleIndex, BuildContext context) {
+    // Wait for the next frame to ensure the ListView is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_styleScrollController.hasClients && styleIndex >= 0) {
+        // Calculate approximate position based on item index
+        // Each item has: right padding (10) + text width (varies) + horizontal padding (12*2)
+        // Average style name is about 10-15 characters, so estimate ~100-150px per item
+        // Use a more accurate estimate: base width + text length estimate
+        final baseItemWidth = 140.0; // Base width (padding + border + some text)
+        final scrollPosition = (styleIndex * baseItemWidth).clamp(
+          0.0,
+          _styleScrollController.position.maxScrollExtent,
+        );
+        
+        // Center the selected item in the viewport if possible
+        final viewportWidth = MediaQuery.of(context).size.width;
+        final centeredPosition = (scrollPosition - viewportWidth / 2 + baseItemWidth / 2).clamp(
+          0.0,
+          _styleScrollController.position.maxScrollExtent,
+        );
+        
+        _styleScrollController.animateTo(
+          centeredPosition,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final imageGenerateViewModel = Provider.of<ImageGenerateViewModel>(context);
     return Scaffold(
       backgroundColor: context.backgroundColor,
+
       body: SafeArea(
         child: Stack(
           children: [
-            ListView(
-          padding: context.padSym(h: 20),
-          children: [
-            SizedBox(height: context.h(20)),
-            Text(
-              "Describe Your Vision",
-              style: context.appTextStyles?.imageGenerateSectionTitle,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: context.h(12)),
-            Container(
-              width: context.w(double.infinity),
-              decoration: BoxDecoration(
-                color: context.backgroundColor,
-                borderRadius: BorderRadius.circular(context.radius(8)),
-                border: Border.all(
-                  color: context.colorScheme.onSurface,
-                  width: context.h(1.5),
-                ),
-              ),
-              padding: context.padAll(12),
-              child: Stack(
-                children: [
-                  TextFormField(
-                    controller: imageGenerateViewModel.promptController,
-                    maxLines: 4,
-                    minLines: 1,
-                    enabled: true,
-                    readOnly: false,
-                    style: context.appTextStyles?.imageGeneratePromptText,
-                    decoration: InputDecoration(
-                      hintText: 'Describe the wallpaper you want to create...',
-                      hintStyle: context.appTextStyles?.imageGeneratePromptHint,
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.only(
-                        bottom: context.h(45),
-                        right: context.w(5),
-                      ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: context.w(20)),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: context.h(20)),
+                    Text(
+                      "Describe Your Vision",
+                      style: context.appTextStyles?.imageGenerateSectionTitle,
+                      textAlign: TextAlign.center,
                     ),
-                    maxLength: null,
-                    textInputAction: TextInputAction.newline,
-                    keyboardType: TextInputType.multiline,
-                  ),
-
-                  Positioned(
-                    bottom: context.h(8),
-                    right: context.w(8),
-                    child: GestureDetector(
-                      onTap: imageGenerateViewModel.isGettingSuggestion
-                          ? null
-                          : () => imageGenerateViewModel.getSuggestion(context),
-                      child: Container(
-                        height: context.h(32),
-                        width: context.w(123),
-                        decoration: BoxDecoration(
-                          color: context.backgroundColor,
-                          borderRadius: BorderRadius.circular(
-                            context.radius(8),
-                          ),
+                    SizedBox(height: context.h(12)),
+                    Container(
+                      width: context.w(double.infinity),
+                      decoration: BoxDecoration(
+                        color: context.backgroundColor,
+                        borderRadius: BorderRadius.circular(context.radius(8)),
+                        border: Border.all(
+                          color: context.colorScheme.primary,
+                          width: context.h(1.5),
                         ),
-                        child: ShaderMask(
-                          shaderCallback: (bounds) {
-                            return AppColors.gradient.createShader(bounds);
-                          },
-                          blendMode: BlendMode.srcIn,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                context.radius(8),
-                              ),
-                              border: Border.all(
-                                color: context.colorScheme.onSurface,
-                                width: context.w(1.5),
+                      ),
+                      padding: context.padAll(12),
+                      child: Stack(
+                        children: [
+                          TextFormField(
+                            controller: imageGenerateViewModel.promptController,
+                            maxLines: 4,
+                            minLines: 1,
+                            enabled: true,
+                            readOnly: false,
+                            style:
+                                context.appTextStyles?.imageGeneratePromptText,
+                            decoration: InputDecoration(
+                              hintText:
+                                  'Describe the wallpaper you want to create...',
+                              hintStyle: context
+                                  .appTextStyles
+                                  ?.imageGeneratePromptHint,
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              focusedErrorBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.only(
+                                bottom: context.h(45),
+                                right: context.w(5),
                               ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                if (imageGenerateViewModel.isGettingSuggestion)
-                                  SizedBox(
-                                    height: context.h(17),
-                                    width: context.w(17),
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        context.textColor,
-                                      ),
+                            maxLength: null,
+                            textInputAction: TextInputAction.newline,
+                            keyboardType: TextInputType.multiline,
+                          ),
+
+                          Positioned(
+                            bottom: context.h(8),
+                            right: context.w(8),
+                            child: GestureDetector(
+                              onTap: imageGenerateViewModel.isGettingSuggestion
+                                  ? null
+                                  : () => imageGenerateViewModel.getSuggestion(
+                                      context,
                                     ),
-                                  )
-                                else
-                                  ShaderMask(
-                                    shaderCallback: (bounds) =>
-                                        AppColors.gradient.createShader(bounds),
-                                    blendMode: BlendMode.srcIn,
-                                    child: Image.asset(
-                                      AppAssets.imageIcon,
-                                      height: context.h(17),
-                                      width: context.w(17),
-                                      color: Colors.white,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
-                                SizedBox(width: context.w(4)),
-                                ShaderMask(
-                                  shaderCallback: (bounds) =>
-                                      AppColors.gradient.createShader(bounds),
-                                  blendMode: BlendMode.srcIn,
-                                  child: Text(
-                                    imageGenerateViewModel.isGettingSuggestion
-                                        ? 'Loading...'
-                                        : 'AI Suggestion',
-                                    style: context.appTextStyles?.imageGenerateAISuggestion,
+                              child: Container(
+                                height: context.h(32),
+                                width: context.w(123),
+                                decoration: BoxDecoration(
+                                  color: context.backgroundColor,
+                                  borderRadius: BorderRadius.circular(
+                                    context.radius(8),
                                   ),
                                 ),
-                              ],
+                                child: ShaderMask(
+                                  shaderCallback: (bounds) {
+                                    return AppColors.gradient.createShader(
+                                      bounds,
+                                    );
+                                  },
+                                  blendMode: BlendMode.srcIn,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(
+                                        context.radius(8),
+                                      ),
+                                      border: Border.all(
+                                        color: context.colorScheme.primary,
+                                        width: context.w(1.5),
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        if (imageGenerateViewModel
+                                            .isGettingSuggestion)
+                                          SizedBox(
+                                            height: context.h(17),
+                                            width: context.w(17),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    context.textColor,
+                                                  ),
+                                            ),
+                                          )
+                                        else
+                                          ShaderMask(
+                                            shaderCallback: (bounds) =>
+                                                AppColors.gradient.createShader(
+                                                  bounds,
+                                                ),
+                                            blendMode: BlendMode.srcIn,
+                                            child: Image.asset(
+                                              AppAssets.imageIcon,
+                                              height: context.h(17),
+                                              width: context.w(17),
+                                              color: Colors.white,
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        SizedBox(width: context.w(4)),
+                                        ShaderMask(
+                                          shaderCallback: (bounds) => AppColors
+                                              .gradient
+                                              .createShader(bounds),
+                                          blendMode: BlendMode.srcIn,
+                                          child: Text(
+                                            imageGenerateViewModel
+                                                    .isGettingSuggestion
+                                                ? 'Loading...'
+                                                : 'AI Suggestion',
+                                            style: context
+                                                .appTextStyles
+                                                ?.imageGenerateAISuggestion,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    SizedBox(height: context.h(20)),
+                    Text(
+                      "Inspiration Gallery",
+                      style: context.appTextStyles?.imageGenerateSectionTitle,
+                      textAlign: TextAlign.center,
+                    ),
+
+                    Wrap(
+                      spacing: context.w(8),
+                      runSpacing: context.h(4),
+                      children: [
+                         PromptContiner(
+                           text: 'Abstract neon cityscape at night',
+                           onTap: () {
+                             // Set prompt, auto-select Square size, and Cyberpunk style
+                             imageGenerateViewModel.setPromptWithDefaults(
+                               'Abstract neon cityscape at night',
+                               7, // Cyberpunk style index
+                               0, // Prompt index 
+                             );
+                             // Scroll to the selected style
+                             _scrollToSelectedStyle(7, context);
+                           },
+                           isSelected: imageGenerateViewModel.selectedPromptIndex == 0,
+                         ),
+                         PromptContiner(
+                           text: 'Serene mountain landscape with sunset',
+                           onTap: () {
+                             // Set prompt, auto-select Square size, and Photorealistic style
+                             imageGenerateViewModel.setPromptWithDefaults(
+                               'Serene mountain landscape with sunset',
+                               3, // Photorealistic style index
+                               1, // Prompt index
+                             );
+                             // Scroll to the selected style
+                             _scrollToSelectedStyle(3, context);
+                           },
+                           isSelected: imageGenerateViewModel.selectedPromptIndex == 1,
+                         ),
+                         PromptContiner(
+                           text: 'Cosmic galaxy with stars and nebula',
+                           onTap: () {
+                             // Set prompt, auto-select Square size, and 3D Render style
+                             imageGenerateViewModel.setPromptWithDefaults(
+                               'Cosmic galaxy with stars and nebula',
+                               1, // 3D Render style index
+                               2, // Prompt index
+                             );
+                             // Scroll to the selected style
+                             _scrollToSelectedStyle(1, context);
+                           },
+                           isSelected: imageGenerateViewModel.selectedPromptIndex == 2,
+                         ),
+                         PromptContiner(
+                           text: 'Minimalist geometric patterns',
+                           onTap: () {
+                             // Set prompt, auto-select Square size, and Illustration style
+                             imageGenerateViewModel.setPromptWithDefaults(
+                               'Minimalist geometric patterns',
+                               4, // Illustration style index
+                               3, // Prompt index
+                             );
+                             // Scroll to the selected style
+                             _scrollToSelectedStyle(4, context);
+                           },
+                           isSelected: imageGenerateViewModel.selectedPromptIndex == 3,
+                         ),
+                         PromptContiner(
+                           text: 'Tropical beach paradise scene',
+                           onTap: () {
+                             // Set prompt, auto-select Square size, and Photorealistic style
+                             imageGenerateViewModel.setPromptWithDefaults(
+                               'Tropical beach paradise scene',
+                               3, // Photorealistic style index
+                               4, // Prompt index
+                             );
+                             // Scroll to the selected style
+                             _scrollToSelectedStyle(3, context);
+                           },
+                           isSelected: imageGenerateViewModel.selectedPromptIndex == 4,
+                         ),
+                         PromptContiner(
+                           text: 'Cyberpunk futuristic city',
+                           onTap: () {
+                             // Set prompt, auto-select Square size, and Cyberpunk style
+                             imageGenerateViewModel.setPromptWithDefaults(
+                               'Cyberpunk futuristic city',
+                               7, // Cyberpunk style index
+                               5, // Prompt index
+                             );
+                             // Scroll to the selected style
+                             _scrollToSelectedStyle(7, context);
+                           },
+                           isSelected: imageGenerateViewModel.selectedPromptIndex == 5,
+                         ),
+                      ],
+                    ),
+                    SizedBox(height: context.h(20)),
+                    Text(
+                      "Choose Your Size",
+                      style: context.appTextStyles?.imageGenerateSectionTitle,
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: context.h(12)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        for (
+                          int i = 0;
+                          i < imageGenerateViewModel.sizes.length;
+                          i++
+                        ) ...[
+                          Expanded(
+                            child: SizeContiner(
+                              text2: imageGenerateViewModel.sizes[i]['text2']!,
+                              height1: context.h(40),
+                              width1: double
+                                  .infinity, // Will be constrained by Expanded
+                              height2: context.h(20),
+                              width2: context.w(
+                                35,
+                              ), // Slightly wider for longer text
+                              isSelected:
+                                  imageGenerateViewModel.selectedIndex == i,
+                              onTap: () {
+                                imageGenerateViewModel.setSelectedSize(i);
+                              },
+                            ),
+                          ),
+                          if (i < imageGenerateViewModel.sizes.length - 1)
+                            SizedBox(width: context.w(8)), // Reduced spacing
+                        ],
+                      ],
+                    ),
+                    SizedBox(height: context.h(20)),
+                    HomeAlign(text: 'Choose Your Style (Optional)'),
+                    SizedBox(height: context.h(12)),
+                    SizedBox(
+                      height: context.h(100),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: imageGenerateViewModel.styles.length,
+                        itemBuilder: (context, index) {
+                          final style = imageGenerateViewModel.styles[index];
+                          final isSelected =
+                              imageGenerateViewModel.selectedStyleIndex ==
+                              index;
+                          return Padding(
+                            padding: EdgeInsets.only(right: context.w(10)),
+                            child: PromptContiner(
+                              text: style,
+                              isSelected: isSelected,
+                              onTap: () {
+                                imageGenerateViewModel.setSelectedStyle(index);
+                                // Scroll to selected style when manually tapped
+                                if (!isSelected) {
+                                  _scrollToSelectedStyle(index, context);
+                                }
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(height: context.h(20)),
+                    CustomButton(
+                      onPressed: () =>
+                          imageGenerateViewModel.createWallpaper(context),
+
+                      width: context.w(350),
+                      iconHeight: 24,
+                      iconWidth: 24,
+                      gradient: AppColors.gradient,
+                      text: imageGenerateViewModel.isCreating
+                          ? 'Crafting Your Masterpiece...'
+                          : 'Create Magic',
+                      icon: AppAssets.magicStarIcon,
+                    ),
+                    SizedBox(height: context.h(100)),
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: context.h(20)),
-            Text(
-              "Inspiration Gallery",
-              style: context.appTextStyles?.imageGenerateSectionTitle,
-              textAlign: TextAlign.center,
-            ),
-            
-            Wrap(
-              spacing: context.w(8),
-              runSpacing: context.h(4),
-              children: [
-                PromptContiner(
-                  text: 'Man stand in front of lake background',
-                  onTap: () {
-                    setState(() {
-                      selectedPromptIndex = 2;
-                    });
-                    // Set the prompt text in the text field
-                    imageGenerateViewModel.setPromptText('Man stand in front of lake background');
-                  },
-                  isSelected: selectedPromptIndex == 2,
-                ),
-                PromptContiner(
-                  text: 'Unicorn usually shopping at Mall',
-                  onTap: () {
-                    setState(() {
-                      selectedPromptIndex = 0;
-                    });
-                    // Set the prompt text in the text field
-                    imageGenerateViewModel.setPromptText('Unicorn usually shopping at Mall');
-                  },
-                  isSelected: selectedPromptIndex == 0,
-                ),
-                PromptContiner(
-                  text: 'Street View of time square',
-                  onTap: () {
-                    setState(() {
-                      selectedPromptIndex = 1;
-                    });
-                    // Set the prompt text in the text field
-                    imageGenerateViewModel.setPromptText('Street View of time square');
-                  },
-                  isSelected: selectedPromptIndex == 1,
-                ),
-                PromptContiner(
-                  text: 'Panda in a lather suit',
-                  onTap: () {
-                    setState(() {
-                      selectedPromptIndex = 3;
-                    });
-                    // Set the prompt text in the text field
-                    imageGenerateViewModel.setPromptText('Panda in a lather suit');
-                  },
-                  isSelected: selectedPromptIndex == 3,
-                ),
-              ],
-            ),
-            SizedBox(height: context.h(20)),
-            Text(
-              "Choose Your Size",
-              style: context.appTextStyles?.imageGenerateSectionTitle,
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: context.h(12)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (int i = 0; i < imageGenerateViewModel.sizes.length; i++) ...[
-                  Expanded(
-                    child: SizeContiner(
-                       text2: imageGenerateViewModel.sizes[i]['text2']!,
-                      height1: context.h(40),
-                      width1: double.infinity, // Will be constrained by Expanded
-                      height2: context.h(20),
-                      width2: context.w(35), // Slightly wider for longer text
-                      isSelected: imageGenerateViewModel.selectedIndex == i,
-                      onTap: () {
-                        setState(() {
-                          imageGenerateViewModel.selectedIndex = i;
-                        });
-                      },
-                    ),
-                  ),
-                  if (i < imageGenerateViewModel.sizes.length - 1)
-                    SizedBox(width: context.w(8)), // Reduced spacing
-                ],
-              ],
-            ),
-            SizedBox(height: context.h(20)),
-            HomeAlign(text: 'Choose Your Style (Optional)'),
-            SizedBox(height: context.h(12)),
-            SizedBox(
-              height: context.h(100),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: imageGenerateViewModel.styles.length,
-                itemBuilder: (context, index) {
-                  final style = imageGenerateViewModel.styles[index];
-                  final isSelected = imageGenerateViewModel.selectedStyleIndex == index;
-                  return Padding(
-                    padding: EdgeInsets.only(right: context.w(10)),
-                    child: PromptContiner(
-                      text: style,
-                      isSelected: isSelected,
-                      onTap: () {
-                        setState(() {
-                          imageGenerateViewModel.selectedStyleIndex = isSelected ? -1 : index;
-                        });
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: context.h(20)),
-            CustomButton(
-              onPressed: () => imageGenerateViewModel.createWallpaper(context),
-               
-              width: context.w(350),
-              iconHeight: 24,
-              iconWidth: 24,
-              gradient: AppColors.gradient,
-              text: imageGenerateViewModel.isCreating ? 'Crafting Your Masterpiece...' : 'Create Magic',
-              icon: AppAssets.magicStarIcon,
-            ),
-            SizedBox(height: context.h(100)),
-          ],
-        ),
             // Loading Overlay
             if (imageGenerateViewModel.isCreating)
               Consumer<ImageGenerateViewModel>(
@@ -354,7 +472,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
   @override
   Widget build(BuildContext context) {
     final progressPercent = (widget.progress * 100).toInt().clamp(0, 100);
-    
+
     return Container(
       color: context.backgroundColor.withOpacity(0.9),
       child: Center(
@@ -466,7 +584,11 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
     );
   }
 
-  Widget _buildStageIndicator(BuildContext context, String label, bool isActive) {
+  Widget _buildStageIndicator(
+    BuildContext context,
+    String label,
+    bool isActive,
+  ) {
     return Column(
       children: [
         Container(

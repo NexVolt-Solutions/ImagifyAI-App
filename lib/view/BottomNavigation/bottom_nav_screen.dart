@@ -39,36 +39,35 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(55),
+        preferredSize: const Size.fromHeight(65),
         child: Container(
           color: context.backgroundColor,
           child: Align(
-            alignment: Alignment.center,
+            alignment: Alignment.bottomCenter,
             child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                        SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                      ],
-                    ),
+              alignment: Alignment.center,
+              children: [
+                SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+              ],
+            ),
           ),
         ),
       ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            /// MAIN SCREEN
-            bottomNavScreenViewModel.screens[bottomNavScreenViewModel
-                .currentIndex],
+      body: Stack(
+        children: [
+          /// MAIN SCREEN
+          bottomNavScreenViewModel.screens[bottomNavScreenViewModel
+              .currentIndex],
 
-            /// BOTTOM NAV BAR
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                                 margin:  EdgeInsets.symmetric(
+          /// BOTTOM NAV BAR
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: EdgeInsets.symmetric(
                     horizontal: context.w(20),
                     vertical: context.h(20),
                   ),
@@ -76,64 +75,72 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                     horizontal: context.w(16),
                     vertical: context.h(11),
                   ),
-                    decoration: BoxDecoration(
-                      color: context.theme.bottomNavigationBarTheme.backgroundColor,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(context.radius(68)),
-                        topLeft: Radius.circular(context.radius(68)),
-                        bottomLeft: Radius.circular(context.radius(56)),
-                        bottomRight: Radius.circular(context.radius(56)),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(
-                        bottomNavScreenViewModel.bottomData.length,
-                        (index) {
-                          return InkWell(
-                            onTap: () =>
-                                bottomNavScreenViewModel.updateIndex(index),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                bottomNavScreenViewModel.currentIndex == index
-                                    ? ShaderMask(
-                                        shaderCallback: (bounds) => AppColors
-                                            .gradient
-                                            .createShader(bounds),
-                                        blendMode: BlendMode.srcIn,
-                                        child: Image.asset(
-                                          bottomNavScreenViewModel
-                                              .bottomData[index]['image'],
-                                        
-                                        ),
-                                      )
-                                    : Image.asset(
-                                        bottomNavScreenViewModel
-                                            .bottomData[index]['image'],
-                                
-                                        color: context.theme.bottomNavigationBarTheme.unselectedItemColor,
-                                      ),
-                                SizedBox(height: context.h(4)),
-                                Text(
-                                  bottomNavScreenViewModel
-                                      .bottomData[index]['name'],
-                                  style: bottomNavScreenViewModel.currentIndex == index
-                                      ? context.appTextStyles?.bottomNavLabelSelected
-                                      : context.appTextStyles?.bottomNavLabelUnselected,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                  decoration: BoxDecoration(
+                    color:
+                        context.theme.bottomNavigationBarTheme.backgroundColor,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(context.radius(68)),
+                      topLeft: Radius.circular(context.radius(68)),
+                      bottomLeft: Radius.circular(context.radius(56)),
+                      bottomRight: Radius.circular(context.radius(56)),
                     ),
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(
+                      bottomNavScreenViewModel.bottomData.length,
+                      (index) {
+                        return InkWell(
+                          onTap: () =>
+                              bottomNavScreenViewModel.updateIndex(index),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              bottomNavScreenViewModel.currentIndex == index
+                                  ? ShaderMask(
+                                      shaderCallback: (bounds) => AppColors
+                                          .gradient
+                                          .createShader(bounds),
+                                      blendMode: BlendMode.srcIn,
+                                      child: Image.asset(
+                                        bottomNavScreenViewModel
+                                            .bottomData[index]['image'],
+                                      ),
+                                    )
+                                  : Image.asset(
+                                      bottomNavScreenViewModel
+                                          .bottomData[index]['image'],
+
+                                      color: context
+                                          .theme
+                                          .bottomNavigationBarTheme
+                                          .unselectedItemColor,
+                                    ),
+                              SizedBox(height: context.h(4)),
+                              Text(
+                                bottomNavScreenViewModel
+                                    .bottomData[index]['name'],
+                                style:
+                                    bottomNavScreenViewModel.currentIndex ==
+                                        index
+                                    ? context
+                                          .appTextStyles
+                                          ?.bottomNavLabelSelected
+                                    : context
+                                          .appTextStyles
+                                          ?.bottomNavLabelUnselected,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

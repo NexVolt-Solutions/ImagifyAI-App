@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/splash_screen_view_model.dart';
-
-class SplashScreen extends StatefulWidget {
+ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      body: Center(child: Image.asset(AppAssets.splashLogo)),
+      body: Center(child: SvgPicture.asset(AppAssets.splashLogo)),
     );
   }
 }

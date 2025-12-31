@@ -1,10 +1,7 @@
 class ApiConstants {
   ApiConstants._();
-
-  // Base URL from updated API documentation
   // Note: If 404 errors occur, the API might require /api/v1 prefix
   static const String baseUrl = 'https://genwalls.nexvoltsolutions.com/api/v1';
-
   // Authentication endpoints
   static const String register = '/auth/register';
   static const String verifyEmail = '/auth/verify';
@@ -17,9 +14,6 @@ class ApiConstants {
   static const String resetPassword = '/auth/reset-password';
   static const String googleSignIn = '/auth/google';
   static const String signOut = '/auth/sign-out';
-
-  // User profile endpoints
-  // Note: All endpoints require {user_id} in the path
   // Use helper methods in repository to construct paths with user_id
   static const String getCurrentUser = '/users'; // Will be /users/{user_id}
   static const String updateUser = '/users'; // Will be /users/{user_id}
@@ -30,8 +24,10 @@ class ApiConstants {
   // Wallpaper endpoints
   static const String suggestPrompt = '/wallpapers/suggest';
   static const String wallpapers = '/wallpapers/';
+  static const String groupedWallpapers = '/wallpapers/grouped';
   static const String recreateWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/recreate
   static const String downloadWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/download
   static const String deleteWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}
+  static const String googleWebClientId = '247136119306-p8qvdr6se04jf40t1ha3hqlu7jl36blg.apps.googleusercontent.com';
 }
 

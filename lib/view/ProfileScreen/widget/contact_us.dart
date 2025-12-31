@@ -27,29 +27,33 @@ class _ContactUsState extends State<ContactUs> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-             SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-            SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Icon(
-                    Icons.arrow_back_ios,
-                    color: Theme.of(context).iconTheme.color,
+         //with arrow 
+        appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(65),
+
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  Positioned(
+                    left: 0,
+                     child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: Theme.of(context).iconTheme.color,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+          
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: context.h(20)),
@@ -87,7 +91,7 @@ class _ContactUsState extends State<ContactUs> {
                     ),
                     SizedBox(height: context.h(11)),
                     Text(
-                      '+1012 3456 789',
+                      '+923174869556',
                       style: context.appTextStyles?.profileContactInfo,
                     ),
                   ],
@@ -101,7 +105,7 @@ class _ContactUsState extends State<ContactUs> {
                     ),
                     SizedBox(height: context.h(11)),
                     Text(
-                      'demo@gmail.com',
+                      'info@nexvoltsolutions.com',
                       style: context.appTextStyles?.profileContactInfo,
                     ),
                   ],
@@ -147,30 +151,67 @@ class _ContactUsState extends State<ContactUs> {
               runSpacing: context.h(13),
               children: List.generate(subjects.length, (index) {
                 bool isSelected = selectedIndex == index;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircleAvatar(
-                        radius: context.radius(10),
-                        backgroundColor: isSelected
-                            ? context.primaryColor
-                            : context.subtitleColor,
-                        child: isSelected
-                            ? Icon(Icons.check, color: context.textColor, size: 12)
-                            : null,
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = index;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: context.w(8),
+                        vertical: context.h(4),
                       ),
-                      SizedBox(width: context.w(3.5)),
-                      Text(
-                        subjects[index],
-                        style: context.appTextStyles?.profileContactInfo,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut,
+                            padding: EdgeInsets.all(context.w(4)),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? context.primaryColor
+                                  : Colors.transparent,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
+                                    ? context.primaryColor
+                                    : context.colorScheme.onSurface.withOpacity(0.5),
+                                width: 2,
+                              ),
+                            ),
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 200),
+                              child: isSelected
+                                  ? Icon(
+                                      Icons.check,
+                                      key: const ValueKey('check'),
+                                      color: context.colorScheme.onPrimary,
+                                      size: 14,
+                                    )
+                                  : SizedBox(
+                                      key: const ValueKey('empty'),
+                                      width: 14,
+                                      height: 14,
+                                    ),
+                            ),
+                          ),
+                          SizedBox(width: context.w(8)),
+                          Text(
+                            subjects[index],
+                            style: (context.appTextStyles?.profileContactInfo ?? TextStyle()).copyWith(
+                              color: isSelected
+                                  ? context.primaryColor
+                                  : context.textColor,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 );
               }),

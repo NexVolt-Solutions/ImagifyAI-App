@@ -1,11 +1,12 @@
 class AppAssets {
   //main Logo
-  static const String splashLogo = "assets/logo/splashLogo.png";
+  static const String splashLogo = "assets/logo/splashLogo.svg";
   static const String starLogo = "assets/logo/star.svg";
   static const String genWallsLogo = "assets/logo/genwalllogo.svg";
 
   //icons
   static const String googleIcon = "assets/icon/google.png";
+  static const String startIcon = "assets/icon/start.svg";
   static const String verifIcon = "assets/icon/veriIcon.png";
   static const String dotConIcon = "assets/icon/dotContainerIcon.png";
   static const String conIcon = "assets/icon/s.jpg";
@@ -17,13 +18,10 @@ class AppAssets {
   static const String emailIcon = "assets/icon/emailIcon.png";
   static const String imageIconPlus = "assets/icon/imageIconPlus.png";
   static const String cameraIconPlus = "assets/icon/avaterCamera.png";
-
   static const String profileIcon = "assets/icon/avaterIconPro.png";
-
   static const String onBoardingIcon1 = "assets/icon/onBordingScreenIcon1.png";
   static const String onBoardingIcon2 = "assets/icon/onBordingScreenIcon2.png";
-   static const String onBoardingIcon3 = "assets/icon/onBordingScreenIcon3.png";
-
+  static const String onBoardingIcon3 = "assets/icon/onBordingScreenIcon3.png";
   static const String tickIcon = "assets/icon/tickIcon.png";
 
   //profileIcon

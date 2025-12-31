@@ -11,29 +11,33 @@ class TermOfUse extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.backgroundColor,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(64),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-              SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-            SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Icon(
-                    Icons.arrow_back_ios,
-                    color: Theme.of(context).iconTheme.color,
+        //with arrow 
+        appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(65),
+
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  Positioned(
+                    left: 0,
+                     child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: Theme.of(context).iconTheme.color,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+          
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: context.h(20)),

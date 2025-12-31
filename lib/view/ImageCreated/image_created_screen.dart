@@ -169,31 +169,22 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
 
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(64),
-            child: Container(
-              color: context.backgroundColor,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
+           appBar:PreferredSize(
+        preferredSize: const Size.fromHeight(65),
+        child: Container(
+          color: context.backgroundColor,
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                        SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                      ],
                     ),
-                  ),
-                  Positioned(
-                    child: SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                  ),
-                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                ],
-              ),
-            ),
           ),
+        ),
+      ),
           body: SafeArea(
             child: ListView(
               shrinkWrap: true,
