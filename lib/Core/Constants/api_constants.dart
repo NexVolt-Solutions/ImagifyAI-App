@@ -25,6 +25,7 @@ class ApiConstants {
   static const String suggestPrompt = '/wallpapers/suggest';
   static const String wallpapers = '/wallpapers/';
   static const String groupedWallpapers = '/wallpapers/grouped';
+  static const String wallpapersStyles = '/wallpapers/styles';
   static const String recreateWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/recreate
   static const String downloadWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/download
   static const String deleteWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}

@@ -147,13 +147,10 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
             ],
             SizedBox(height: context.h(40)),
             CustomButton(
-              onPressed: viewModel.isLoading
-                  ? null
-                  : () => viewModel.verify(context),
-               
+              onPressed: () => viewModel.verify(context),
               gradient: AppColors.gradient,
               text: viewModel.isLoading ? 'Verifying...' : 'Verify',
-           
+              isLoading: viewModel.isLoading,
             ),
           ],
         ),

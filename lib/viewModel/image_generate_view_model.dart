@@ -60,28 +60,11 @@ class ImageGenerateViewModel extends ChangeNotifier {
     {'text1': '2:3 Landscape', 'text2': 'Landscape'},
   ];
   
-  // Styles matching backend STYLE_SUFFIXES
-  final List<String> styles = [
-    'Colorful',
-    '3D Render',
-    '3D Cinematic',
-    'Photorealistic',
-    'Illustration',
-    'Oil Painting',
-    'Watercolor',
-    'Cyberpunk',
-    'Fantasy',
-    'Anime',
-    'Manga',
-    'Cartoon',
-    'Cartoon (Vector)',
-    'Disney/Pixar',
-    'Chibi',
-    'Kawaii',
-    'Cel-Shading',
-    'Comic Strip',
-    'Steampunk',
-  ];
+  // Styles fetched from API (keys are style names, values are style suffixes)
+  Map<String, String> _stylesMap = {};
+  List<String> get styles => _stylesMap.keys.toList();
+  bool isLoadingStyles = false;
+  String? stylesError;
   
   // Get selected size value
   String get selectedSize {
@@ -106,12 +89,21 @@ class ImageGenerateViewModel extends ChangeNotifier {
   }
 
   // Method to set prompt, size, and style when a predefined prompt is selected
-  void setPromptWithDefaults(String promptText, int styleIndex, int promptIndex) {
+  // styleName: The name of the style (e.g., 'Cyberpunk', 'Photorealistic')
+  void setPromptWithDefaults(String promptText, String styleName, int promptIndex) {
     promptController.text = promptText;
     selectedIndex = 0; // Always set to Square (1:1)
-    selectedStyleIndex = styleIndex;
+    // Find the index of the style by name
+    final styleIndex = styles.indexOf(styleName);
+    selectedStyleIndex = styleIndex >= 0 ? styleIndex : -1;
     selectedPromptIndex = promptIndex;
     notifyListeners();
+  }
+  
+  // Helper method to find style index by name
+  int? getStyleIndexByName(String styleName) {
+    final index = styles.indexOf(styleName);
+    return index >= 0 ? index : null;
   }
 
   // Method to update selected size
@@ -127,6 +119,60 @@ class ImageGenerateViewModel extends ChangeNotifier {
   }
   
   bool isGettingSuggestion = false;
+  
+  /// Load styles from the API
+  Future<void> loadStyles(BuildContext context) async {
+    if (isLoadingStyles || _stylesMap.isNotEmpty) return;
+    
+    // Get access token from SignInViewModel
+    final signInViewModel = context.read<SignInViewModel>();
+    final accessToken = signInViewModel.accessToken;
+    
+    if (accessToken == null || accessToken.isEmpty) {
+      if (kDebugMode) {
+        print('⚠️  No access token available for loading styles');
+      }
+      return;
+    }
+    
+    isLoadingStyles = true;
+    stylesError = null;
+    notifyListeners();
+    
+    try {
+      if (kDebugMode) {
+        print('═══════════════════════════════════════════════════════════');
+        print('=== LOAD STYLES: START ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+      
+      _stylesMap = await _wallpaperRepository.fetchStyles(
+        accessToken: accessToken,
+      );
+      
+      if (kDebugMode) {
+        print('✅ Styles loaded successfully');
+        print('Total styles: ${_stylesMap.length}');
+        print('Style names: ${styles}');
+        print('═══════════════════════════════════════════════════════════');
+        print('=== LOAD STYLES: SUCCESS ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+    } on ApiException catch (e) {
+      stylesError = e.message;
+      if (kDebugMode) {
+        print('❌ Error loading styles: ${e.message}');
+      }
+    } catch (e) {
+      stylesError = 'Failed to load styles';
+      if (kDebugMode) {
+        print('❌ Unexpected error loading styles: $e');
+      }
+    } finally {
+      isLoadingStyles = false;
+      notifyListeners();
+    }
+  }
   
   Future<void> getSuggestion(BuildContext context) async {
     final currentPrompt = promptController.text.trim();

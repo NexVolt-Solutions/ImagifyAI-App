@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:genwalls/Core/Constants/api_constants.dart';
 import 'package:genwalls/Core/services/api_service.dart';
@@ -278,18 +279,74 @@ class WallpaperRepository {
   Future<Wallpaper> recreateWallpaper({
     required String wallpaperId,
     required String accessToken,
+    String? prompt,
+    String? size,
+    String? style,
   }) async {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
     }
     
+    if (kDebugMode) {
+      print('═══════════════════════════════════════════════════════════');
+      print('=== RECREATE WALLPAPER API: START ===');
+      print('═══════════════════════════════════════════════════════════');
+      print('Wallpaper ID: $wallpaperId');
+      if (prompt != null) print('Updated Prompt: $prompt');
+      if (size != null) print('Size: $size');
+      if (style != null) print('Style: $style');
+    }
+    
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
+    
+    // Build request body with optional parameters
+    final body = <String, dynamic>{};
+    if (prompt != null && prompt.isNotEmpty) {
+      body['prompt'] = prompt.trim(); // Ensure trimmed prompt
+    }
+    if (size != null && size.isNotEmpty) {
+      body['size'] = size;
+    }
+    if (style != null && style.isNotEmpty) {
+      body['style'] = style;
+    }
+    
+    if (kDebugMode) {
+      print('--- Request Body ---');
+      print('Body map: $body');
+      print('Body is empty: ${body.isEmpty}');
+      if (body.isNotEmpty) {
+        print('Body will be sent: ${jsonEncode(body)}');
+      } else {
+        print('⚠️ WARNING: Body is empty, no parameters will be sent!');
+      }
+    }
     
     final path = '${ApiConstants.recreateWallpaper}/$wallpaperId/recreate';
     final json = await _apiService.post(
       path,
       headers: headers,
+      body: body.isNotEmpty ? body : null,
     );
+    
+    if (kDebugMode) {
+      print('✅ Wallpaper recreated successfully');
+      print('═══════════════════════════════════════════════════════════');
+      print('=== RECREATE WALLPAPER API: SUCCESS ===');
+      print('═══════════════════════════════════════════════════════════');
+      
+      // Check if API used the prompt we sent
+      final returnedPrompt = json['prompt']?.toString() ?? '';
+      final sentPrompt = prompt?.trim() ?? '';
+      if (sentPrompt.isNotEmpty && returnedPrompt != sentPrompt) {
+        print('⚠️ BACKEND ISSUE DETECTED:');
+        print('   Prompt we sent: "$sentPrompt"');
+        print('   Prompt API returned: "$returnedPrompt"');
+        print('   The backend is NOT using the prompt from the request body!');
+        print('   The generated image will be based on the old prompt.');
+      }
+    }
+    
     return Wallpaper.fromJson(json);
   }
 
@@ -326,8 +383,10 @@ class WallpaperRepository {
       headers: headers,
     );
   }
- Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
+  Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
     required String accessToken,
+    int page = 1,
+    int limit = 4, // Reduced to 4 per category for faster initial load
   }) async {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
@@ -339,6 +398,7 @@ class WallpaperRepository {
       print('═══════════════════════════════════════════════════════════');
       print('Endpoint: GET ${ApiConstants.groupedWallpapers}');
       print('Note: This should return general/public wallpapers, not user-specific');
+      print('Page: $page, Limit: $limit');
     }
 
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
@@ -347,6 +407,8 @@ class WallpaperRepository {
     // The backend should return general wallpapers for all users
     final queryParams = <String, String>{
       'public': 'true', // Request public/general wallpapers only
+      'page': page.toString(),
+      'limit': limit.toString(),
     };
     
     if (kDebugMode) {
@@ -403,6 +465,73 @@ class WallpaperRepository {
         print(stackTrace);
         print('═══════════════════════════════════════════════════════════');
         print('=== FETCH GROUPED WALLPAPERS API: ERROR ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+      rethrow;
+    }
+  }
+
+  /// Fetch available styles from the API
+  /// Returns a map where keys are style names and values are style suffixes
+  Future<Map<String, String>> fetchStyles({
+    required String accessToken,
+  }) async {
+    if (accessToken.isEmpty) {
+      throw ApiException('Access token is required', statusCode: 401);
+    }
+
+    if (kDebugMode) {
+      print('═══════════════════════════════════════════════════════════');
+      print('=== FETCH STYLES API: START ===');
+      print('═══════════════════════════════════════════════════════════');
+      print('Endpoint: GET ${ApiConstants.wallpapersStyles}');
+    }
+
+    final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
+
+    try {
+      final json = await _apiService.get(
+        ApiConstants.wallpapersStyles,
+        headers: headers,
+      );
+
+      if (kDebugMode) {
+        print('✅ Response received successfully');
+        print('Response type: ${json.runtimeType}');
+        print('Response keys: ${json.keys.toList()}');
+      }
+
+      // The response is a map where keys are style names and values are style suffixes
+      final Map<String, String> styles = {};
+      
+      json.forEach((styleName, styleSuffix) {
+        if (styleSuffix is String) {
+          styles[styleName] = styleSuffix;
+        }
+      });
+
+      if (kDebugMode) {
+        print('Total styles: ${styles.length}');
+        print('Styles: ${styles.keys.toList()}');
+        print('═══════════════════════════════════════════════════════════');
+        print('=== FETCH STYLES API: SUCCESS ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+
+      return styles;
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('❌ Error in fetchStyles API call');
+        print('Error: $e');
+        print('Error type: ${e.runtimeType}');
+        if (e is ApiException) {
+          print('Status code: ${e.statusCode}');
+          print('Message: ${e.message}');
+        }
+        print('--- Stack Trace ---');
+        print(stackTrace);
+        print('═══════════════════════════════════════════════════════════');
+        print('=== FETCH STYLES API: ERROR ===');
         print('═══════════════════════════════════════════════════════════');
       }
       rethrow;

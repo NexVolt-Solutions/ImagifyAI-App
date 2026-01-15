@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
@@ -142,9 +143,7 @@ class _SignInState extends State<SignIn> {
                             Column(
                               children: [
                                 CustomButton(
-                                  onPressed: signInViewModel.isLoading
-                                      ? null
-                                      : () => signInViewModel.login(
+                                  onPressed: () => signInViewModel.login(
                                           context,
                                           formKey: _formKey,
                                         ),
@@ -153,6 +152,7 @@ class _SignInState extends State<SignIn> {
                                   text: signInViewModel.isLoading
                                       ? 'Signing you in...'
                                       : 'Sign In',
+                                  isLoading: signInViewModel.isLoading,
                                   iconWidth: null,
                                   iconHeight: null,
                                   icon: null,
@@ -164,6 +164,8 @@ class _SignInState extends State<SignIn> {
                                       : () => signInViewModel.signInWithGoogle(
                                           context,
                                         ),
+                                  child: Opacity(
+                                    opacity: signInViewModel.isLoading ? 0.7 : 1.0,
                                   child: Container(
                                     height: context.h(47.9),
                                     width: context.w(350),
@@ -179,6 +181,9 @@ class _SignInState extends State<SignIn> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
+                                          if (signInViewModel.isLoading)
+                                            const AppLoadingIndicator.medium()
+                                          else
                                         Image.asset(
                                           AppAssets.googleIcon,
                                           height: context.h(23.94),
@@ -186,12 +191,15 @@ class _SignInState extends State<SignIn> {
                                         ),
                                         SizedBox(width: context.w(8)),
                                         Text(
-                                          'Continue with Google',
+                                            signInViewModel.isLoading
+                                                ? 'Signing in...'
+                                                : 'Continue with Google',
                                           style: context
                                               .appTextStyles
                                               ?.authGoogleButton,
                                         ),
                                       ],
+                                      ),
                                     ),
                                   ),
                                 ),

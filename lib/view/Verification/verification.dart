@@ -184,11 +184,9 @@ class _VerificationState extends State<Verification> {
                     SizedBox(height: context.h(32)),
                   CustomButton(
                     onPressed: () => verificationViewModel.verify(context, formKey: _formKey),
-                     
-                     gradient: AppColors.gradient,
-                    text:
-                        verificationViewModel.isLoading ? 'Verifying...' : 'Verify Account',
-                 
+                    gradient: AppColors.gradient,
+                    text: verificationViewModel.isLoading ? 'Verifying...' : 'Verify Account',
+                    isLoading: verificationViewModel.isLoading,
                   ),
                  
                  

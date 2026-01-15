@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/snackbar_util.dart';
@@ -111,7 +112,9 @@ class _LibraryState extends State<Library> {
                 ),
                 SizedBox(height: context.h(10)),
                 if (isLoading)
-                  const Center(child: CircularProgressIndicator())
+                  const Center(
+                    child: AppLoadingIndicator.large(),
+                  )
                 
                 else
                   GridView.builder(
@@ -159,13 +162,7 @@ class _LibraryState extends State<Library> {
                                           return Container(
                                             color: context.surfaceColor,
                                             child: Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded /
-                                                        loadingProgress.expectedTotalBytes!
-                                                    : null,
-                                                strokeWidth: 2,
-                                              ),
+                                              child: AppLoadingIndicator.medium(),
                                             ),
                                           );
                                         },
@@ -215,7 +212,7 @@ class _LibraryState extends State<Library> {
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: context.h(20)),
                       child: const Center(
-                        child: CircularProgressIndicator(),
+                        child: AppLoadingIndicator.large(),
                       ),
                     ),
                  

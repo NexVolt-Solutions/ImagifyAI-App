@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/theme/app_theme.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:provider/provider.dart';
@@ -138,6 +139,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                       topLeft: Radius.circular(context.radius(68)),
                       bottomLeft: Radius.circular(context.radius(56)),
                       bottomRight: Radius.circular(context.radius(56)),
+                    ),
+                    border: Border.all(
+                      color:
+                      context.theme.brightness == Brightness.dark ? context.backgroundColor : context.primaryColor,
+                      width: context.w(1),
                     ),
                   ),
                   child: Row(

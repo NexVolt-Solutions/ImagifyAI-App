@@ -185,10 +185,20 @@ class AppTheme {
       
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.bottomBarColor,
+          backgroundColor: AppColors.lightBackground  ,
         selectedItemColor: AppColors.primeryColor,
         unselectedItemColor: AppColors.bottomBarIconColor,
         type: BottomNavigationBarType.fixed,
+
+
+        selectedLabelStyle: TextStyle(
+           fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: TextStyle(
+           fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -598,13 +608,13 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       ),
       bottomNavLabelSelected: const TextStyle(
         fontFamily: 'Manrope',
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColors.primeryColor,
       ),
       bottomNavLabelUnselected: const TextStyle(
         fontFamily: 'Manrope',
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColors.bottomBarIconColor,
       ),
@@ -927,13 +937,13 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       ),
       bottomNavLabelSelected: const TextStyle(
         fontFamily: 'Manrope',
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColors.primeryColor,
       ),
       bottomNavLabelUnselected: const TextStyle(
         fontFamily: 'Manrope',
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
         color: AppColors.bottomBarIconColor,
       ),

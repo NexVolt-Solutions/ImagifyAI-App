@@ -332,6 +332,9 @@ class SignInViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
+    // Declare googleUser outside try block to access in catch block
+    GoogleSignInAccount? googleUser;
+
     try {
       // Initialize Google Sign-In with server client ID for ID token generation
       // The serverClientId (Web Client ID) is required to get ID tokens for server-side verification
@@ -342,8 +345,21 @@ class SignInViewModel extends ChangeNotifier {
         serverClientId: ApiConstants.googleWebClientId,
       );
 
-      // Sign in with Google
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      // Always sign out/disconnect first so the account picker shows every time
+      try {
+        await googleSignIn.signOut();
+        await googleSignIn.disconnect();
+        if (kDebugMode) {
+          print('✅ Google Sign-In cache cleared to force account picker');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Ignoring Google signOut/disconnect error: $e');
+        }
+      }
+
+      // Sign in with Google (will now show the account picker)
+      googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
         // User cancelled the sign-in
@@ -513,6 +529,35 @@ class SignInViewModel extends ChangeNotifier {
       _showMessage(context, message, isError: false);
       Navigator.pushNamed(context, RoutesName.BottomNavScreen);
     } on ApiException catch (e) {
+      // Check if email is registered with password (needs standard login)
+      final errorMessageLower = e.message.toLowerCase();
+      if (errorMessageLower.contains('registered with password') || 
+          errorMessageLower.contains('standard login')) {
+        // Get email from googleUser if available
+        String? userEmail = googleUser?.email;
+        
+        if (kDebugMode) {
+          print('=== EMAIL REGISTERED WITH PASSWORD ===');
+          print('Email: ${userEmail ?? "Unknown"}');
+          print('Navigating to sign in screen...');
+        }
+        
+        // Save email for sign-in screen (pre-fill) if available
+        if (userEmail != null && userEmail.isNotEmpty) {
+          await TokenStorageService.saveRememberedEmail(userEmail);
+        }
+        
+        _showMessage(
+          context,
+          'This email is registered with a password. Please sign in with your password instead.',
+          isError: false,
+        );
+        
+        // Navigate to sign-in screen
+        Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
+        return; // Exit early
+      }
+      
       errorMessage = e.message;
       _showMessage(context, e.message);
     } on PlatformException catch (e) {
@@ -628,11 +673,24 @@ class SignInViewModel extends ChangeNotifier {
       _refreshToken = null;
       _accessToken = null;
       
-      // Clear tokens from SharedPreferences
-      await TokenStorageService.clearTokens();
+       await TokenStorageService.clearTokens();
       
-      // Clear remembered email on logout
-      await TokenStorageService.clearRememberedEmail();
+       await TokenStorageService.clearRememberedEmail();
+      
+        try {
+        final GoogleSignIn googleSignIn = GoogleSignIn(
+          scopes: ['email', 'profile', 'openid'],
+          serverClientId: ApiConstants.googleWebClientId,
+        );
+        await googleSignIn.signOut();
+        if (kDebugMode) {
+          print('✅ Google Sign-In account selection cleared');
+        }
+      } catch (e) {
+         if (kDebugMode) {
+          print('⚠️ Google Sign-In sign out error (ignored): $e');
+        }
+      }
       
       emailController.clear();
       passwordController.clear();

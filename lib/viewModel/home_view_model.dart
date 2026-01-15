@@ -15,7 +15,6 @@ import 'package:genwalls/repositories/wallpaper_repository.dart';
 import 'package:genwalls/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:genwalls/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
-
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
     WallpaperRepository? wallpaperRepository,
@@ -52,28 +51,11 @@ class HomeViewModel extends ChangeNotifier {
     {'text1': '2:3 Landscape', 'text2': 'Landscape'},
   ];
 
-  // Styles matching backend STYLE_SUFFIXES
-  final List<String> styles = [
-    'Colorful',
-    '3D Render',
-    '3D Cinematic',
-    'Photorealistic',
-    'Illustration',
-    'Oil Painting',
-    'Watercolor',
-    'Cyberpunk',
-    'Fantasy',
-    'Anime',
-    'Manga',
-    'Cartoon',
-    'Cartoon (Vector)',
-    'Disney/Pixar',
-    'Chibi',
-    'Kawaii',
-    'Cel-Shading',
-    'Comic Strip',
-    'Steampunk',
-  ];
+  // Styles fetched from API (keys are style names, values are style suffixes)
+  Map<String, String> _stylesMap = {};
+  List<String> get styles => _stylesMap.keys.toList();
+  bool isLoadingStyles = false;
+  String? stylesError;
 
   // Get selected size value
   String get selectedSize {
@@ -542,14 +524,80 @@ class HomeViewModel extends ChangeNotifier {
       print('🔄 Refreshing home data...');
     }
     
-    // Reload user data with force reload
-    await loadCurrentUser(context, forceReload: true);
-    
-    // Reload grouped wallpapers
-    await loadGroupedWallpapers(context);
+    // Load all data in parallel for faster refresh
+    await Future.wait([
+      loadCurrentUser(context, forceReload: true),
+      loadStyles(context),
+      loadGroupedWallpapers(context),
+    ]);
     
     if (kDebugMode) {
       print('✅ Home data refreshed');
+    }
+  }
+  
+  /// Load styles from the API
+  Future<void> loadStyles(BuildContext context) async {
+    if (isLoadingStyles || _stylesMap.isNotEmpty) return;
+    
+    // Get access token from SignInViewModel
+    final signInViewModel = context.read<SignInViewModel>();
+    String? accessToken = signInViewModel.accessToken;
+    
+    // If not available in SignInViewModel, try loading from storage
+    if (accessToken == null || accessToken.isEmpty) {
+      try {
+        accessToken = await TokenStorageService.getAccessToken();
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Failed to load token from storage: $e');
+        }
+      }
+    }
+    
+    if (accessToken == null || accessToken.isEmpty) {
+      if (kDebugMode) {
+        print('⚠️  No access token available for loading styles');
+      }
+      return;
+    }
+    
+    isLoadingStyles = true;
+    stylesError = null;
+    notifyListeners();
+    
+    try {
+      if (kDebugMode) {
+        print('═══════════════════════════════════════════════════════════');
+        print('=== LOAD STYLES (HOME): START ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+      
+      _stylesMap = await _wallpaperRepository.fetchStyles(
+        accessToken: accessToken,
+      );
+      
+      if (kDebugMode) {
+        print('✅ Styles loaded successfully');
+        print('Total styles: ${_stylesMap.length}');
+        print('Style names: ${styles}');
+        print('═══════════════════════════════════════════════════════════');
+        print('=== LOAD STYLES (HOME): SUCCESS ===');
+        print('═══════════════════════════════════════════════════════════');
+      }
+    } on ApiException catch (e) {
+      stylesError = e.message;
+      if (kDebugMode) {
+        print('❌ Error loading styles: ${e.message}');
+      }
+    } catch (e) {
+      stylesError = 'Failed to load styles';
+      if (kDebugMode) {
+        print('❌ Unexpected error loading styles: $e');
+      }
+    } finally {
+      isLoadingStyles = false;
+      notifyListeners();
     }
   }
 
@@ -594,6 +642,8 @@ class HomeViewModel extends ChangeNotifier {
     try {
       final grouped = await _wallpaperRepository.fetchGroupedWallpapers(
         accessToken: accessToken,
+        page: 1,
+        limit: 4, // Reduced to 4 per category for faster initial load
       );
       groupedWallpapers = grouped;
       errorMessage = null;

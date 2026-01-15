@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class CustomButton extends StatelessWidget {
@@ -11,6 +12,7 @@ class CustomButton extends StatelessWidget {
   final String? text;
   final VoidCallback? onPressed;
   final String? icon;
+  final bool isLoading;
 
   final Color? borderColor;
   final Gradient? gradient;
@@ -27,6 +29,7 @@ class CustomButton extends StatelessWidget {
     this.iconHeight,
     this.iconWidth,
     this.fontSize,
+    this.isLoading = false,
   });
 
   @override
@@ -50,6 +53,7 @@ class CustomButton extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: context.w(16)),
           decoration: BoxDecoration(
             gradient: gradient,
+          
             border: Border.all(color: borderColor ?? context.backgroundColor),
             borderRadius: BorderRadius.circular(context.radius(8)),
           ),
@@ -57,7 +61,12 @@ class CustomButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              if (icon != null) ...[
+              if (isLoading) ...[
+                const AppLoadingIndicator.medium(
+                  color: Colors.white,
+                ),
+                SizedBox(width: context.w(8)),
+              ] else if (icon != null) ...[
                 Image.asset(
                   icon!,
                   height: iconHeight ?? context.h(20),
@@ -85,17 +94,23 @@ class CustomButton extends StatelessWidget {
         // If width is infinity and we have bounded constraints, wrap in SizedBox
         if (buttonWidth == double.infinity && constraints.maxWidth != double.infinity) {
           return GestureDetector(
-            onTap: onPressed,
+            onTap: isLoading ? null : onPressed,
+            child: Opacity(
+              opacity: isLoading ? 0.7 : 1.0,
             child: SizedBox(
               width: double.infinity,
               child: buttonContent,
+              ),
             ),
           );
         }
 
         return GestureDetector(
-          onTap: onPressed,
+          onTap: isLoading ? null : onPressed,
+          child: Opacity(
+            opacity: isLoading ? 0.7 : 1.0,
           child: buttonContent,
+          ),
         );
       },
     );

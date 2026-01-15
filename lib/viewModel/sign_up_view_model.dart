@@ -239,30 +239,30 @@ class SignUpViewModel extends ChangeNotifier {
           return; // Exit early - don't show the error message again
         } else {
           // Email is registered but NOT verified - navigate to verification screen
-          if (kDebugMode) {
+        if (kDebugMode) {
             print('=== EMAIL ALREADY REGISTERED - NOT VERIFIED ===');
-            print('Email: $email');
-            print('Navigating to verification screen to resend OTP...');
-          }
-          
-          // Navigate to verification screen and automatically resend OTP
-          // Pass email and autoResend flag in arguments
-          Navigator.pushNamed(
-            context,
-            RoutesName.VerificationScreen,
-            arguments: {
-              'email': email,
-              'autoResend': true, // Flag to auto-resend OTP
-            },
-          );
-          
-          _showMessage(
-            context, 
-            'This email is already registered. Please verify your email to continue.',
-            isError: false,
-          );
-          
-          return; // Exit early - don't show the error message again
+          print('Email: $email');
+          print('Navigating to verification screen to resend OTP...');
+        }
+        
+        // Navigate to verification screen and automatically resend OTP
+        // Pass email and autoResend flag in arguments
+        Navigator.pushNamed(
+          context,
+          RoutesName.VerificationScreen,
+          arguments: {
+            'email': email,
+            'autoResend': true, // Flag to auto-resend OTP
+          },
+        );
+        
+        _showMessage(
+          context, 
+          'This email is already registered. Please verify your email to continue.',
+          isError: false,
+        );
+        
+        return; // Exit early - don't show the error message again
         }
       }
       
@@ -343,6 +343,9 @@ class SignUpViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
+    // Declare googleUser outside try block to access in catch block
+    GoogleSignInAccount? googleUser;
+
     try {
       // Initialize Google Sign-In with server client ID for ID token generation
       final GoogleSignIn googleSignIn = GoogleSignIn(
@@ -350,8 +353,21 @@ class SignUpViewModel extends ChangeNotifier {
         serverClientId: ApiConstants.googleWebClientId,
       );
 
-      // Sign in with Google
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      // Always sign out/disconnect first so the account picker shows every time
+      try {
+        await googleSignIn.signOut();
+        await googleSignIn.disconnect();
+        if (kDebugMode) {
+          print('✅ Google Sign-In cache cleared to force account picker (signup)');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Ignoring Google signOut/disconnect error (signup): $e');
+        }
+      }
+
+      // Sign in with Google (will now show the account picker)
+      googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
         // User cancelled the sign-in
@@ -471,6 +487,38 @@ class SignUpViewModel extends ChangeNotifier {
       _showMessage(context, message, isError: false);
       Navigator.pushNamed(context, RoutesName.BottomNavScreen);
     } on ApiException catch (e) {
+      // Check if email is registered with password (needs standard login)
+      final errorMessageLower = e.message.toLowerCase();
+      if (errorMessageLower.contains('registered with password') || 
+          errorMessageLower.contains('standard login')) {
+        // Get email from googleUser if available, otherwise try to extract from error
+        String? userEmail = googleUser?.email;
+        
+        if (kDebugMode) {
+          print('=== EMAIL REGISTERED WITH PASSWORD (SIGNUP) ===');
+          print('Email: ${userEmail ?? "Unknown"}');
+          print('Navigating to sign in screen...');
+        }
+        
+        // Save email for sign-in screen (pre-fill) if available
+        if (userEmail != null && userEmail.isNotEmpty) {
+          await TokenStorageService.saveRememberedEmail(userEmail);
+        }
+        
+        // Clear form fields before navigating
+        clearForm();
+        
+        _showMessage(
+          context,
+          'This email is registered with a password. Please sign in with your password instead.',
+          isError: false,
+        );
+        
+        // Navigate to sign-in screen
+        Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
+        return; // Exit early
+      }
+      
       errorMessage = e.message;
       _showMessage(context, e.message);
     } on PlatformException catch (e) {

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class AppColors {
   static const Color blackColor = Colors.black;
   static const Color whiteColor = Colors.white;
@@ -32,6 +31,7 @@ class AppColors {
   static const Color lightGoldenAccent = Color(0xFFD4AF37); // Brighter gold for accents
  
   static const gradient = LinearGradient(
+    stops: [0.3, 1.0],
     colors: [primeryColor, lightPurple],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
@@ -39,7 +39,8 @@ class AppColors {
   
   // Light theme gradient (golden to warm cream)
   static const gradientLight = LinearGradient(
-    colors: [primeryColor, lightGoldenAccent],
+   stops: [0.3, 1.0],
+    colors: [primeryColor, lightPurple],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

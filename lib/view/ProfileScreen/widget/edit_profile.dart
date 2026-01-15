@@ -3,6 +3,7 @@ import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
 import 'package:genwalls/Core/CustomWidget/align_text.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/password_text.dart';
@@ -193,7 +194,7 @@ class _EditProfileState extends State<EditProfile> {
                           Padding(
                             padding: EdgeInsets.only(top: context.h(8)),
                             child: const Center(
-                              child: CircularProgressIndicator(),
+                              child: AppLoadingIndicator.medium(),
                             ),
                           ),
                       ],
@@ -349,33 +350,31 @@ class _EditProfileState extends State<EditProfile> {
               children: [
                 Expanded(
                   child: CustomButton(
-                    onPressed: editProfileViewModel.isLoading
-                        ? null
-                        : () {
-                            final signInViewModel = context
-                                .read<SignInViewModel>();
-                            final accessToken = signInViewModel.accessToken;
-                            if (accessToken != null && accessToken.isNotEmpty) {
-                              editProfileViewModel.updateProfile(
-                                context: context,
-                                accessToken: accessToken,
-                                formKey: _formKey,
-                              );
-                            }
-                          },
+                    onPressed: () {
+                      final signInViewModel = context
+                          .read<SignInViewModel>();
+                      final accessToken = signInViewModel.accessToken;
+                      if (accessToken != null && accessToken.isNotEmpty) {
+                        editProfileViewModel.updateProfile(
+                          context: context,
+                          accessToken: accessToken,
+                          formKey: _formKey,
+                        );
+                      }
+                    },
                     text: editProfileViewModel.isLoading
                         ? "Saving..."
                         : "Save Changes",
+                    isLoading: editProfileViewModel.isLoading,
                     gradient: AppColors.gradient,
                   ),
                 ),
                 SizedBox(width: context.w(12)),
                 Expanded(
                   child: CustomButton(
-                    onPressed: editProfileViewModel.isLoading
-                        ? null
-                        : () => Navigator.pop(context),
+                    onPressed: () => Navigator.pop(context),
                     text: "Cancel",
+                    isLoading: editProfileViewModel.isLoading,
                     icon: null,
                     borderColor: context.colorScheme.onSurface,
                   ),

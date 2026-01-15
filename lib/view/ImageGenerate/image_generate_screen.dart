@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
 import 'package:genwalls/Core/CustomWidget/prompt_continer.dart';
@@ -19,6 +20,18 @@ class ImageGenerateScreen extends StatefulWidget {
 
 class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
   final ScrollController _styleScrollController = ScrollController();
+  bool _hasLoadedStyles = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasLoadedStyles) {
+      _hasLoadedStyles = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<ImageGenerateViewModel>().loadStyles(context);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -30,10 +43,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     // Wait for the next frame to ensure the ListView is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_styleScrollController.hasClients && styleIndex >= 0) {
-        // Calculate approximate position based on item index
-        // Each item has: right padding (10) + text width (varies) + horizontal padding (12*2)
-        // Average style name is about 10-15 characters, so estimate ~100-150px per item
-        // Use a more accurate estimate: base width + text length estimate
+       
         final baseItemWidth = 140.0; // Base width (padding + border + some text)
         final scrollPosition = (styleIndex * baseItemWidth).clamp(
           0.0,
@@ -54,6 +64,14 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
         );
       }
     });
+  }
+  
+  void _scrollToStyleByName(String styleName, BuildContext context) {
+    final viewModel = context.read<ImageGenerateViewModel>();
+    final styleIndex = viewModel.getStyleIndexByName(styleName);
+    if (styleIndex != null) {
+      _scrollToSelectedStyle(styleIndex, context);
+    }
   }
 
   @override
@@ -163,16 +181,8 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                                       children: [
                                         if (imageGenerateViewModel
                                             .isGettingSuggestion)
-                                          SizedBox(
-                                            height: context.h(17),
-                                            width: context.w(17),
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                    context.textColor,
-                                                  ),
-                                            ),
+                                          AppLoadingIndicator.small(
+                                            color: context.textColor,
                                           )
                                         else
                                           ShaderMask(
@@ -232,11 +242,11 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                              // Set prompt, auto-select Square size, and Cyberpunk style
                              imageGenerateViewModel.setPromptWithDefaults(
                                'Abstract neon cityscape at night',
-                               7, // Cyberpunk style index
+                               'Cyberpunk', // Style name
                                0, // Prompt index 
                              );
                              // Scroll to the selected style
-                             _scrollToSelectedStyle(7, context);
+                             _scrollToStyleByName('Cyberpunk', context);
                            },
                            isSelected: imageGenerateViewModel.selectedPromptIndex == 0,
                          ),
@@ -246,11 +256,11 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                              // Set prompt, auto-select Square size, and Photorealistic style
                              imageGenerateViewModel.setPromptWithDefaults(
                                'Serene mountain landscape with sunset',
-                               3, // Photorealistic style index
+                               'Photorealistic', // Style name
                                1, // Prompt index
                              );
                              // Scroll to the selected style
-                             _scrollToSelectedStyle(3, context);
+                             _scrollToStyleByName('Photorealistic', context);
                            },
                            isSelected: imageGenerateViewModel.selectedPromptIndex == 1,
                          ),
@@ -260,11 +270,11 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                              // Set prompt, auto-select Square size, and 3D Render style
                              imageGenerateViewModel.setPromptWithDefaults(
                                'Cosmic galaxy with stars and nebula',
-                               1, // 3D Render style index
+                               '3D Render', // Style name
                                2, // Prompt index
                              );
                              // Scroll to the selected style
-                             _scrollToSelectedStyle(1, context);
+                             _scrollToStyleByName('3D Render', context);
                            },
                            isSelected: imageGenerateViewModel.selectedPromptIndex == 2,
                          ),
@@ -274,11 +284,11 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                              // Set prompt, auto-select Square size, and Illustration style
                              imageGenerateViewModel.setPromptWithDefaults(
                                'Minimalist geometric patterns',
-                               4, // Illustration style index
+                               'Illustration', // Style name
                                3, // Prompt index
                              );
                              // Scroll to the selected style
-                             _scrollToSelectedStyle(4, context);
+                             _scrollToStyleByName('Illustration', context);
                            },
                            isSelected: imageGenerateViewModel.selectedPromptIndex == 3,
                          ),
@@ -324,32 +334,55 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                     SizedBox(height: context.h(20)),
                     HomeAlign(text: 'Choose Your Style (Optional)'),
                     SizedBox(height: context.h(12)),
-                    SizedBox(
-                      height: context.h(100),
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: imageGenerateViewModel.styles.length,
-                        itemBuilder: (context, index) {
-                          final style = imageGenerateViewModel.styles[index];
-                          final isSelected =
-                              imageGenerateViewModel.selectedStyleIndex ==
-                              index;
-                          return Padding(
-                            padding: EdgeInsets.only(right: context.w(10)),
-                            child: PromptContiner(
-                              text: style,
-                              isSelected: isSelected,
-                              onTap: () {
-                                imageGenerateViewModel.setSelectedStyle(index);
-                                // Scroll to selected style when manually tapped
-                                if (!isSelected) {
-                                  _scrollToSelectedStyle(index, context);
-                                }
-                              },
+                    Consumer<ImageGenerateViewModel>(
+                      builder: (context, vm, _) {
+                        if (vm.isLoadingStyles) {
+                          return SizedBox(
+                            height: context.h(100),
+                            child: Center(
+                              child: AppLoadingIndicator.medium(),
                             ),
                           );
-                        },
-                      ),
+                        }
+                        if (vm.stylesError != null) {
+                          return SizedBox(
+                            height: context.h(100),
+                            child: Center(
+                              child: Text(
+                                'Failed to load styles',
+                                style: context.appTextStyles?.homeCardDescription,
+                              ),
+                            ),
+                          );
+                        }
+                        return SizedBox(
+                          height: context.h(100),
+                          child: ListView.builder(
+                            controller: _styleScrollController,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: vm.styles.length,
+                            itemBuilder: (context, index) {
+                              final style = vm.styles[index];
+                              final isSelected =
+                                  vm.selectedStyleIndex == index;
+                              return Padding(
+                                padding: EdgeInsets.only(right: context.w(10)),
+                                child: PromptContiner(
+                                  text: style,
+                                  isSelected: isSelected,
+                                  onTap: () {
+                                    vm.setSelectedStyle(index);
+                                    // Scroll to selected style when manually tapped
+                                    if (!isSelected) {
+                                      _scrollToSelectedStyle(index, context);
+                                    }
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
                     SizedBox(height: context.h(20)),
                     CustomButton(

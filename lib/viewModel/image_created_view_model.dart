@@ -6,7 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/services/api_service.dart';
+import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/Core/utils/snackbar_util.dart';
 import 'package:genwalls/models/wallpaper/wallpaper.dart';
 import 'package:genwalls/repositories/wallpaper_repository.dart';
@@ -32,7 +34,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
   DateTime? _pollingStartTime;
   int _pollingAttempts = 0;
   static const int _maxPollingAttempts = 120; // 10 minutes max (120 attempts * 5 seconds)
-  
+
   // Progress tracking for overlay
   double creationProgress = 0.0;
   Timer? _progressTimer;
@@ -41,6 +43,29 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
   void setWallpaper(Wallpaper? data) {
     wallpaper = data;
+    
+    // If wallpaper already has an image URL, stop polling
+    if (data != null && data.imageUrl.isNotEmpty && data.imageUrl != 'null') {
+      isPolling = false;
+      _stopProgressAnimation();
+      creationProgress = 1.0;
+      _currentStage = 'Complete!';
+      _pollingStartTime = null;
+      _pollingAttempts = 0;
+      
+      if (kDebugMode) {
+        print('✅ Wallpaper already has image URL, skipping polling');
+        print('Image URL: ${data.imageUrl}');
+      }
+    } else if (data != null) {
+      // Image not ready yet, will start polling
+      isPolling = true;
+      if (kDebugMode) {
+        print('⏳ Wallpaper image not ready yet, will start polling');
+        print('Wallpaper ID: ${data.id}');
+      }
+    }
+    
     notifyListeners();
   }
   
@@ -102,7 +127,22 @@ class ImageCreatedViewModel extends ChangeNotifier {
       if (updatedWallpaper != null) {
         if (updatedWallpaper.imageUrl.isNotEmpty && updatedWallpaper.imageUrl != 'null') {
           // Image is ready!
-          wallpaper = updatedWallpaper;
+          // Preserve the edited prompt from current wallpaper (if it was edited)
+          // The API might return the old prompt, so we keep the one from the current wallpaper
+          final preservedPrompt = wallpaper!.prompt;
+          
+          wallpaper = Wallpaper(
+            id: updatedWallpaper.id,
+            prompt: preservedPrompt, // Preserve the edited prompt
+            size: updatedWallpaper.size,
+            style: updatedWallpaper.style,
+            title: updatedWallpaper.title,
+            aiModel: updatedWallpaper.aiModel,
+            thumbnailUrl: updatedWallpaper.thumbnailUrl,
+            imageUrl: updatedWallpaper.imageUrl, // Use the new image URL
+            createdAt: updatedWallpaper.createdAt,
+          );
+          
           isPolling = false;
           _stopProgressAnimation();
           creationProgress = 1.0;
@@ -117,6 +157,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
           if (kDebugMode) {
             print('✅ Image is ready! URL: ${updatedWallpaper.imageUrl}');
             print('⏱️ Total generation time: ${elapsedTime}s (${_pollingAttempts} polling attempts)');
+            print('📝 Preserved prompt: $preservedPrompt');
           }
           
           notifyListeners();
@@ -192,7 +233,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
     return '${minutes}m ${remainingSeconds}s';
   }
 
-  Future<void> recreate(BuildContext context) async {
+  Future<void> recreate(BuildContext context, {String? editedPrompt}) async {
     if (isLoading || wallpaper == null || wallpaper!.id.isEmpty) return;
 
     // Get access token from SignInViewModel
@@ -210,9 +251,49 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
     try {
       final oldWallpaperId = wallpaper!.id;
-      wallpaper = await _wallpaperRepository.recreateWallpaper(
+      
+      // Use edited prompt if provided, otherwise use original prompt
+      // Always use the same size and style from the original wallpaper
+      final promptToUse = editedPrompt?.trim() ?? wallpaper!.prompt;
+      final sizeToUse = wallpaper!.size;
+      final styleToUse = wallpaper!.style;
+      
+      if (kDebugMode) {
+        print('🔄 Recreating wallpaper with:');
+        print('   Prompt: $promptToUse');
+        print('   Size: $sizeToUse');
+        print('   Style: $styleToUse');
+      }
+      
+      final recreatedWallpaper = await _wallpaperRepository.recreateWallpaper(
         wallpaperId: oldWallpaperId,
         accessToken: accessToken,
+        prompt: promptToUse,
+        size: sizeToUse,
+        style: styleToUse,
+      );
+      
+      // Check if API returned a different prompt than what we sent
+      if (kDebugMode && recreatedWallpaper.prompt != promptToUse) {
+        print('⚠️ WARNING: API returned different prompt!');
+        print('   Sent prompt: "$promptToUse"');
+        print('   API returned: "${recreatedWallpaper.prompt}"');
+        print('   This indicates the backend is not using the prompt from the request body.');
+        print('   The generated image will be based on the old prompt, not the edited one.');
+      }
+      
+      // Update the wallpaper with the edited prompt if it was provided
+      // (API might not return the updated prompt, so we override it)
+      wallpaper = Wallpaper(
+        id: recreatedWallpaper.id,
+        prompt: promptToUse, // Use the edited prompt (not the API response)
+        size: recreatedWallpaper.size,
+        style: recreatedWallpaper.style,
+        title: recreatedWallpaper.title,
+        aiModel: recreatedWallpaper.aiModel,
+        thumbnailUrl: recreatedWallpaper.thumbnailUrl,
+        imageUrl: recreatedWallpaper.imageUrl,
+        createdAt: recreatedWallpaper.createdAt,
       );
       
       // Reset polling state and start checking for the new image
@@ -225,6 +306,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
       
       if (kDebugMode) {
         print('✅ Wallpaper recreated with new ID: ${wallpaper!.id}');
+        print('New prompt: ${wallpaper!.prompt}');
         print('New image URL: ${wallpaper!.imageUrl}');
       }
       
@@ -488,7 +570,7 @@ class _DownloadShareDialog extends StatelessWidget {
                             color: Colors.black,
                             borderRadius: BorderRadius.circular(context.radius(12)),
                             border: Border.all(
-                              color: AppColors.primeryColor.withOpacity(0.3),
+                              color:context.primaryColor.withOpacity(0.3),
                               width: 1,
                             ),
                           ),
@@ -500,12 +582,8 @@ class _DownloadShareDialog extends StatelessWidget {
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                          color: AppColors.primeryColor,
+                        child: AppLoadingIndicator.medium(
+                               color:context.primaryColor
                         ),
                       );
                     },
@@ -544,8 +622,8 @@ class _DownloadShareDialog extends StatelessWidget {
                             borderRadius: BorderRadius.circular(context.radius(12)),
                           ),
                           child: Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primeryColor,
+                            child: AppLoadingIndicator.medium(
+                               color:context.primaryColor
                             ),
                           ),
                         ),
@@ -570,13 +648,13 @@ class _DownloadShareDialog extends StatelessWidget {
                         height: context.h(60),
                         width: context.w(60),
                         decoration: BoxDecoration(
-                          color: AppColors.primeryColor.withOpacity(0.2),
+                          color:context.primaryColor.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
                           icon: Icon(
                             Icons.download,
-                            color: AppColors.primeryColor,
+                            color:context.primaryColor,
                             size: 30,
                           ),
                           onPressed: onDownload,
@@ -602,13 +680,13 @@ class _DownloadShareDialog extends StatelessWidget {
                         height: context.h(60),
                         width: context.w(60),
                         decoration: BoxDecoration(
-                          color: AppColors.primeryColor.withOpacity(0.2),
+                          color:context.primaryColor.withOpacity(0.2),
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
                           icon: Icon(
                             Icons.share,
-                            color: AppColors.primeryColor,
+                                color:context.primaryColor,
                             size: 30,
                           ),
                           onPressed: onShare,

@@ -89,13 +89,11 @@ class _ForgotScreenState extends State<ForgotScreen> {
                       SizedBox(height: context.h(24)),
                       CustomButton(
                         onPressed: () => forgotPasswordViewModel.sendReset(context, formKey: _formKey),
-                       
                         gradient: AppColors.gradient,
                         text: forgotPasswordViewModel.isLoading
                             ? 'Sending...'
                             : 'Send Reset Code',
-                     
-                       
+                        isLoading: forgotPasswordViewModel.isLoading,
                       ),
                   
                     ],

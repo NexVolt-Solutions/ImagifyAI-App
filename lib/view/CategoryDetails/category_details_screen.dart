@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/CustomWidget/full_screen_image_viewer.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 import 'package:genwalls/models/wallpaper/wallpaper.dart';
@@ -123,13 +124,7 @@ class CategoryDetailsScreen extends StatelessWidget {
                           return Container(
                             color: context.surfaceColor,
                             child: Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                                strokeWidth: 2,
-                              ),
+                              child: AppLoadingIndicator.medium(),
                             ),
                           );
                         },

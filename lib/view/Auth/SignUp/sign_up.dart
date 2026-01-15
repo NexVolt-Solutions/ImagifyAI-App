@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
 import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
@@ -210,29 +211,37 @@ class _SignUpState extends State<SignUp> {
                     onTap: signUpViewModel.isLoading
                         ? null
                         : () => signUpViewModel.signInWithGoogle(context),
-                    child: Container(
-                      height: context.h(47.9),
-                      width: context.w(350),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: context.colorScheme.onSurface,
+                    child: Opacity(
+                      opacity: signUpViewModel.isLoading ? 0.7 : 1.0,
+                      child: Container(
+                        height: context.h(47.9),
+                        width: context.w(350),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: context.colorScheme.onSurface,
+                          ),
+                          borderRadius: BorderRadius.circular(context.radius(8)),
                         ),
-                        borderRadius: BorderRadius.circular(context.radius(8)),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            AppAssets.googleIcon,
-                            height: context.h(23.94),
-                            width: context.w(23.94),
-                          ),
-                          SizedBox(width: context.w(8)),
-                          Text(
-                            'Continue with Google',
-                            style: context.appTextStyles?.authGoogleButton,
-                          ),
-                        ],
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (signUpViewModel.isLoading)
+                              const AppLoadingIndicator.medium()
+                            else
+                              Image.asset(
+                                AppAssets.googleIcon,
+                                height: context.h(23.94),
+                                width: context.w(23.94),
+                              ),
+                            SizedBox(width: context.w(8)),
+                            Text(
+                              signUpViewModel.isLoading
+                                  ? 'Signing in...'
+                                  : 'Continue with Google',
+                              style: context.appTextStyles?.authGoogleButton,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -241,12 +250,12 @@ class _SignUpState extends State<SignUp> {
                   CustomButton(
                     onPressed: () =>
                         signUpViewModel.register(context, formKey: _formKey),
-
                     width: context.w(350),
                     gradient: AppColors.gradient,
                     text: signUpViewModel.isLoading
                         ? 'Creating your account...'
                         : 'Create Account',
+                    isLoading: signUpViewModel.isLoading,
                   ),
 
                   SizedBox(height: context.h(16)),

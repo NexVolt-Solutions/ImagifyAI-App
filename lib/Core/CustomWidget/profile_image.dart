@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/theme/theme_extensions.dart';
 
 class ProfileImage extends StatelessWidget {
@@ -79,12 +80,7 @@ class ProfileImage extends StatelessWidget {
                   height: height,
                   width: width,
                   child: Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
+                    child: AppLoadingIndicator.medium(),
                   ),
                 );
               },

@@ -19,7 +19,7 @@ class LibraryViewModel extends ChangeNotifier {
   String? errorMessage;
   List<Wallpaper> wallpapers = [];
   int currentPage = 1;
-  int limit = 20; // Number of items per page
+  int limit = 10; // Number of items per page (updated to 10)
   bool hasMorePages = true;
 
   /// Load wallpapers (first page or refresh)

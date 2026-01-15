@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:genwalls/Core/Constants/app_assets.dart';
 import 'package:genwalls/Core/Constants/app_colors.dart';
 import 'package:genwalls/Core/Constants/size_extension.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:genwalls/Core/CustomWidget/custom_button.dart';
 import 'package:genwalls/Core/CustomWidget/custom_list_view.dart';
 import 'package:genwalls/Core/CustomWidget/home_align.dart';
@@ -48,19 +49,15 @@ class _HomeState extends State<Home> {
 
     final homeViewModel = context.read<HomeViewModel>();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        // Small delay to ensure context is fully ready
-        await Future.delayed(const Duration(milliseconds: 200));
-
-        if (mounted) {
-          if (kDebugMode) {
-            print('✅ Calling loadCurrentUser...');
-          }
-          homeViewModel.loadCurrentUser(context);
-          // Also load grouped wallpapers
-          homeViewModel.loadGroupedWallpapers(context);
+        if (kDebugMode) {
+          print('✅ Starting parallel data loading...');
         }
+        // Load all data in parallel for faster loading
+        homeViewModel.loadCurrentUser(context);
+        homeViewModel.loadStyles(context);
+        homeViewModel.loadGroupedWallpapers(context);
       }
     });
   }
@@ -117,9 +114,7 @@ class _HomeState extends State<Home> {
                                           shape: BoxShape.circle,
                                         ),
                                         child: const Center(
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
+                                          child: AppLoadingIndicator.small(),
                                         ),
                                       );
                                     },
@@ -201,6 +196,7 @@ class _HomeState extends State<Home> {
                             text: homeViewModel.isLoading
                                 ? 'Creating...'
                                 : 'Generate Now',
+                            isLoading: homeViewModel.isLoading,
                           ),
                         ],
                       ),
@@ -209,7 +205,16 @@ class _HomeState extends State<Home> {
                 ),
 
                 // Dynamic Categories from API
-                if (homeViewModel.groupedWallpapers.isEmpty) ...[
+                if (homeViewModel.isLoadingGroupedWallpapers) ...[
+                  // Show loading indicator while fetching grouped wallpapers
+                  SliverToBoxAdapter(child: SizedBox(height: context.h(40))),
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: AppLoadingIndicator.large(),
+                    ),
+                  ),
+                  SliverToBoxAdapter(child: SizedBox(height: context.h(20))),
+                ] else if (homeViewModel.groupedWallpapers.isEmpty) ...[
                   // Show message when no wallpapers are available
                   SliverToBoxAdapter(child: SizedBox(height: context.h(20))),
                   SliverToBoxAdapter(

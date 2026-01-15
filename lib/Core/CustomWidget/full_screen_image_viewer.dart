@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
 
 class FullScreenImageViewer extends StatelessWidget {
   final String imageUrl;
@@ -55,11 +56,7 @@ class FullScreenImageViewer extends StatelessWidget {
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
+                        child: AppLoadingIndicator.medium(
                           color: Colors.white,
                         ),
                       );
