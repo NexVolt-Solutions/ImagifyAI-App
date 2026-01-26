@@ -1,7 +1,7 @@
 class ApiConstants {
   ApiConstants._();
   // Note: If 404 errors occur, the API might require /api/v1 prefix
-  static const String baseUrl = 'https://genwalls.nexvoltsolutions.com/api/v1';
+  static const String baseUrl = 'https://imagifyai.io/api/v1';
   // Authentication endpoints
   static const String register = '/auth/register';
   static const String verifyEmail = '/auth/verify';

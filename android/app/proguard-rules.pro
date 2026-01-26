@@ -49,10 +49,10 @@
 }
 
 # Keep all model classes in your package
--keep class com.example.genwalls.models.** { *; }
--keep class com.example.genwalls.Core.** { *; }
--keep class com.example.genwalls.repositories.** { *; }
--keep class com.example.genwalls.viewModel.** { *; }
+-keep class com.imagifyai.app.models.** { *; }
+-keep class com.imagifyai.app.Core.** { *; }
+-keep class com.imagifyai.app.repositories.** { *; }
+-keep class com.imagifyai.app.viewModel.** { *; }
 
 # Keep HTTP client classes
 -keep class okhttp3.** { *; }
