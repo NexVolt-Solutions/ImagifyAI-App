@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/viewModel/verification_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/viewModel/verification_view_model.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
@@ -29,7 +29,7 @@ class _VerificationState extends State<Verification> {
     final args = ModalRoute.of(context)?.settings.arguments;
     String? email;
     bool autoResend = false;
-    
+
     // Handle both String (email only) and Map (email + autoResend flag)
     if (args is String && args.isNotEmpty) {
       email = args;
@@ -37,11 +37,11 @@ class _VerificationState extends State<Verification> {
       email = args['email']?.toString();
       autoResend = args['autoResend'] == true;
     }
-    
+
     if (email != null && email.isNotEmpty) {
       final verificationViewModel = context.read<VerificationViewModel>();
       verificationViewModel.setEmail(email);
-      
+
       // Auto-resend OTP if flag is set
       if (autoResend) {
         // Use a small delay to ensure the screen is fully built
@@ -68,14 +68,15 @@ class _VerificationState extends State<Verification> {
           ),
         );
 
-        final emailDisplay = verificationViewModel.emailController.text.isNotEmpty
+        final emailDisplay =
+            verificationViewModel.emailController.text.isNotEmpty
             ? verificationViewModel.emailController.text
             : 'your email';
 
         return Scaffold(
           backgroundColor: context.backgroundColor,
           appBar: PreferredSize(
-              preferredSize: Size.fromHeight(context.h(64)),
+            preferredSize: Size.fromHeight(context.h(64)),
             child: Stack(
               alignment: Alignment.center,
               children: [
@@ -85,7 +86,7 @@ class _VerificationState extends State<Verification> {
                   placeholderBuilder: (context) => const SizedBox.shrink(),
                 ),
                 SvgPicture.asset(
-                  AppAssets.genWallsLogo,
+                  AppAssets.imagifyaiLogo,
                   fit: BoxFit.contain,
                   placeholderBuilder: (context) => const SizedBox.shrink(),
                 ),
@@ -113,7 +114,7 @@ class _VerificationState extends State<Verification> {
             child: Form(
               key: _formKey,
               child: ListView(
-                padding: EdgeInsets.symmetric(horizontal  : context.h(20)),
+                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
                   SizedBox(height: context.h(35)),
                   Text(
@@ -121,12 +122,11 @@ class _VerificationState extends State<Verification> {
                     style: context.appTextStyles?.authTitlePrimary,
                     textAlign: TextAlign.center,
                   ),
-                SizedBox(height: context.h(24)),
+                  SizedBox(height: context.h(24)),
                   Center(
                     child: Image.asset(
                       AppAssets.verifIcon,
                       fit: BoxFit.contain,
-                     
                     ),
                   ),
                   SizedBox(height: context.h(24)),
@@ -135,13 +135,13 @@ class _VerificationState extends State<Verification> {
                     style: context.appTextStyles?.authTitleWhite,
                     textAlign: TextAlign.start,
                   ),
-                   SizedBox(height: context.h(24)),
+                  SizedBox(height: context.h(24)),
                   Text(
                     'Enter the 6-digit code that we have sent to $emailDisplay',
                     style: context.appTextStyles?.authBodyRegular,
                     textAlign: TextAlign.center,
                   ),
-                 
+
                   SizedBox(height: context.h(24)),
                   Pinput(
                     length: 6,
@@ -181,15 +181,18 @@ class _VerificationState extends State<Verification> {
                       ),
                     ),
                   ],
-                    SizedBox(height: context.h(32)),
+                  SizedBox(height: context.h(32)),
                   CustomButton(
-                    onPressed: () => verificationViewModel.verify(context, formKey: _formKey),
+                    onPressed: () => verificationViewModel.verify(
+                      context,
+                      formKey: _formKey,
+                    ),
                     gradient: AppColors.gradient,
-                    text: verificationViewModel.isLoading ? 'Verifying...' : 'Verify Account',
+                    text: verificationViewModel.isLoading
+                        ? 'Verifying...'
+                        : 'Verify Account',
                     isLoading: verificationViewModel.isLoading,
                   ),
-                 
-                 
                 ],
               ),
             ),

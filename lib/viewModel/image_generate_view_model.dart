@@ -1,47 +1,46 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/wallpaper/wallpaper.dart';
-import 'package:genwalls/repositories/wallpaper_repository.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/in_app_review_service.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ImageGenerateViewModel extends ChangeNotifier {
   ImageGenerateViewModel({WallpaperRepository? wallpaperRepository})
-      : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
+    : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
 
   final WallpaperRepository _wallpaperRepository;
 
   int selectedIndex = -1;
   int selectedStyleIndex = -1;
-  int selectedPromptIndex = -1; // Track which prompt is selected
+  int selectedPromptIndex = -1;
   bool isCreating = false;
   double creationProgress = 0.0;
   Timer? _progressTimer;
   Timer? _pollingTimer;
   String? errorMessage;
   Wallpaper? createdWallpaper;
-  
+
   // Progress stages
   String _currentStage = 'Preparing prompt...';
   String get currentStage => _currentStage;
-  
+
   // Polling state
   bool _isPolling = false;
   int _pollingAttempts = 0;
   DateTime? _pollingStartTime;
-  static const int _maxPollingAttempts = 120; // 10 minutes max (120 attempts * 5 seconds)
-  
-  // Get elapsed polling time in seconds
+  static const int _maxPollingAttempts = 120;
+
   int get elapsedPollingTime {
     if (_pollingStartTime == null) return 0;
     return DateTime.now().difference(_pollingStartTime!).inSeconds;
   }
-  
-  // Get elapsed time as formatted string (e.g., "2m 30s")
+
   String get elapsedPollingTimeFormatted {
     final seconds = elapsedPollingTime;
     if (seconds < 60) return '${seconds}s';
@@ -49,107 +48,103 @@ class ImageGenerateViewModel extends ChangeNotifier {
     final remainingSeconds = seconds % 60;
     return '${minutes}m ${remainingSeconds}s';
   }
-  
-  // Controller for the prompt text field
+
   final promptController = TextEditingController();
 
-  // Sizes matching backend SIZE_MAP
   final List<Map<String, dynamic>> sizes = [
     {'text1': '1:1', 'text2': 'Square'},
     {'text1': '2:3 Portrait', 'text2': 'Portrait'},
     {'text1': '2:3 Landscape', 'text2': 'Landscape'},
   ];
-  
-  // Styles fetched from API (keys are style names, values are style suffixes)
+
   Map<String, String> _stylesMap = {};
   List<String> get styles => _stylesMap.keys.toList();
   bool isLoadingStyles = false;
   String? stylesError;
-  
-  // Get selected size value
+
   String get selectedSize {
     if (selectedIndex >= 0 && selectedIndex < sizes.length) {
       return sizes[selectedIndex]['text1'] as String;
     }
-    return '1:1'; // Default
+    return '1:1';
   }
-  
-  // Get selected style value
+
   String get selectedStyle {
     if (selectedStyleIndex >= 0 && selectedStyleIndex < styles.length) {
       return styles[selectedStyleIndex];
     }
-    return 'default'; // Default
+    return 'default';
   }
-  
-  // Method to set prompt text when a predefined prompt is selected
+
   void setPromptText(String text) {
     promptController.text = text;
     notifyListeners();
   }
 
-  // Method to set prompt, size, and style when a predefined prompt is selected
-  // styleName: The name of the style (e.g., 'Cyberpunk', 'Photorealistic')
-  void setPromptWithDefaults(String promptText, String styleName, int promptIndex) {
+  void setPromptWithDefaults(
+    String promptText,
+    String styleName,
+    int promptIndex,
+  ) {
     promptController.text = promptText;
-    selectedIndex = 0; // Always set to Square (1:1)
-    // Find the index of the style by name
+    selectedIndex = 0;
     final styleIndex = styles.indexOf(styleName);
     selectedStyleIndex = styleIndex >= 0 ? styleIndex : -1;
     selectedPromptIndex = promptIndex;
     notifyListeners();
   }
-  
-  // Helper method to find style index by name
+
   int? getStyleIndexByName(String styleName) {
     final index = styles.indexOf(styleName);
     return index >= 0 ? index : null;
   }
 
-  // Method to update selected size
   void setSelectedSize(int index) {
     selectedIndex = index;
     notifyListeners();
   }
 
-  // Method to update selected style
-  void setSelectedStyle(int index) {
+  void setSelectedStyle(int index, [BuildContext? context]) {
     selectedStyleIndex = index == selectedStyleIndex ? -1 : index;
+    if (selectedStyleIndex >= 0 && selectedStyleIndex < styles.length) {
+      InAppReviewService.recordStyleTriedAndMaybeReview(
+        styles[selectedStyleIndex],
+        context,
+      );
+    }
     notifyListeners();
   }
-  
+
   bool isGettingSuggestion = false;
-  
-  /// Load styles from the API
+
   Future<void> loadStyles(BuildContext context) async {
     if (isLoadingStyles || _stylesMap.isNotEmpty) return;
-    
-    // Get access token from SignInViewModel
+
     final signInViewModel = context.read<SignInViewModel>();
     final accessToken = signInViewModel.accessToken;
-    
+
     if (accessToken == null || accessToken.isEmpty) {
       if (kDebugMode) {
         print('⚠️  No access token available for loading styles');
       }
       return;
     }
-    
+
     isLoadingStyles = true;
     stylesError = null;
     notifyListeners();
-    
+
     try {
       if (kDebugMode) {
         print('═══════════════════════════════════════════════════════════');
         print('=== LOAD STYLES: START ===');
         print('═══════════════════════════════════════════════════════════');
       }
-      
+
       _stylesMap = await _wallpaperRepository.fetchStyles(
         accessToken: accessToken,
       );
-      
+
       if (kDebugMode) {
         print('✅ Styles loaded successfully');
         print('Total styles: ${_stylesMap.length}');
@@ -173,28 +168,27 @@ class ImageGenerateViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   Future<void> getSuggestion(BuildContext context) async {
     final currentPrompt = promptController.text.trim();
-    
+
     if (currentPrompt.isEmpty) {
       _showMessage(context, 'Start by describing your vision!');
       return;
     }
-    
-    // Get access token from SignInViewModel
+
     final signInViewModel = context.read<SignInViewModel>();
     final accessToken = signInViewModel.accessToken;
-    
+
     if (accessToken == null || accessToken.isEmpty) {
       _showMessage(context, 'Sign in to unlock AI suggestions');
       return;
     }
-    
+
     isGettingSuggestion = true;
     errorMessage = null;
     notifyListeners();
-    
+
     try {
       if (kDebugMode) {
         print('═══════════════════════════════════════════════════════════');
@@ -202,25 +196,28 @@ class ImageGenerateViewModel extends ChangeNotifier {
         print('═══════════════════════════════════════════════════════════');
         print('Current prompt: $currentPrompt');
       }
-      
+
       final response = await _wallpaperRepository.suggestPrompt(
         prompt: currentPrompt,
         accessToken: accessToken,
       );
-      
+
       if (response.suggestion != null && response.suggestion!.isNotEmpty) {
-        // Update the prompt field with the suggestion
         promptController.text = response.suggestion!;
         notifyListeners();
-        
+
         if (kDebugMode) {
           print('✅ Suggestion received: ${response.suggestion}');
           print('═══════════════════════════════════════════════════════════');
           print('=== GET PROMPT SUGGESTION: SUCCESS ===');
           print('═══════════════════════════════════════════════════════════');
         }
-        
-        _showMessage(context, 'AI suggestion ready! Check it out above', isError: false);
+
+        _showMessage(
+          context,
+          'AI suggestion ready! Check it out above',
+          isError: false,
+        );
       } else {
         _showMessage(context, 'No suggestion available');
       }
@@ -235,7 +232,8 @@ class ImageGenerateViewModel extends ChangeNotifier {
       }
       _showMessage(context, e.message);
     } catch (e) {
-      errorMessage = 'Oops! Couldn\'t generate a suggestion. Give it another try!';
+      errorMessage =
+          'Oops! Couldn\'t generate a suggestion. Give it another try!';
       if (kDebugMode) {
         print('❌ Unexpected error in getSuggestion: $e');
         print('Error type: ${e.runtimeType}');
@@ -252,18 +250,19 @@ class ImageGenerateViewModel extends ChangeNotifier {
 
   Future<void> createWallpaper(BuildContext context) async {
     if (isCreating) return;
-    
+
     final prompt = promptController.text.trim();
     if (prompt.isEmpty) {
-      _showMessage(context, 'Let your creativity flow! Enter a prompt to begin');
+      _showMessage(
+        context,
+        'Let your creativity flow! Enter a prompt to begin',
+      );
       return;
     }
 
-    // Get selected size and style
     final size = selectedSize;
     final style = selectedStyle;
 
-    // Get access token from SignInViewModel
     final signInViewModel = context.read<SignInViewModel>();
     final accessToken = signInViewModel.accessToken;
 
@@ -305,50 +304,44 @@ class ImageGenerateViewModel extends ChangeNotifier {
         print('═══════════════════════════════════════════════════════════');
       }
 
-      // Check if image is ready
-      if (createdWallpaper != null && 
-          createdWallpaper!.imageUrl.isNotEmpty && 
+      if (createdWallpaper != null &&
+          createdWallpaper!.imageUrl.isNotEmpty &&
           createdWallpaper!.imageUrl != 'null') {
-        // Image is ready, navigate immediately
         creationProgress = 1.0;
         _currentStage = 'Complete!';
         notifyListeners();
-        
+
         _showMessage(context, 'Wallpaper created successfully', isError: false);
+        InAppReviewService.recordCompletedGenerationAndMaybeReview(context);
         Navigator.pushNamed(
           context,
           RoutesName.ImageCreatedScreen,
           arguments: createdWallpaper,
         );
-        
-        // Reset state
+
         isCreating = false;
         _stopProgressAnimation();
         _stopPolling();
         notifyListeners();
       } else {
-        // Image is still generating, start polling
         _currentStage = 'Generating your masterpiece...';
         _pollingStartTime = DateTime.now();
         _startPolling(context, signInViewModel, accessToken);
         notifyListeners();
       }
     } on ApiException catch (e) {
-      // Handle token expiration - automatically refresh and retry
       if (e.statusCode == 401 && e.message.toLowerCase().contains('token')) {
         if (kDebugMode) {
           print('🔄 Token expired, attempting to refresh...');
         }
-        
-        // Try to refresh the token
+
         final refreshed = await signInViewModel.refreshTokenSilently();
-        
+
         if (refreshed && signInViewModel.accessToken != null) {
           if (kDebugMode) {
             print('✅ Token refreshed, retrying wallpaper creation...');
           }
-          
-          // Retry the request with new token
+
           try {
             createdWallpaper = await _wallpaperRepository.createWallpaper(
               prompt: prompt,
@@ -363,52 +356,56 @@ class ImageGenerateViewModel extends ChangeNotifier {
               print('Image URL: ${createdWallpaper?.imageUrl}');
             }
 
-            // Check if image is ready
-            if (createdWallpaper != null && 
-                createdWallpaper!.imageUrl.isNotEmpty && 
+            if (createdWallpaper != null &&
+                createdWallpaper!.imageUrl.isNotEmpty &&
                 createdWallpaper!.imageUrl != 'null') {
-              // Image is ready, navigate immediately
               creationProgress = 1.0;
               _currentStage = 'Complete!';
               notifyListeners();
-              
-              _showMessage(context, 'Wallpaper created successfully', isError: false);
+
+              _showMessage(
+                context,
+                'Wallpaper created successfully',
+                isError: false,
+              );
+              InAppReviewService.recordCompletedGenerationAndMaybeReview(
+                context,
+              );
               Navigator.pushNamed(
                 context,
                 RoutesName.ImageCreatedScreen,
                 arguments: createdWallpaper,
               );
-              
-              // Reset state
+
               isCreating = false;
               _stopProgressAnimation();
               _stopPolling();
               notifyListeners();
             } else {
-              // Image is still generating, start polling
               _currentStage = 'Generating your masterpiece...';
               _pollingStartTime = DateTime.now();
-              _startPolling(context, signInViewModel, signInViewModel.accessToken!);
+              _startPolling(
+                context,
+                signInViewModel,
+                signInViewModel.accessToken!,
+              );
               notifyListeners();
             }
-            return; // Success, exit early
+            return;
           } catch (retryError) {
             if (kDebugMode) {
               print('❌ Retry failed after token refresh: $retryError');
             }
-            // Fall through to show error message
           }
         } else {
           if (kDebugMode) {
             print('❌ Failed to refresh token, user needs to login again');
           }
-          // Stop progress and polling
           _stopProgressAnimation();
           _stopPolling();
           isCreating = false;
           notifyListeners();
-          
-          // Navigate to login screen
+
           if (context.mounted) {
             _showMessage(context, 'Session expired. Please login again.');
             Navigator.pushNamedAndRemoveUntil(
@@ -420,7 +417,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
           return;
         }
       }
-      
+
       errorMessage = e.message;
       if (kDebugMode) {
         print('❌ ApiException in createWallpaper: ${e.message}');
@@ -429,12 +426,12 @@ class ImageGenerateViewModel extends ChangeNotifier {
         print('=== CREATE WALLPAPER: ERROR ===');
         print('═══════════════════════════════════════════════════════════');
       }
-      // Stop progress and polling
       _stopProgressAnimation();
       _stopPolling();
       _showMessage(context, e.message);
     } catch (e) {
-      errorMessage = 'Hmm, something unexpected happened. Let\'s try that again!';
+      errorMessage =
+          'Hmm, something unexpected happened. Let\'s try that again!';
       if (kDebugMode) {
         print('❌ Unexpected error in createWallpaper: $e');
         print('Error type: ${e.runtimeType}');
@@ -442,12 +439,10 @@ class ImageGenerateViewModel extends ChangeNotifier {
         print('=== CREATE WALLPAPER: ERROR ===');
         print('═══════════════════════════════════════════════════════════');
       }
-      // Stop progress and polling
       _stopProgressAnimation();
       _stopPolling();
       _showMessage(context, errorMessage!);
     } finally {
-      // Only set isCreating to false if we're not polling
       if (!_isPolling) {
         isCreating = false;
         _stopProgressAnimation();
@@ -460,76 +455,84 @@ class ImageGenerateViewModel extends ChangeNotifier {
     _progressTimer?.cancel();
     creationProgress = 0.0;
     _currentStage = 'Generating your masterpiece...';
-    
+
     _progressTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (!isCreating) {
         timer.cancel();
         return;
       }
-      
-      // Simple progress animation from 0 to 99%
-      // Will reach 100% only when image is ready
+
       if (creationProgress < 0.99) {
-        creationProgress += 0.01; // Increase by 1% every 50ms
+        creationProgress += 0.01;
       } else {
-        creationProgress = 0.99; // Cap at 99% until image is ready
+        creationProgress = 0.99;
       }
-      
+
       notifyListeners();
     });
   }
-  
+
   void _stopProgressAnimation() {
     _progressTimer?.cancel();
     _progressTimer = null;
   }
-  
-  void _startPolling(BuildContext context, SignInViewModel signInViewModel, String accessToken) {
+
+  void _startPolling(
+    BuildContext context,
+    SignInViewModel signInViewModel,
+    String accessToken,
+  ) {
     if (createdWallpaper == null || createdWallpaper!.id.isEmpty) return;
-    
+
     _isPolling = true;
     _pollingAttempts = 0;
     _pollingTimer?.cancel();
-    
+
     String currentAccessToken = accessToken;
-    
+
     _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       if (!isCreating || !_isPolling) {
         timer.cancel();
         return;
       }
-      
+
       _pollingAttempts++;
-      
+
       // Check timeout
       if (_pollingAttempts >= _maxPollingAttempts) {
         _stopPolling();
         isCreating = false;
         _stopProgressAnimation();
-        errorMessage = 'Your masterpiece is taking a bit longer than usual. Feel free to try again!';
+        errorMessage =
+            'Your masterpiece is taking a bit longer than usual. Feel free to try again!';
         if (context.mounted) {
           _showMessage(context, errorMessage!);
         }
         notifyListeners();
         return;
       }
-      
+
       try {
         if (kDebugMode && _pollingAttempts % 6 == 0) {
           // Log every 30 seconds (6 attempts * 5 seconds)
-          print('⏳ Polling attempt $_pollingAttempts - Elapsed: ${elapsedPollingTimeFormatted}');
+          print(
+            '⏳ Polling attempt $_pollingAttempts - Elapsed: ${elapsedPollingTimeFormatted}',
+          );
           print('   Wallpaper ID: ${createdWallpaper!.id}');
-          print('   Current progress: ${(creationProgress * 100).toStringAsFixed(1)}%');
+          print(
+            '   Current progress: ${(creationProgress * 100).toStringAsFixed(1)}%',
+          );
           print('   Current stage: $_currentStage');
         }
-        
+
         final updatedWallpaper = await _wallpaperRepository.getWallpaperById(
           wallpaperId: createdWallpaper!.id,
           accessToken: currentAccessToken,
         );
-        
+
         if (updatedWallpaper != null) {
-          if (updatedWallpaper.imageUrl.isNotEmpty && updatedWallpaper.imageUrl != 'null') {
+          if (updatedWallpaper.imageUrl.isNotEmpty &&
+              updatedWallpaper.imageUrl != 'null') {
             // Image is ready!
             final attempts = _pollingAttempts;
             final elapsed = elapsedPollingTimeFormatted;
@@ -538,23 +541,30 @@ class ImageGenerateViewModel extends ChangeNotifier {
             creationProgress = 1.0;
             _currentStage = 'Complete!';
             notifyListeners();
-            
+
             if (kDebugMode) {
               print('✅ Image is ready! URL: ${updatedWallpaper.imageUrl}');
               print('⏱️ Total polling attempts: $attempts');
               print('⏱️ Total elapsed time: $elapsed');
             }
-            
+
             // Navigate to image created screen
             if (context.mounted) {
-              _showMessage(context, 'Your masterpiece is ready!', isError: false);
+              _showMessage(
+                context,
+                'Your masterpiece is ready!',
+                isError: false,
+              );
+              InAppReviewService.recordCompletedGenerationAndMaybeReview(
+                context,
+              );
               Navigator.pushNamed(
                 context,
                 RoutesName.ImageCreatedScreen,
                 arguments: createdWallpaper,
               );
             }
-            
+
             // Reset state
             isCreating = false;
             _stopProgressAnimation();
@@ -567,10 +577,10 @@ class ImageGenerateViewModel extends ChangeNotifier {
           if (kDebugMode) {
             print('🔄 Token expired during polling, attempting to refresh...');
           }
-          
+
           // Try to refresh the token
           final refreshed = await signInViewModel.refreshTokenSilently();
-          
+
           if (refreshed && signInViewModel.accessToken != null) {
             if (kDebugMode) {
               print('✅ Token refreshed during polling, continuing...');
@@ -587,7 +597,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
             _stopProgressAnimation();
             notifyListeners();
             timer.cancel();
-            
+
             // Navigate to login screen
             if (context.mounted) {
               _showMessage(context, 'Session expired. Please login again.');
@@ -601,19 +611,22 @@ class ImageGenerateViewModel extends ChangeNotifier {
         } else {
           if (kDebugMode) {
             print('❌ Error polling wallpaper status: ${e.message}');
-            print('   Attempt: $_pollingAttempts, Elapsed: ${elapsedPollingTimeFormatted}');
+            print(
+              '   Attempt: $_pollingAttempts, Elapsed: ${elapsedPollingTimeFormatted}',
+            );
           }
         }
       } catch (e) {
         if (kDebugMode) {
           print('❌ Error polling wallpaper status: $e');
-          print('   Attempt: $_pollingAttempts, Elapsed: ${elapsedPollingTimeFormatted}');
+          print(
+            '   Attempt: $_pollingAttempts, Elapsed: ${elapsedPollingTimeFormatted}',
+          );
         }
       }
     });
   }
-  
-  
+
   void _stopPolling() {
     _pollingTimer?.cancel();
     _pollingTimer = null;
@@ -622,10 +635,14 @@ class ImageGenerateViewModel extends ChangeNotifier {
     _pollingStartTime = null;
   }
 
-  void _showMessage(BuildContext context, String message, {bool isError = true}) {
+  void _showMessage(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
-  
+
   @override
   void dispose() {
     _progressTimer?.cancel();
@@ -634,4 +651,3 @@ class ImageGenerateViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-

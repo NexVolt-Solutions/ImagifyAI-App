@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/user/user.dart';
-import 'package:genwalls/repositories/auth_repository.dart';
-import 'package:genwalls/viewModel/home_view_model.dart';
-import 'package:genwalls/viewModel/profile_screen_view_model.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/user/user.dart';
+import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/viewModel/home_view_model.dart';
+import 'package:imagifyai/viewModel/profile_screen_view_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -317,12 +317,14 @@ class EditProfileViewModel extends ChangeNotifier {
             firstName: firstName,
             lastName: lastName,
             phoneNumber: phoneNumber,
-            username: null, // Don't send username here, it goes to /profile endpoint
+            username:
+                null, // Don't send username here, it goes to /profile endpoint
             accessToken: accessToken,
             userId: currentUser!.id!,
           );
           if (successMessage == null) {
-            successMessage = response.message ?? 'Your profile has been updated!';
+            successMessage =
+                response.message ?? 'Your profile has been updated!';
           }
         }
 

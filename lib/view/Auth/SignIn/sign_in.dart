@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_text_rich.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SignIn extends StatefulWidget {
@@ -29,22 +29,25 @@ class _SignInState extends State<SignIn> {
       builder: (context, signInViewModel, _) {
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          appBar:PreferredSize(
-        preferredSize: const Size.fromHeight(65),
-        child: Container(
-          color: context.backgroundColor,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                        SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                      ],
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(65),
+            child: Container(
+              color: context.backgroundColor,
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+                    SvgPicture.asset(
+                      AppAssets.imagifyaiLogo,
+                      fit: BoxFit.cover,
                     ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
           body: SafeArea(
             child: Form(
               key: _formKey,
@@ -144,9 +147,9 @@ class _SignInState extends State<SignIn> {
                               children: [
                                 CustomButton(
                                   onPressed: () => signInViewModel.login(
-                                          context,
-                                          formKey: _formKey,
-                                        ),
+                                    context,
+                                    formKey: _formKey,
+                                  ),
                                   width: context.w(350),
                                   gradient: AppColors.gradient,
                                   text: signInViewModel.isLoading
@@ -165,40 +168,42 @@ class _SignInState extends State<SignIn> {
                                           context,
                                         ),
                                   child: Opacity(
-                                    opacity: signInViewModel.isLoading ? 0.7 : 1.0,
-                                  child: Container(
-                                    height: context.h(47.9),
-                                    width: context.w(350),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: context.colorScheme.onSurface,
+                                    opacity: signInViewModel.isLoading
+                                        ? 0.7
+                                        : 1.0,
+                                    child: Container(
+                                      height: context.h(47.9),
+                                      width: context.w(350),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: context.colorScheme.onSurface,
+                                        ),
+                                        borderRadius: BorderRadius.circular(
+                                          context.radius(8),
+                                        ),
                                       ),
-                                      borderRadius: BorderRadius.circular(
-                                        context.radius(8),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
                                           if (signInViewModel.isLoading)
                                             const AppLoadingIndicator.medium()
                                           else
-                                        Image.asset(
-                                          AppAssets.googleIcon,
-                                          height: context.h(23.94),
-                                          width: context.w(23.94),
-                                        ),
-                                        SizedBox(width: context.w(8)),
-                                        Text(
+                                            Image.asset(
+                                              AppAssets.googleIcon,
+                                              height: context.h(23.94),
+                                              width: context.w(23.94),
+                                            ),
+                                          SizedBox(width: context.w(8)),
+                                          Text(
                                             signInViewModel.isLoading
                                                 ? 'Signing in...'
                                                 : 'Continue with Google',
-                                          style: context
-                                              .appTextStyles
-                                              ?.authGoogleButton,
-                                        ),
-                                      ],
+                                            style: context
+                                                .appTextStyles
+                                                ?.authGoogleButton,
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),

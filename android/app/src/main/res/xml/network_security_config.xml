@@ -2,7 +2,7 @@
 <network-security-config>
     <!-- Allow HTTPS connections to your API domain -->
     <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">genwalls.nexvoltsolutions.com</domain>
+        <domain includeSubdomains="true">imagifyai.nexvoltsolutions.com</domain>
         <trust-anchors>
             <!-- Trust system certificates -->
             <certificates src="system" />

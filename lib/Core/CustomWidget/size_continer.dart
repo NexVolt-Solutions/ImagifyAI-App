@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class SizeContiner extends StatelessWidget {
   final double height1;
   final double width1;
   final double height2;
   final double width2;
-   final String text2;
+  final String text2;
   final bool isSelected;
   final VoidCallback? onTap;
 
   const SizeContiner({
     super.key,
-     required this.text2,
+    required this.text2,
     required this.height1,
     required this.width1,
     required this.height2,
@@ -29,14 +29,18 @@ class SizeContiner extends StatelessWidget {
       onTap: onTap,
       child: Container(
         height: height1,
-        width: width1 == double.infinity ? null : width1, // Allow flexible width
-        constraints: width1 == double.infinity 
+        width: width1 == double.infinity
+            ? null
+            : width1, // Allow flexible width
+        constraints: width1 == double.infinity
             ? BoxConstraints(minWidth: 0, maxWidth: double.infinity)
             : null,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(context.radius(8)),
           border: Border.all(
-            color: isSelected ? context.colorScheme.primary : context.colorScheme.onSurface,
+            color: isSelected
+                ? context.colorScheme.primary
+                : context.colorScheme.onSurface,
             width: context.w(1.5),
           ),
         ),

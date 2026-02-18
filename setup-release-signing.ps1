@@ -44,7 +44,7 @@ if ([string]::IsNullOrWhiteSpace($keyPasswordInput)) {
 $content = "storePassword=$storePasswordPlain`n"
 $content += "keyPassword=$keyPasswordPlain`n"
 $content += "keyAlias=upload`n"
-$content += "storeFile=../upload-keystore.jks`n"
+$content += "storeFile=upload-keystore.jks`n"
 
 $content | Out-File -FilePath "android/key.properties" -Encoding ASCII -NoNewline
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class ProfileImage extends StatelessWidget {
   final String imagePath;
@@ -17,8 +17,9 @@ class ProfileImage extends StatelessWidget {
     this.forceRefresh = false,
   });
 
-  bool get isNetworkImage => imagePath.startsWith('http://') || imagePath.startsWith('https://');
-  
+  bool get isNetworkImage =>
+      imagePath.startsWith('http://') || imagePath.startsWith('https://');
+
   /// Add cache-busting parameter to URL if forceRefresh is true
   String get imageUrl {
     if (!isNetworkImage || !forceRefresh) return imagePath;
@@ -79,9 +80,7 @@ class ProfileImage extends StatelessWidget {
                 return SizedBox(
                   height: height,
                   width: width,
-                  child: Center(
-                    child: AppLoadingIndicator.medium(),
-                  ),
+                  child: Center(child: AppLoadingIndicator.medium()),
                 );
               },
             )

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/models/user/user.dart';
-import 'package:genwalls/repositories/auth_repository.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/models/user/user.dart';
+import 'package:imagifyai/repositories/auth_repository.dart';
 
 class ProfileScreenViewModel extends ChangeNotifier {
   ProfileScreenViewModel({AuthRepository? authRepository})
@@ -63,7 +63,7 @@ class ProfileScreenViewModel extends ChangeNotifier {
       'leading': AppAssets.contactIcon,
       'title': 'Contact Us',
       'subtitle': 'Get help or share feedback',
-       'trailingType': 'arrow',
+      'trailingType': 'arrow',
       'switchValue': false,
     },
   ];

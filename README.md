@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# genwalls
+# imagifyai
 
 A new Flutter project.
 
@@ -16,6 +16,6 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 =======
-# Genwalls
+# imagifyai
 UI doce done
 >>>>>>> baf8bbd03c1ed5a5c9010de5853fa420c176d715

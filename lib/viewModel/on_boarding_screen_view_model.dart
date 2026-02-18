@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
 
 class OnBoardingScreenViewModel extends ChangeNotifier {
   int currentPage = 0;

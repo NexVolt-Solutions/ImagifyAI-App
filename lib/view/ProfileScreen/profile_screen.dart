@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/full_screen_image_viewer.dart';
-import 'package:genwalls/Core/CustomWidget/profile_image.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/viewModel/profile_screen_view_model.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
-import 'package:genwalls/viewModel/theme_provider.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/full_screen_image_viewer.dart';
+import 'package:imagifyai/Core/CustomWidget/profile_image.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/viewModel/profile_screen_view_model.dart';
+import 'package:imagifyai/viewModel/sign_in_view_model.dart';
+import 'package:imagifyai/viewModel/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -25,14 +25,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.didChangeDependencies();
     if (_hasLoaded) return;
     _hasLoaded = true;
-    
+
     final signInViewModel = context.read<SignInViewModel>();
     final profileViewModel = context.read<ProfileScreenViewModel>();
-    
+
     // Always try to load user data (will check if reload is needed internally)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        profileViewModel.loadCurrentUser(accessToken: signInViewModel.accessToken);
+        profileViewModel.loadCurrentUser(
+          accessToken: signInViewModel.accessToken,
+        );
       }
     });
   }
@@ -42,10 +44,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Consumer<ProfileScreenViewModel>(
       builder: (context, profileScreenViewModel, _) {
         final user = profileScreenViewModel.currentUser;
-        
+
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          
+
           body: SafeArea(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: context.h(20)),
@@ -56,7 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onTap: () {
                       final imageUrl = user?.profileImageUrl ?? '';
                       if (imageUrl.isNotEmpty) {
-                        final heroTag = 'profile_image_${user?.id ?? 'default'}';
+                        final heroTag =
+                            'profile_image_${user?.id ?? 'default'}';
                         FullScreenImageViewer.show(
                           context,
                           imageUrl,
@@ -92,23 +95,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ],
                 ),
-            
-                 ListView.builder(
+
+                ListView.builder(
                   itemCount: profileScreenViewModel.profileData.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {
                     final item = profileScreenViewModel.profileData[index];
                     final isThemeItem = item['title'] == 'Theme';
-                    
+
                     // Get theme provider for theme toggle
-                    final themeProvider = isThemeItem 
+                    final themeProvider = isThemeItem
                         ? Provider.of<ThemeProvider>(context)
                         : null;
                     final isDarkMode = themeProvider?.isDarkMode ?? false;
-                    
+
                     return ListTile(
-                      onTap: () => profileScreenViewModel.onTapFun(context, index),
+                      onTap: () =>
+                          profileScreenViewModel.onTapFun(context, index),
                       contentPadding: EdgeInsets.zero,
                       leading: item['leading'] != null
                           ? Image.asset(
@@ -123,7 +127,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         style: context.appTextStyles?.profileListItemTitle,
                       ),
                       subtitle: Text(
-                        isThemeItem 
+                        isThemeItem
                             ? (isDarkMode ? 'Dark Mode' : 'Light Mode')
                             : (item['subtitle'] ?? ''),
                         style: context.appTextStyles?.profileListItemSubtitle,
@@ -133,8 +137,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               inactiveThumbColor: context.subtitleColor,
                               activeTrackColor: context.textColor,
                               activeThumbColor: context.primaryColor,
-                              value: isThemeItem 
-                                  ? isDarkMode 
+                              value: isThemeItem
+                                  ? isDarkMode
                                   : (item['switchValue'] ?? false),
                               onChanged: (val) {
                                 if (isThemeItem) {
@@ -155,17 +159,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               size: 16,
                             ),
                     );
-              },
-            ),
+                  },
+                ),
                 SizedBox(height: context.h(20)),
                 CustomButton(
-                  onPressed: () => context.read<SignInViewModel>().logout(context),
-                   
+                  onPressed: () =>
+                      context.read<SignInViewModel>().logout(context),
+
                   width: context.w(350),
                   gradient: AppColors.gradient,
                   text: 'Sign out',
-              
-                ),SizedBox(height: context.h(100)),
+                ),
+                SizedBox(height: context.h(100)),
               ],
             ),
           ),

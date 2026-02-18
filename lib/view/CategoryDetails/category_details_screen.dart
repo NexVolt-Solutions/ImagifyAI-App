@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/CustomWidget/full_screen_image_viewer.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/full_screen_image_viewer.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 
 class CategoryDetailsScreen extends StatelessWidget {
   final String categoryName;
@@ -23,16 +23,10 @@ class CategoryDetailsScreen extends StatelessWidget {
         backgroundColor: context.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: context.textColor,
-          ),
+          icon: Icon(Icons.arrow_back_ios, color: context.textColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          categoryName,
-          style: context.appTextStyles?.homeAlignText,
-        ),
+        title: Text(categoryName, style: context.appTextStyles?.homeAlignText),
         centerTitle: true,
       ),
       body: wallpapers.isEmpty
@@ -67,8 +61,8 @@ class CategoryDetailsScreen extends StatelessWidget {
                 final imageUrl = wallpaper.imageUrl.isNotEmpty
                     ? wallpaper.imageUrl
                     : (wallpaper.thumbnailUrl.isNotEmpty
-                        ? wallpaper.thumbnailUrl
-                        : null);
+                          ? wallpaper.thumbnailUrl
+                          : null);
 
                 if (imageUrl == null || imageUrl.isEmpty) {
                   return Container(
@@ -123,9 +117,7 @@ class CategoryDetailsScreen extends StatelessWidget {
                           if (loadingProgress == null) return child;
                           return Container(
                             color: context.surfaceColor,
-                            child: Center(
-                              child: AppLoadingIndicator.medium(),
-                            ),
+                            child: Center(child: AppLoadingIndicator.medium()),
                           );
                         },
                       ),
@@ -137,4 +129,3 @@ class CategoryDetailsScreen extends StatelessWidget {
     );
   }
 }
-

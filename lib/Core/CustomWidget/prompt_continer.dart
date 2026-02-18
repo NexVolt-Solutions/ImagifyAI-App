@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class PromptContiner extends StatelessWidget {
   final String text;
@@ -21,10 +21,12 @@ class PromptContiner extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-           decoration: BoxDecoration(
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(context.radius(8)),
             border: Border.all(
-              color: isSelected ? context.colorScheme.primary : context.colorScheme.onSurface,
+              color: isSelected
+                  ? context.colorScheme.primary
+                  : context.colorScheme.onSurface,
               width: context.w(1.5),
             ),
           ),

@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/view/Auth/ForgotScreen/Widget/AccountCreated/accound_created.dart';
-import 'package:genwalls/view/Auth/ForgotScreen/Widget/ConfirmEmail/confirm_email.dart';
-import 'package:genwalls/view/Auth/ForgotScreen/Widget/SetNewPassword/set_new_password_screen.dart';
-import 'package:genwalls/view/Auth/ForgotScreen/Widget/Verification/forgot_verification_screen.dart';
-import 'package:genwalls/view/Auth/ForgotScreen/forgot_screen.dart';
-import 'package:genwalls/view/Auth/SignIn/sign_in.dart';
-import 'package:genwalls/view/Auth/SignUp/sign_up.dart';
-import 'package:genwalls/view/BottomNavigation/bottom_nav_screen.dart';
-import 'package:genwalls/view/Home/home.dart';
-import 'package:genwalls/view/ImageCreated/image_created_screen.dart';
-import 'package:genwalls/view/ImageGenerate/image_generate_screen.dart';
-import 'package:genwalls/view/OnBoardingScreen/on_boarding_screen.dart';
-import 'package:genwalls/view/ProfileScreen/profile_screen.dart';
-import 'package:genwalls/view/ProfileScreen/widget/contact_us.dart';
-import 'package:genwalls/view/ProfileScreen/widget/edit_profile.dart';
-import 'package:genwalls/view/ProfileScreen/widget/library.dart';
-import 'package:genwalls/view/ProfileScreen/widget/privacy_policy.dart';
-import 'package:genwalls/view/ProfileScreen/widget/term_of_use.dart';
-import 'package:genwalls/view/SplahScrren/splash_screen.dart';
-import 'package:genwalls/view/Verification/verification.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/view/Auth/ForgotScreen/Widget/AccountCreated/accound_created.dart';
+import 'package:imagifyai/view/Auth/ForgotScreen/Widget/ConfirmEmail/confirm_email.dart';
+import 'package:imagifyai/view/Auth/ForgotScreen/Widget/SetNewPassword/set_new_password_screen.dart';
+import 'package:imagifyai/view/Auth/ForgotScreen/Widget/Verification/forgot_verification_screen.dart';
+import 'package:imagifyai/view/Auth/ForgotScreen/forgot_screen.dart';
+import 'package:imagifyai/view/Auth/SignIn/sign_in.dart';
+import 'package:imagifyai/view/Auth/SignUp/sign_up.dart';
+import 'package:imagifyai/view/BottomNavigation/bottom_nav_screen.dart';
+import 'package:imagifyai/view/Home/home.dart';
+import 'package:imagifyai/view/ImageCreated/image_created_screen.dart';
+import 'package:imagifyai/view/ImageGenerate/image_generate_screen.dart';
+import 'package:imagifyai/view/OnBoardingScreen/on_boarding_screen.dart';
+import 'package:imagifyai/view/ProfileScreen/profile_screen.dart';
+import 'package:imagifyai/view/ProfileScreen/widget/contact_us.dart';
+import 'package:imagifyai/view/ProfileScreen/widget/edit_profile.dart';
+import 'package:imagifyai/view/ProfileScreen/widget/library.dart';
+import 'package:imagifyai/view/ProfileScreen/widget/privacy_policy.dart';
+import 'package:imagifyai/view/ProfileScreen/widget/term_of_use.dart';
+import 'package:imagifyai/view/SplahScrren/splash_screen.dart';
+import 'package:imagifyai/view/Verification/verification.dart';
 
 class Routes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -48,7 +48,7 @@ class Routes {
           settings: settings,
           builder: (_) => ForgotScreen(),
         );
-        
+
       case RoutesName.HomeScreen:
         return MaterialPageRoute(settings: settings, builder: (_) => Home());
       case RoutesName.ImageGenerateScreen:

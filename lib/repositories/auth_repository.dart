@@ -1,22 +1,23 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:genwalls/Core/Constants/api_constants.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
-import 'package:genwalls/models/auth/logout_response.dart';
-import 'package:genwalls/models/auth/login_response.dart';
-import 'package:genwalls/models/auth/forgot_password_response.dart';
-import 'package:genwalls/models/auth/register_response.dart';
-import 'package:genwalls/models/auth/refresh_response.dart';
-import 'package:genwalls/models/auth/verify_response.dart';
-import 'package:genwalls/models/user/user.dart';
-import 'package:genwalls/models/user/update_user_response.dart';
-import 'package:genwalls/models/user/update_profile_picture_response.dart';
-import 'package:genwalls/models/user/update_password_response.dart';
+import 'package:imagifyai/Core/Constants/api_constants.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
+import 'package:imagifyai/models/auth/logout_response.dart';
+import 'package:imagifyai/models/auth/login_response.dart';
+import 'package:imagifyai/models/auth/forgot_password_response.dart';
+import 'package:imagifyai/models/auth/register_response.dart';
+import 'package:imagifyai/models/auth/refresh_response.dart';
+import 'package:imagifyai/models/auth/verify_response.dart';
+import 'package:imagifyai/models/user/user.dart';
+import 'package:imagifyai/models/user/update_user_response.dart';
+import 'package:imagifyai/models/user/update_profile_picture_response.dart';
+import 'package:imagifyai/models/user/update_password_response.dart';
 
 class AuthRepository {
-  AuthRepository({ApiService? apiService}) : _apiService = apiService ?? ApiService();
+  AuthRepository({ApiService? apiService})
+    : _apiService = apiService ?? ApiService();
 
   final ApiService _apiService;
 
@@ -52,7 +53,7 @@ class AuthRepository {
       if (kDebugMode) {
         print('Calling _apiService.postMultipart...');
       }
-      
+
       final json = await _apiService.postMultipart(
         path: ApiConstants.register,
         fields: fields,
@@ -98,9 +99,10 @@ class AuthRepository {
           print('JSON that failed to parse: $json');
         }
         // If parsing fails, check if there's an error message in the response
-        final errorMsg = json['message']?.toString() ?? 
-                        json['error']?.toString() ?? 
-                        'Failed to parse registration response';
+        final errorMsg =
+            json['message']?.toString() ??
+            json['error']?.toString() ??
+            'Failed to parse registration response';
         throw ApiException(errorMsg);
       }
     } catch (e, stackTrace) {
@@ -110,7 +112,7 @@ class AuthRepository {
         print('Exception: $e');
         print('Stack trace: $stackTrace');
       }
-      
+
       // Re-throw ApiException as-is
       if (e is ApiException) {
         if (kDebugMode) {
@@ -118,37 +120,29 @@ class AuthRepository {
         }
         rethrow;
       }
-      
+
       // Wrap other exceptions with more context
       if (kDebugMode) {
         print('Wrapping exception as ApiException');
       }
-      throw ApiException(
-        'Registration failed: ${e.toString()}',
-      );
+      throw ApiException('Registration failed: ${e.toString()}');
     }
   }
 
-  Future<VerifyResponse> verifyEmail({
-    required String code,
-  }) async {
+  Future<VerifyResponse> verifyEmail({required String code}) async {
     // Convert code string to integer to match API spec: {"code": 999999}
     final codeInt = int.tryParse(code) ?? 0;
-    
+
     final json = await _apiService.post(
       ApiConstants.verifyEmail,
-      body: {
-        'code': codeInt,
-      },
+      body: {'code': codeInt},
     );
 
     return VerifyResponse.fromJson(json);
   }
 
   Future<Map<String, dynamic>> resendCode() async {
-    final json = await _apiService.post(
-      ApiConstants.resendCode,
-    );
+    final json = await _apiService.post(ApiConstants.resendCode);
     return json;
   }
 
@@ -158,18 +152,13 @@ class AuthRepository {
   }) async {
     final json = await _apiService.post(
       ApiConstants.login,
-      body: {
-        'email': email,
-        'password': password,
-      },
+      body: {'email': email, 'password': password},
     );
 
     return LoginResponse.fromJson(json);
   }
 
-  Future<RefreshResponse> refreshToken({
-    required String refreshToken,
-  }) async {
+  Future<RefreshResponse> refreshToken({required String refreshToken}) async {
     final json = await _apiService.post(
       ApiConstants.refresh,
       query: {'refresh_token': refreshToken},
@@ -178,22 +167,16 @@ class AuthRepository {
     return RefreshResponse.fromJson(json);
   }
 
-  Future<ForgotPasswordResponse> forgotPassword({
-    required String email,
-  }) async {
+  Future<ForgotPasswordResponse> forgotPassword({required String email}) async {
     final json = await _apiService.post(
       ApiConstants.forgotPassword,
-      body: {
-        'email': email,
-      },
+      body: {'email': email},
     );
 
     return ForgotPasswordResponse.fromJson(json);
   }
 
-  Future<LogoutResponse> signOut({
-    required String refreshToken,
-  }) async {
+  Future<LogoutResponse> signOut({required String refreshToken}) async {
     final json = await _apiService.post(
       ApiConstants.signOut,
       query: {'refresh_token': refreshToken},
@@ -234,18 +217,21 @@ class AuthRepository {
       print('Full URL: ${ApiConstants.baseUrl}$path');
       print('Method: GET');
       print('Headers: Present');
-      print('  - Authorization: Bearer *** (${headers['Authorization']?.length ?? 0} chars)');
-      print('  - Token preview (first 30): ${accessToken.substring(0, accessToken.length > 30 ? 30 : accessToken.length)}...');
-      print('  - Token preview (last 30): ...${accessToken.substring(accessToken.length > 30 ? accessToken.length - 30 : 0)}');
+      print(
+        '  - Authorization: Bearer *** (${headers['Authorization']?.length ?? 0} chars)',
+      );
+      print(
+        '  - Token preview (first 30): ${accessToken.substring(0, accessToken.length > 30 ? 30 : accessToken.length)}...',
+      );
+      print(
+        '  - Token preview (last 30): ...${accessToken.substring(accessToken.length > 30 ? accessToken.length - 30 : 0)}',
+      );
       print('User ID to use: $userId');
       print('--- Sending Request ---');
     }
 
     try {
-      final json = await _apiService.get(
-        path,
-        headers: headers,
-      );
+      final json = await _apiService.get(path, headers: headers);
 
       if (kDebugMode) {
         print('═══════════════════════════════════════════════════════════');
@@ -325,10 +311,12 @@ class AuthRepository {
           if (e.statusCode == 403) {
             print('  - 403 Forbidden: Unauthorized access');
             print('  - Possible reasons:');
-          
+
             print('    2. user_id is required but not provided');
             print('    3. Token is invalid or expired');
-            print('    4. User does not have permission to access this resource');
+            print(
+              '    4. User does not have permission to access this resource',
+            );
           } else if (e.statusCode == 404) {
             print('  - 404 Not Found: Endpoint does not exist');
             print('  - The path "$path" is not available on the server');
@@ -358,7 +346,7 @@ class AuthRepository {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
     }
-    
+
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
 
     if (userId.isEmpty) {
@@ -367,7 +355,7 @@ class AuthRepository {
         statusCode: 400,
       );
     }
-    
+
     // Construct path: /users/{user_id}
     final path = '${ApiConstants.updateUser}/$userId';
 
@@ -415,16 +403,16 @@ class AuthRepository {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
     }
-    
+
     if (userId.isEmpty) {
       throw ApiException(
         'User ID is required for updating user profile',
         statusCode: 400,
       );
     }
-    
+
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
-    
+
     // Construct path: /users/{user_id}/profile
     final path = '${ApiConstants.updateUserProfile}/$userId/profile';
 
@@ -465,16 +453,16 @@ class AuthRepository {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
     }
-    
+
     if (userId.isEmpty) {
       throw ApiException(
         'User ID is required for updating profile picture',
         statusCode: 400,
       );
     }
-    
+
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
-    
+
     // Construct path: /users/{user_id}/profile (as per updated API docs)
     final path = '${ApiConstants.updateUserProfile}/$userId/profile';
 
@@ -504,16 +492,16 @@ class AuthRepository {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
     }
-    
+
     if (userId.isEmpty) {
       throw ApiException(
         'User ID is required for updating password',
         statusCode: 400,
       );
     }
-    
+
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
-    
+
     // Construct path: /users/{user_id}/password
     final path = '${ApiConstants.updatePassword}/$userId/password';
 
@@ -530,14 +518,10 @@ class AuthRepository {
     return UpdatePasswordResponse.fromJson(json);
   }
 
-  Future<Map<String, dynamic>> verifyForgotOtp({
-    required String code,
-  }) async {
+  Future<Map<String, dynamic>> verifyForgotOtp({required String code}) async {
     final json = await _apiService.post(
       ApiConstants.verifyForgotOtp,
-      body: {
-        'code': code,
-      },
+      body: {'code': code},
     );
     return json;
   }
@@ -548,10 +532,7 @@ class AuthRepository {
   }) async {
     final json = await _apiService.post(
       ApiConstants.setNewPassword,
-      body: {
-        'password': password,
-        'confirm_password': confirmPassword,
-      },
+      body: {'password': password, 'confirm_password': confirmPassword},
     );
     return json;
   }
@@ -565,7 +546,7 @@ class AuthRepository {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
     }
-    
+
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
 
     final json = await _apiService.post(
@@ -585,10 +566,7 @@ class AuthRepository {
     required String name,
     String? picture,
   }) async {
-    final body = <String, dynamic>{
-      'id_token': idToken,
-      'name': name,
-    };
+    final body = <String, dynamic>{'id_token': idToken, 'name': name};
     if (picture != null && picture.isNotEmpty) {
       body['picture'] = picture;
     }
@@ -603,10 +581,7 @@ class AuthRepository {
       print('Request body keys: ${body.keys.toList()}');
     }
 
-    final json = await _apiService.post(
-      ApiConstants.googleSignIn,
-      body: body,
-    );
+    final json = await _apiService.post(ApiConstants.googleSignIn, body: body);
 
     return LoginResponse.fromJson(json);
   }
@@ -618,18 +593,14 @@ class AuthRepository {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
     }
-    
+
     if (userId.isEmpty) {
       throw ApiException('User ID is required', statusCode: 400);
     }
-    
+
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
 
     // Use /users/{user_id} as per API docs
-    await _apiService.delete(
-      '/users/$userId',
-      headers: headers,
-    );
+    await _apiService.delete('/users/$userId', headers: headers);
   }
 }
-

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/viewModel/forgot_password_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/viewModel/forgot_password_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ForgotScreen extends StatefulWidget {
@@ -31,10 +31,9 @@ class _ForgotScreenState extends State<ForgotScreen> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-             
-                SvgPicture.asset(AppAssets.starLogo,),
-                SvgPicture.asset(AppAssets.genWallsLogo,),
-                   Align(
+                SvgPicture.asset(AppAssets.starLogo),
+                SvgPicture.asset(AppAssets.imagifyaiLogo),
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
                     padding: EdgeInsets.only(left: context.h(8)),
@@ -53,8 +52,8 @@ class _ForgotScreenState extends State<ForgotScreen> {
                 ),
               ],
             ),
-          ), 
-          body: SafeArea( 
+          ),
+          body: SafeArea(
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -88,21 +87,22 @@ class _ForgotScreenState extends State<ForgotScreen> {
                       ),
                       SizedBox(height: context.h(24)),
                       CustomButton(
-                        onPressed: () => forgotPasswordViewModel.sendReset(context, formKey: _formKey),
+                        onPressed: () => forgotPasswordViewModel.sendReset(
+                          context,
+                          formKey: _formKey,
+                        ),
                         gradient: AppColors.gradient,
                         text: forgotPasswordViewModel.isLoading
                             ? 'Sending...'
                             : 'Send Reset Code',
                         isLoading: forgotPasswordViewModel.isLoading,
                       ),
-                  
                     ],
                   ),
                 ),
               ),
             ),
           ),
-              
         );
       },
     );

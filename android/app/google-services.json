@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "725660898004",
+    "project_id": "imagifyai-453d3",
+    "storage_bucket": "imagifyai-453d3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:725660898004:android:54702659a74d021da12141",
+        "android_client_info": {
+          "package_name": "com.imagifyai.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkbJ4-l08iZGq1K2tVDHRODISdwIFnlHU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

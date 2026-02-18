@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class CustomTextField extends StatelessWidget {
   final String validatorType;
@@ -73,21 +73,21 @@ class CustomTextField extends StatelessWidget {
               // For now, just return null if it has content (validation happens in view model)
               return null;
             }
-            
+
             // For all other fields, check if they're required
             if (value == null || value.trim().isEmpty) {
               return "This field is required";
             }
-        
+
             if (validatorType == "name" && value.length < 3) {
               return "Enter a valid name";
             }
-        
+
             if (validatorType == "phone" &&
                 !RegExp(r'^[0-9]{10,13}$').hasMatch(value)) {
               return "Enter a valid phone number";
             }
-        
+
             if (validatorType == "email") {
               // More comprehensive email validation regex
               // Allows: letters, numbers, dots, hyphens, underscores, plus signs before @
@@ -101,12 +101,12 @@ class CustomTextField extends StatelessWidget {
                 return "Enter a valid email";
               }
             }
-        
+
             return null;
           },
-        
+
           style: context.appTextStyles?.customTextFieldInput,
-        
+
           decoration: InputDecoration(
             prefixIcon: prefixIcon != null
                 ? Padding(
@@ -119,7 +119,7 @@ class CustomTextField extends StatelessWidget {
                     ),
                   )
                 : null,
-        
+
             suffixIcon: suffixIcon != null
                 ? Padding(
                     padding: context.padAll(10),
@@ -131,15 +131,13 @@ class CustomTextField extends StatelessWidget {
                     ),
                   )
                 : null,
-        
+
             hintText: hintText,
-            hintStyle:
-                hintStyle ??
-                context.appTextStyles?.authHintText,
-        
+            hintStyle: hintStyle ?? context.appTextStyles?.authHintText,
+
             filled: true,
             fillColor: fillColor ?? Colors.transparent,
-        
+
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
                 color: enabledBorderColor ?? context.colorScheme.onSurface,
@@ -155,18 +153,16 @@ class CustomTextField extends StatelessWidget {
                 color: focusedBorderColor ?? context.colorScheme.primary,
                 width: borderWidth ?? context.radius(1.5),
               ),
-              borderRadius: BorderRadius.circular(
-                context.radius(8),
-              ),
+              borderRadius: BorderRadius.circular(context.radius(8)),
             ),
-                border: OutlineInputBorder(
+            border: OutlineInputBorder(
               borderSide: BorderSide(
                 color: context.colorScheme.primary,
-                  width: borderWidth ?? context.w(1.5),
+                width: borderWidth ?? context.w(1.5),
               ),
               borderRadius: BorderRadius.circular(
                 borderRadius ?? context.radius(8),
-              ) 
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderSide: BorderSide(

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/align_text.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/password_text.dart';
-import 'package:genwalls/Core/CustomWidget/profile_image.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/viewModel/edit_profile_view_model.dart';
-import 'package:genwalls/viewModel/profile_screen_view_model.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/align_text.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/CustomWidget/password_text.dart';
+import 'package:imagifyai/Core/CustomWidget/profile_image.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/viewModel/edit_profile_view_model.dart';
+import 'package:imagifyai/viewModel/profile_screen_view_model.dart';
+import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -87,10 +87,10 @@ class _EditProfileState extends State<EditProfile> {
                 alignment: Alignment.center,
                 children: [
                   SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.imagifyaiLogo, fit: BoxFit.cover),
                   Positioned(
                     left: 0,
-                     child: GestureDetector(
+                    child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(
                         Icons.arrow_back_ios,
@@ -109,7 +109,7 @@ class _EditProfileState extends State<EditProfile> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                   Align(
+                  Align(
                     alignment: Alignment.topLeft,
                     child: Text(
                       "Edit Profile",
@@ -120,7 +120,7 @@ class _EditProfileState extends State<EditProfile> {
                   Align(
                     alignment: Alignment.topLeft,
                     child: Text(
-                      "Manage your GENWALLS account settings",
+                      "Manage your imagifyai account settings",
                       style: context.appTextStyles?.profileScreenSubtitle,
                       textAlign: TextAlign.start,
                     ),
@@ -351,8 +351,7 @@ class _EditProfileState extends State<EditProfile> {
                 Expanded(
                   child: CustomButton(
                     onPressed: () {
-                      final signInViewModel = context
-                          .read<SignInViewModel>();
+                      final signInViewModel = context.read<SignInViewModel>();
                       final accessToken = signInViewModel.accessToken;
                       if (accessToken != null && accessToken.isNotEmpty) {
                         editProfileViewModel.updateProfile(

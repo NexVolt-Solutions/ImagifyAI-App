@@ -17,8 +17,10 @@ class ApiConstants {
   // Use helper methods in repository to construct paths with user_id
   static const String getCurrentUser = '/users'; // Will be /users/{user_id}
   static const String updateUser = '/users'; // Will be /users/{user_id}
-  static const String updateUserProfile = '/users'; // Will be /users/{user_id}/profile
-  static const String updatePassword = '/users'; // Will be /users/{user_id}/password
+  static const String updateUserProfile =
+      '/users'; // Will be /users/{user_id}/profile
+  static const String updatePassword =
+      '/users'; // Will be /users/{user_id}/password
   static const String deleteAccount = '/users'; // Will be /users/{user_id}
 
   // Wallpaper endpoints
@@ -26,9 +28,18 @@ class ApiConstants {
   static const String wallpapers = '/wallpapers/';
   static const String groupedWallpapers = '/wallpapers/grouped';
   static const String wallpapersStyles = '/wallpapers/styles';
-  static const String recreateWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/recreate
-  static const String downloadWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/download
-  static const String deleteWallpaper = '/wallpapers'; // Will be /wallpapers/{wallpaper_id}
-  static const String googleWebClientId = '247136119306-p8qvdr6se04jf40t1ha3hqlu7jl36blg.apps.googleusercontent.com';
-}
+  static const String recreateWallpaper =
+      '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/recreate
+  static const String downloadWallpaper =
+      '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/download
+  static const String deleteWallpaper =
+      '/wallpapers'; // Will be /wallpapers/{wallpaper_id}
 
+  /// Web Client ID for Google Sign-In. Use the one from your **Firebase project** so you
+  /// don't need a separate Google Cloud Console setup: Firebase Console → Project settings
+  /// → Your apps → Web app → copy "Web client ID", or in Google Cloud Console (same project
+  /// as Firebase, e.g. imagifyai-453d3) → Credentials → "Web client (auto created by Google Service)".
+  /// From OAuth client (project imagifyai-482410). Used as serverClientId for Google Sign-In.
+  static const String googleWebClientId =
+      '247136119306-doc657heguufi8vd1enaau2dqu834fsv.apps.googleusercontent.com';
+}

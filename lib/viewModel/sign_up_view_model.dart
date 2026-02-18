@@ -2,21 +2,20 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:genwalls/Core/Constants/api_constants.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/Core/utils/jwt_decoder.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/auth/login_response.dart';
-import 'package:genwalls/models/auth/register_response.dart';
-import 'package:genwalls/repositories/auth_repository.dart';
+import 'package:imagifyai/Core/Constants/api_constants.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/Core/utils/jwt_decoder.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/auth/login_response.dart';
+import 'package:imagifyai/models/auth/register_response.dart';
+import 'package:imagifyai/repositories/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 
 class SignUpViewModel extends ChangeNotifier {
-
   final AuthRepository _authRepository;
 
   // FormKey is no longer stored here to avoid GlobalKey conflicts
@@ -38,7 +37,7 @@ class SignUpViewModel extends ChangeNotifier {
   ];
 
   SignUpViewModel({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository() {
+    : _authRepository = authRepository ?? AuthRepository() {
     // Add listener to password controller for real-time validation
     passwordController.addListener(_validatePassword);
   }
@@ -98,9 +97,12 @@ class SignUpViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> register(BuildContext context, {required GlobalKey<FormState> formKey}) async {
+  Future<void> register(
+    BuildContext context, {
+    required GlobalKey<FormState> formKey,
+  }) async {
     if (isLoading) return;
-    
+
     // Validate form - if validation fails, stop here
     if (formKey.currentState == null) {
       if (kDebugMode) {
@@ -108,7 +110,7 @@ class SignUpViewModel extends ChangeNotifier {
       }
       return;
     }
-    
+
     final isValid = formKey.currentState!.validate();
     if (!isValid) {
       if (kDebugMode) {
@@ -118,7 +120,8 @@ class SignUpViewModel extends ChangeNotifier {
       return;
     }
 
-    if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+    if (passwordController.text.trim() !=
+        confirmPasswordController.text.trim()) {
       _showMessage(context, 'Password and Confirm Password must match');
       return;
     }
@@ -138,7 +141,7 @@ class SignUpViewModel extends ChangeNotifier {
       if (kDebugMode) {
         print('Calling _authRepository.register...');
       }
-      
+
       final RegisterResponse response = await _authRepository.register(
         username: usernameController.text.trim(),
         email: emailController.text.trim(),
@@ -155,9 +158,9 @@ class SignUpViewModel extends ChangeNotifier {
         print('Response type: ${response.runtimeType}');
       }
 
-   
       if (response.status == false) {
-        final message = response.message ?? 'Registration failed. Please try again.';
+        final message =
+            response.message ?? 'Registration failed. Please try again.';
         errorMessage = message;
         if (kDebugMode) {
           print('=== REGISTRATION FAILED ===');
@@ -172,17 +175,19 @@ class SignUpViewModel extends ChangeNotifier {
       // Registration successful (status is null/true or we have success message)
       final message = response.message ?? 'Registered successfully';
       final email = emailController.text.trim();
-      
+
       if (kDebugMode) {
         print('=== REGISTRATION SUCCESSFUL ===');
-        print('Status: ${response.status ?? "null (success by 200 status code)"}');
+        print(
+          'Status: ${response.status ?? "null (success by 200 status code)"}',
+        );
         print('Message: $message');
         print('Navigating to verification screen...');
         print('Email for verification: $email');
       }
-      
+
       _showMessage(context, message, isError: false);
-      
+
       // Clear all form fields before navigating (save email first for verification screen)
       usernameController.clear();
       emailController.clear(); // Clear email field too
@@ -192,29 +197,28 @@ class SignUpViewModel extends ChangeNotifier {
       selectedIndex = -1;
       errorMessage = null;
       notifyListeners();
-      
+
       Navigator.pushNamed(
         context,
         RoutesName.VerificationScreen,
         arguments: email, // Use saved email value
       );
-      
+
       if (kDebugMode) {
         print('=== REGISTRATION FLOW COMPLETED ===');
       }
     } on ApiException catch (e) {
       // Backend now allows duplicate usernames and only checks for duplicate emails
       // Error messages will reflect this (e.g., "Email already exists" instead of "Username already taken")
-      
+
       final errorMessageLower = e.message.toLowerCase();
       final email = emailController.text.trim();
-      
+
       // Check if error is about email already registered/exists
-      if (errorMessageLower.contains('email') && 
-          (errorMessageLower.contains('already') || 
-           errorMessageLower.contains('exists') ||
-           errorMessageLower.contains('registered'))) {
-        
+      if (errorMessageLower.contains('email') &&
+          (errorMessageLower.contains('already') ||
+              errorMessageLower.contains('exists') ||
+              errorMessageLower.contains('registered'))) {
         // Check if email is already verified
         if (errorMessageLower.contains('verified')) {
           // Email is already registered AND verified - redirect to sign in
@@ -223,49 +227,49 @@ class SignUpViewModel extends ChangeNotifier {
             print('Email: $email');
             print('Navigating to sign in screen...');
           }
-          
+
           _showMessage(
-            context, 
+            context,
             'This email is already registered and verified. Please sign in instead.',
             isError: false,
           );
-          
+
           // Clear form fields before navigating
           clearForm();
-          
+
           // Navigate to sign in screen
           Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
-          
+
           return; // Exit early - don't show the error message again
         } else {
           // Email is registered but NOT verified - navigate to verification screen
-        if (kDebugMode) {
+          if (kDebugMode) {
             print('=== EMAIL ALREADY REGISTERED - NOT VERIFIED ===');
-          print('Email: $email');
-          print('Navigating to verification screen to resend OTP...');
-        }
-        
-        // Navigate to verification screen and automatically resend OTP
-        // Pass email and autoResend flag in arguments
-        Navigator.pushNamed(
-          context,
-          RoutesName.VerificationScreen,
-          arguments: {
-            'email': email,
-            'autoResend': true, // Flag to auto-resend OTP
-          },
-        );
-        
-        _showMessage(
-          context, 
-          'This email is already registered. Please verify your email to continue.',
-          isError: false,
-        );
-        
-        return; // Exit early - don't show the error message again
+            print('Email: $email');
+            print('Navigating to verification screen to resend OTP...');
+          }
+
+          // Navigate to verification screen and automatically resend OTP
+          // Pass email and autoResend flag in arguments
+          Navigator.pushNamed(
+            context,
+            RoutesName.VerificationScreen,
+            arguments: {
+              'email': email,
+              'autoResend': true, // Flag to auto-resend OTP
+            },
+          );
+
+          _showMessage(
+            context,
+            'This email is already registered. Please verify your email to continue.',
+            isError: false,
+          );
+
+          return; // Exit early - don't show the error message again
         }
       }
-      
+
       errorMessage = e.message;
       if (kDebugMode) {
         print('=== API EXCEPTION ===');
@@ -276,7 +280,8 @@ class SignUpViewModel extends ChangeNotifier {
       }
       _showMessage(context, e.message);
     } on SocketException catch (e) {
-      errorMessage = 'No internet connection. Please check your network and try again.';
+      errorMessage =
+          'No internet connection. Please check your network and try again.';
       if (kDebugMode) {
         print('=== SOCKET EXCEPTION ===');
         print('Message: ${e.message}');
@@ -310,17 +315,19 @@ class SignUpViewModel extends ChangeNotifier {
         print('Exception: $e');
         print('Stack trace: $stackTrace');
       }
-      
+
       final errorMsg = e.toString();
       if (errorMsg.contains('Exception') || errorMsg.contains('Error')) {
         errorMessage = errorMsg.split(':').last.trim();
         if (errorMessage!.isEmpty || errorMessage == errorMsg) {
-          errorMessage = 'Registration failed. Please check your connection and try again.';
+          errorMessage =
+              'Registration failed. Please check your connection and try again.';
         }
       } else {
-        errorMessage = 'Registration failed. Please check your connection and try again.';
+        errorMessage =
+            'Registration failed. Please check your connection and try again.';
       }
-      
+
       if (kDebugMode) {
         print('Final error message: $errorMessage');
       }
@@ -358,7 +365,9 @@ class SignUpViewModel extends ChangeNotifier {
         await googleSignIn.signOut();
         await googleSignIn.disconnect();
         if (kDebugMode) {
-          print('✅ Google Sign-In cache cleared to force account picker (signup)');
+          print(
+            '✅ Google Sign-In cache cleared to force account picker (signup)',
+          );
         }
       } catch (e) {
         if (kDebugMode) {
@@ -377,16 +386,21 @@ class SignUpViewModel extends ChangeNotifier {
       }
 
       // Get authentication details
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       if (kDebugMode) {
         print('=== GOOGLE AUTH DETAILS (SIGNUP) ===');
         print('ID Token: ${googleAuth.idToken != null ? "Present" : "NULL"}');
-        print('Access Token: ${googleAuth.accessToken != null ? "Present" : "NULL"}');
+        print(
+          'Access Token: ${googleAuth.accessToken != null ? "Present" : "NULL"}',
+        );
         print('Email: ${googleUser.email}');
         print('Display Name: ${googleUser.displayName}');
-        print('Server Client ID configured: ${ApiConstants.googleWebClientId != null}');
-        
+        print(
+          'Server Client ID configured: ${ApiConstants.googleWebClientId != null}',
+        );
+
         // Decode and log ID token payload for backend debugging
         if (googleAuth.idToken != null) {
           try {
@@ -416,14 +430,15 @@ class SignUpViewModel extends ChangeNotifier {
           print('   2. OAuth consent screen not properly configured');
           print('   3. App is in testing mode and user not added as test user');
         }
-        
+
         String errorMessage = 'Failed to get ID token from Google.\n\n';
         if (ApiConstants.googleWebClientId == null) {
-          errorMessage += 'Web Client ID is not configured. Please add it in api_constants.dart';
+          errorMessage +=
+              'Web Client ID is not configured. Please add it in api_constants.dart';
         } else {
           errorMessage += 'Please check OAuth consent screen configuration';
         }
-        
+
         throw Exception(errorMessage);
       }
 
@@ -440,19 +455,26 @@ class SignUpViewModel extends ChangeNotifier {
 
       if (kDebugMode) {
         print('=== GOOGLE SIGN-UP SUCCESSFUL ===');
-        print('Access token received: ${accessToken != null && accessToken.isNotEmpty}');
-        print('Refresh token received: ${refreshToken != null && refreshToken.isNotEmpty}');
+        print(
+          'Access token received: ${accessToken != null && accessToken.isNotEmpty}',
+        );
+        print(
+          'Refresh token received: ${refreshToken != null && refreshToken.isNotEmpty}',
+        );
 
         // Extract user_id from login response
         String? userIdFromResponse = response.userId;
 
         // Fallback: Try to extract user_id from JWT token if not in response
         String? userIdFromJwt;
-        if (userIdFromResponse == null && accessToken != null && accessToken.isNotEmpty) {
+        if (userIdFromResponse == null &&
+            accessToken != null &&
+            accessToken.isNotEmpty) {
           try {
             final decoded = JwtDecoder.decode(accessToken);
             if (decoded != null) {
-              userIdFromJwt = decoded['user_id']?.toString() ??
+              userIdFromJwt =
+                  decoded['user_id']?.toString() ??
                   decoded['userId']?.toString() ??
                   decoded['id']?.toString();
 
@@ -489,46 +511,47 @@ class SignUpViewModel extends ChangeNotifier {
     } on ApiException catch (e) {
       // Check if email is registered with password (needs standard login)
       final errorMessageLower = e.message.toLowerCase();
-      if (errorMessageLower.contains('registered with password') || 
+      if (errorMessageLower.contains('registered with password') ||
           errorMessageLower.contains('standard login')) {
         // Get email from googleUser if available, otherwise try to extract from error
         String? userEmail = googleUser?.email;
-        
+
         if (kDebugMode) {
           print('=== EMAIL REGISTERED WITH PASSWORD (SIGNUP) ===');
           print('Email: ${userEmail ?? "Unknown"}');
           print('Navigating to sign in screen...');
         }
-        
+
         // Save email for sign-in screen (pre-fill) if available
         if (userEmail != null && userEmail.isNotEmpty) {
           await TokenStorageService.saveRememberedEmail(userEmail);
         }
-        
+
         // Clear form fields before navigating
         clearForm();
-        
+
         _showMessage(
           context,
           'This email is registered with a password. Please sign in with your password instead.',
           isError: false,
         );
-        
+
         // Navigate to sign-in screen
         Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
         return; // Exit early
       }
-      
+
       errorMessage = e.message;
       _showMessage(context, e.message);
     } on PlatformException catch (e) {
       String userMessage;
-      
+
       if (e.code == 'sign_in_failed' || e.code == 'sign_in_canceled') {
         final errorDetails = e.message ?? '';
-        
+
         if (errorDetails.contains('ApiException: 10')) {
-          userMessage = 'Google Sign-In configuration error. Please contact support.';
+          userMessage =
+              'Google Sign-In configuration error. Please contact support.';
         } else if (errorDetails.contains('ApiException: 7')) {
           userMessage = 'Network error. Please check your internet connection.';
         } else if (errorDetails.contains('ApiException: 8')) {
@@ -539,9 +562,10 @@ class SignUpViewModel extends ChangeNotifier {
           userMessage = 'Failed to sign up with Google. Please try again.';
         }
       } else {
-        userMessage = 'An error occurred during Google Sign-Up. Please try again.';
+        userMessage =
+            'An error occurred during Google Sign-Up. Please try again.';
       }
-      
+
       errorMessage = userMessage;
       if (kDebugMode) {
         print('❌ Google Sign-Up PlatformException:');
@@ -562,7 +586,11 @@ class SignUpViewModel extends ChangeNotifier {
     }
   }
 
-  void _showMessage(BuildContext context, String message, {bool isError = true}) {
+  void _showMessage(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
 

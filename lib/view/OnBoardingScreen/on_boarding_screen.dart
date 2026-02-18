@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/viewModel/on_boarding_screen_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/viewModel/on_boarding_screen_view_model.dart';
 import 'package:provider/provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -33,7 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.center,
               children: [
                 SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                SvgPicture.asset(AppAssets.imagifyaiLogo, fit: BoxFit.cover),
               ],
             ),
           ),

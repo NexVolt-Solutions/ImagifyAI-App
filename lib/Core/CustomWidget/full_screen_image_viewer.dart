@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 
 class FullScreenImageViewer extends StatelessWidget {
   final String imageUrl;
@@ -14,10 +14,8 @@ class FullScreenImageViewer extends StatelessWidget {
   static void show(BuildContext context, String imageUrl, {String? heroTag}) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => FullScreenImageViewer(
-          imageUrl: imageUrl,
-          heroTag: heroTag,
-        ),
+        builder: (context) =>
+            FullScreenImageViewer(imageUrl: imageUrl, heroTag: heroTag),
         fullscreenDialog: true,
       ),
     );
@@ -56,9 +54,7 @@ class FullScreenImageViewer extends StatelessWidget {
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
                       return Center(
-                        child: AppLoadingIndicator.medium(
-                          color: Colors.white,
-                        ),
+                        child: AppLoadingIndicator.medium(color: Colors.white),
                       );
                     },
                     errorBuilder: (context, error, stackTrace) {
@@ -78,4 +74,3 @@ class FullScreenImageViewer extends StatelessWidget {
     );
   }
 }
-

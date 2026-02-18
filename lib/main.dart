@@ -1,13 +1,20 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
-import 'package:genwalls/repositories/auth_repository.dart';
-import 'package:genwalls/view/my_app.dart';
+import 'package:imagifyai/Core/services/analytics_service.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/firebase_analytics_delegate.dart';
+import 'package:imagifyai/Core/services/local_notification_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
+import 'package:imagifyai/firebase_options.dart';
+import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/view/my_app.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Set up token refresh callback before running the app
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  AnalyticsService.delegate = FirebaseAnalyticsDelegate();
+  await LocalNotificationService.initialize();
   _setupTokenRefresh();
   runApp(const MyApp());
 }

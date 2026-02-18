@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/viewModel/library_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/viewModel/library_view_model.dart';
 import 'package:provider/provider.dart';
 
 class Library extends StatefulWidget {
@@ -39,10 +39,10 @@ class _LibraryState extends State<Library> {
 
   void _onScroll() {
     if (!_scrollController.hasClients) return;
-    
+
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    
+
     // Load more when user scrolls to 80% of the list
     if (currentScroll >= maxScroll * 0.8) {
       final libraryViewModel = context.read<LibraryViewModel>();
@@ -67,8 +67,8 @@ class _LibraryState extends State<Library> {
         final isLoading = libraryViewModel.isLoading;
         return Scaffold(
           backgroundColor: context.backgroundColor,
-            //with arrow 
-        appBar: PreferredSize(
+          //with arrow
+          appBar: PreferredSize(
             preferredSize: const Size.fromHeight(65),
 
             child: Align(
@@ -77,10 +77,10 @@ class _LibraryState extends State<Library> {
                 alignment: Alignment.center,
                 children: [
                   SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.imagifyaiLogo, fit: BoxFit.cover),
                   Positioned(
                     left: 0,
-                     child: GestureDetector(
+                    child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(
                         Icons.arrow_back_ios,
@@ -93,7 +93,7 @@ class _LibraryState extends State<Library> {
               ),
             ),
           ),
-            body: SafeArea(
+          body: SafeArea(
             child: RefreshIndicator(
               onRefresh: () async {
                 await libraryViewModel.loadWallpapers(context, refresh: true);
@@ -102,54 +102,83 @@ class _LibraryState extends State<Library> {
                 controller: _scrollController,
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                Align(
+                  Align(
                     alignment: Alignment.topLeft,
-                  child: Text(
-                    "Explore Prompt",
-                    style: context.appTextStyles?.profileScreenTitle,
-                    textAlign: TextAlign.start,
-                  ),
-                ),
-                SizedBox(height: context.h(10)),
-                if (isLoading)
-                  const Center(
-                    child: AppLoadingIndicator.large(),
-                  )
-                
-                else
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: items.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: context.w(10),
-                      mainAxisSpacing: context.h(10),
-                      mainAxisExtent: context.h(200),
+                    child: Text(
+                      "Explore Prompt",
+                      style: context.appTextStyles?.profileScreenTitle,
+                      textAlign: TextAlign.start,
                     ),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final imageUrl =
-                          (item.thumbnailUrl.isNotEmpty ? item.thumbnailUrl : item.imageUrl)
-                              .trim();
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: context.padAll(7),
-                              decoration: BoxDecoration(
-                                color: context.backgroundColor,
-                                borderRadius: BorderRadius.circular(context.radius(12)),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(context.radius(12)),
-                                child: imageUrl.isNotEmpty
-                                    ? Image.network(
-                                        imageUrl,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Container(
+                  ),
+                  SizedBox(height: context.h(10)),
+                  if (isLoading)
+                    const Center(child: AppLoadingIndicator.large())
+                  else
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: items.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: context.w(10),
+                        mainAxisSpacing: context.h(10),
+                        mainAxisExtent: context.h(200),
+                      ),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        final imageUrl =
+                            (item.thumbnailUrl.isNotEmpty
+                                    ? item.thumbnailUrl
+                                    : item.imageUrl)
+                                .trim();
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: context.padAll(7),
+                                decoration: BoxDecoration(
+                                  color: context.backgroundColor,
+                                  borderRadius: BorderRadius.circular(
+                                    context.radius(12),
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    context.radius(12),
+                                  ),
+                                  child: imageUrl.isNotEmpty
+                                      ? Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) =>
+                                              Container(
+                                                color: context.surfaceColor,
+                                                child: Icon(
+                                                  Icons.image_not_supported,
+                                                  color: context.subtitleColor,
+                                                  size: 40,
+                                                ),
+                                              ),
+                                          loadingBuilder:
+                                              (
+                                                context,
+                                                child,
+                                                loadingProgress,
+                                              ) {
+                                                if (loadingProgress == null)
+                                                  return child;
+                                                return Container(
+                                                  color: context.surfaceColor,
+                                                  child: Center(
+                                                    child:
+                                                        AppLoadingIndicator.medium(),
+                                                  ),
+                                                );
+                                              },
+                                        )
+                                      : Container(
                                           color: context.surfaceColor,
                                           child: Icon(
                                             Icons.image_not_supported,
@@ -157,65 +186,48 @@ class _LibraryState extends State<Library> {
                                             size: 40,
                                           ),
                                         ),
-                                        loadingBuilder: (context, child, loadingProgress) {
-                                          if (loadingProgress == null) return child;
-                                          return Container(
-                                            color: context.surfaceColor,
-                                            child: Center(
-                                              child: AppLoadingIndicator.medium(),
-                                            ),
-                                          );
-                                        },
-                                      )
-                                    : Container(
-                                        color: context.surfaceColor,
-                                        child: Icon(
-                                          Icons.image_not_supported,
-                                          color: context.subtitleColor,
-                                          size: 40,
-                                        ),
-                                      ),
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(height: context.h(8)),
-                          Text(
-                            item.title.isNotEmpty
-                                ? item.title
-                                : (item.prompt.isNotEmpty ? item.prompt : 'Wallpaper'),
-                            style: context.appTextStyles?.profileCardTitle,
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: context.h(6)),
-                          CustomButton(
-                            height: context.h(24),
-                            width: context.w(120),
-                            fontSize: context.text(11),
-                            gradient: AppColors.gradient,
-                            text: "Use This Prompt",
-                            onPressed: () {
-                              SnackbarUtil.showTopSnackBar(
-                                context,
-                                item.prompt.isNotEmpty ? item.prompt : 'No prompt',
-                                isError: false,
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                            SizedBox(height: context.h(8)),
+                            Text(
+                              item.title.isNotEmpty
+                                  ? item.title
+                                  : (item.prompt.isNotEmpty
+                                        ? item.prompt
+                                        : 'Wallpaper'),
+                              style: context.appTextStyles?.profileCardTitle,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: context.h(6)),
+                            CustomButton(
+                              height: context.h(24),
+                              width: context.w(120),
+                              fontSize: context.text(11),
+                              gradient: AppColors.gradient,
+                              text: "Use This Prompt",
+                              onPressed: () {
+                                SnackbarUtil.showTopSnackBar(
+                                  context,
+                                  item.prompt.isNotEmpty
+                                      ? item.prompt
+                                      : 'No prompt',
+                                  isError: false,
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   // Load more indicator
                   if (libraryViewModel.isLoadingMore)
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: context.h(20)),
-                      child: const Center(
-                        child: AppLoadingIndicator.large(),
-                      ),
+                      child: const Center(child: AppLoadingIndicator.large()),
                     ),
-                 
                 ],
               ),
             ),

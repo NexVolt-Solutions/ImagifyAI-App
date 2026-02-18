@@ -1,16 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/wallpaper/wallpaper.dart';
-import 'package:genwalls/repositories/wallpaper_repository.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel({WallpaperRepository? wallpaperRepository})
-      : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
+    : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
 
   final WallpaperRepository _wallpaperRepository;
 
@@ -23,7 +23,10 @@ class LibraryViewModel extends ChangeNotifier {
   bool hasMorePages = true;
 
   /// Load wallpapers (first page or refresh)
-  Future<void> loadWallpapers(BuildContext context, {bool refresh = false}) async {
+  Future<void> loadWallpapers(
+    BuildContext context, {
+    bool refresh = false,
+  }) async {
     if (isLoading) return;
 
     // Get access token from SignInViewModel or storage
@@ -33,7 +36,9 @@ class LibraryViewModel extends ChangeNotifier {
     // If not available in SignInViewModel, try loading from storage
     if (accessToken == null || accessToken.isEmpty) {
       if (kDebugMode) {
-        print('⚠️  SignInViewModel token not available, trying to load from storage...');
+        print(
+          '⚠️  SignInViewModel token not available, trying to load from storage...',
+        );
       }
       try {
         accessToken = await TokenStorageService.getAccessToken();
@@ -65,11 +70,11 @@ class LibraryViewModel extends ChangeNotifier {
         page: 1,
         limit: limit,
       );
-      
+
       wallpapers = fetchedWallpapers;
       currentPage = 1;
       hasMorePages = fetchedWallpapers.length >= limit;
-      
+
       if (kDebugMode) {
         print('✅ Wallpapers loaded: ${wallpapers.length}');
         print('Has more pages: $hasMorePages');
@@ -125,12 +130,12 @@ class LibraryViewModel extends ChangeNotifier {
         page: nextPage,
         limit: limit,
       );
-      
+
       if (fetchedWallpapers.isNotEmpty) {
         wallpapers.addAll(fetchedWallpapers);
         currentPage = nextPage;
         hasMorePages = fetchedWallpapers.length >= limit;
-        
+
         if (kDebugMode) {
           print('✅ More wallpapers loaded: ${fetchedWallpapers.length}');
           print('Total wallpapers: ${wallpapers.length}');
@@ -159,8 +164,11 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  void _showMessage(BuildContext context, String message, {bool isError = true}) {
+  void _showMessage(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
 }
-

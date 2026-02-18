@@ -1,22 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 /// Reusable loading indicator widget with iOS (Cupertino) styling
 class AppLoadingIndicator extends StatelessWidget {
   /// Size of the loading indicator (default: 20)
   final double? size;
-  
+
   /// Color of the loading indicator (default: primary color)
   final Color? color;
-  
+
   /// Radius of the CupertinoActivityIndicator (default: 10)
   final double? radius;
-  
+
   /// Whether to use gradient color (default: false)
   final bool useGradient;
-  
+
   const AppLoadingIndicator({
     super.key,
     this.size = 20,
@@ -58,8 +58,9 @@ class AppLoadingIndicator extends StatelessWidget {
     // If no color is provided, use primary color from theme (theme-aware)
     final indicatorColor = color ?? context.primaryColor;
     final indicatorSize = size ?? 20;
-    final indicatorRadius = radius ?? (indicatorSize / 2) * 0.6; // Default radius based on size
-    
+    final indicatorRadius =
+        radius ?? (indicatorSize / 2) * 0.6; // Default radius based on size
+
     Widget indicator = SizedBox(
       width: indicatorSize,
       height: indicatorSize,
@@ -72,10 +73,10 @@ class AppLoadingIndicator extends StatelessWidget {
     // Apply gradient if requested (uses app gradient colors from theme)
     if (useGradient) {
       // Use theme-aware gradient: dark theme uses default gradient, light theme uses light gradient
-      final gradient = context.isDarkMode 
-          ? AppColors.gradient 
+      final gradient = context.isDarkMode
+          ? AppColors.gradient
           : AppColors.gradientLight;
-      
+
       return ShaderMask(
         shaderCallback: (bounds) {
           return gradient.createShader(bounds);
@@ -95,4 +96,3 @@ class AppLoadingIndicator extends StatelessWidget {
     return indicator;
   }
 }
-

@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/auth/verify_response.dart';
-import 'package:genwalls/repositories/auth_repository.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/auth/verify_response.dart';
+import 'package:imagifyai/repositories/auth_repository.dart';
 
 class VerificationViewModel extends ChangeNotifier {
   VerificationViewModel({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository() {
+    : _authRepository = authRepository ?? AuthRepository() {
     _startTimer();
   }
 
@@ -21,14 +21,14 @@ class VerificationViewModel extends ChangeNotifier {
 
   bool isLoading = false;
   String? errorMessage;
-  
+
   Timer? _timer;
   int _remainingSeconds = 120; // 2 minutes = 120 seconds
   bool _canResend = false;
 
   int get remainingSeconds => _remainingSeconds;
   bool get canResend => _canResend;
-  
+
   String get timerText {
     if (_canResend) return '';
     final minutes = _remainingSeconds ~/ 60;
@@ -56,14 +56,20 @@ class VerificationViewModel extends ChangeNotifier {
     emailController.text = email;
   }
 
-  Future<void> verify(BuildContext context, {required GlobalKey<FormState> formKey}) async {
+  Future<void> verify(
+    BuildContext context, {
+    required GlobalKey<FormState> formKey,
+  }) async {
     if (isLoading) return;
 
     final code = codeController.text.trim();
 
     // Validate that code is exactly 6 digits
     if (code.isEmpty || code.length != 6) {
-      _showMessage(context, 'Please enter the complete 6-digit verification code');
+      _showMessage(
+        context,
+        'Please enter the complete 6-digit verification code',
+      );
       return;
     }
 
@@ -94,7 +100,8 @@ class VerificationViewModel extends ChangeNotifier {
       errorMessage = e.message;
       _showMessage(context, e.message);
     } catch (_) {
-      errorMessage = 'Hmm, something unexpected happened. Let\'s try that again!';
+      errorMessage =
+          'Hmm, something unexpected happened. Let\'s try that again!';
       _showMessage(context, errorMessage!);
     } finally {
       isLoading = false;
@@ -102,7 +109,10 @@ class VerificationViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> resendCode(BuildContext context, {bool forceResend = false}) async {
+  Future<void> resendCode(
+    BuildContext context, {
+    bool forceResend = false,
+  }) async {
     // If forceResend is true, bypass the timer check (for auto-resend scenarios)
     if (!forceResend && (isLoading || !_canResend)) return;
 
@@ -112,17 +122,19 @@ class VerificationViewModel extends ChangeNotifier {
 
     try {
       final response = await _authRepository.resendCode();
-      final message = response['message']?.toString() ?? 
-                     'A new verification code has been sent to your email';
+      final message =
+          response['message']?.toString() ??
+          'A new verification code has been sent to your email';
       _showMessage(context, message, isError: false);
-      
+
       // Restart the timer
       _startTimer();
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);
     } catch (_) {
-      errorMessage = 'Hmm, something unexpected happened. Let\'s try that again!';
+      errorMessage =
+          'Hmm, something unexpected happened. Let\'s try that again!';
       _showMessage(context, errorMessage!);
     } finally {
       isLoading = false;
@@ -140,7 +152,7 @@ class VerificationViewModel extends ChangeNotifier {
       print('Email: ${emailController.text}');
       print('Note: This may fail if no active session exists');
     }
-    
+
     try {
       await resendCode(context, forceResend: true);
     } on ApiException catch (e) {
@@ -148,7 +160,9 @@ class VerificationViewModel extends ChangeNotifier {
       if (e.message.toLowerCase().contains('no pending verification') ||
           e.message.toLowerCase().contains('pending verification')) {
         if (kDebugMode) {
-          print('⚠️ No pending verification found - account may be verified or code expired');
+          print(
+            '⚠️ No pending verification found - account may be verified or code expired',
+          );
         }
         // Show helpful message but don't treat it as a critical error
         // Account might already be verified, or verification code expired
@@ -170,7 +184,11 @@ class VerificationViewModel extends ChangeNotifier {
     }
   }
 
-  void _showMessage(BuildContext context, String message, {bool isError = true}) {
+  void _showMessage(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
 
@@ -182,4 +200,3 @@ class VerificationViewModel extends ChangeNotifier {
     super.dispose();
   }
 }
-

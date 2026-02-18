@@ -4,15 +4,17 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/wallpaper/wallpaper.dart';
-import 'package:genwalls/repositories/wallpaper_repository.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/analytics_service.dart';
+import 'package:imagifyai/Core/services/in_app_review_service.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -22,7 +24,7 @@ import 'package:cross_file/cross_file.dart';
 
 class ImageCreatedViewModel extends ChangeNotifier {
   ImageCreatedViewModel({WallpaperRepository? wallpaperRepository})
-      : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
+    : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
 
   final WallpaperRepository _wallpaperRepository;
 
@@ -33,7 +35,8 @@ class ImageCreatedViewModel extends ChangeNotifier {
   String? errorMessage;
   DateTime? _pollingStartTime;
   int _pollingAttempts = 0;
-  static const int _maxPollingAttempts = 120; // 10 minutes max (120 attempts * 5 seconds)
+  static const int _maxPollingAttempts =
+      120; // 10 minutes max (120 attempts * 5 seconds)
 
   // Progress tracking for overlay
   double creationProgress = 0.0;
@@ -43,7 +46,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
   void setWallpaper(Wallpaper? data) {
     wallpaper = data;
-    
+
     // If wallpaper already has an image URL, stop polling
     if (data != null && data.imageUrl.isNotEmpty && data.imageUrl != 'null') {
       isPolling = false;
@@ -52,7 +55,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
       _currentStage = 'Complete!';
       _pollingStartTime = null;
       _pollingAttempts = 0;
-      
+
       if (kDebugMode) {
         print('✅ Wallpaper already has image URL, skipping polling');
         print('Image URL: ${data.imageUrl}');
@@ -65,13 +68,13 @@ class ImageCreatedViewModel extends ChangeNotifier {
         print('Wallpaper ID: ${data.id}');
       }
     }
-    
+
     notifyListeners();
   }
-  
+
   Future<void> checkWallpaperStatus(BuildContext context) async {
     if (wallpaper == null || wallpaper!.id.isEmpty) return;
-    
+
     // If image is already available, stop polling
     if (wallpaper!.imageUrl.isNotEmpty && wallpaper!.imageUrl != 'null') {
       isPolling = false;
@@ -83,19 +86,20 @@ class ImageCreatedViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    
+
     // Initialize polling start time on first attempt
     if (_pollingStartTime == null) {
       _pollingStartTime = DateTime.now();
       // Start progress animation when polling begins
       _startProgressAnimation();
     }
-    
+
     // Check timeout (10 minutes max)
     if (_pollingAttempts >= _maxPollingAttempts) {
       isPolling = false;
       _stopProgressAnimation();
-      errorMessage = 'Your masterpiece is taking a bit longer than usual. Feel free to try again!';
+      errorMessage =
+          'Your masterpiece is taking a bit longer than usual. Feel free to try again!';
       if (kDebugMode) {
         print('⏱️ Polling timeout after $_pollingAttempts attempts');
       }
@@ -103,34 +107,35 @@ class ImageCreatedViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    
+
     _pollingAttempts++;
     isPolling = true;
     notifyListeners();
-    
+
     // Get access token
     final signInViewModel = context.read<SignInViewModel>();
     final accessToken = signInViewModel.accessToken;
-    
+
     if (accessToken == null || accessToken.isEmpty) {
       isPolling = false;
       notifyListeners();
       return;
     }
-    
+
     try {
       final updatedWallpaper = await _wallpaperRepository.getWallpaperById(
         wallpaperId: wallpaper!.id,
         accessToken: accessToken,
       );
-      
+
       if (updatedWallpaper != null) {
-        if (updatedWallpaper.imageUrl.isNotEmpty && updatedWallpaper.imageUrl != 'null') {
+        if (updatedWallpaper.imageUrl.isNotEmpty &&
+            updatedWallpaper.imageUrl != 'null') {
           // Image is ready!
           // Preserve the edited prompt from current wallpaper (if it was edited)
           // The API might return the old prompt, so we keep the one from the current wallpaper
           final preservedPrompt = wallpaper!.prompt;
-          
+
           wallpaper = Wallpaper(
             id: updatedWallpaper.id,
             prompt: preservedPrompt, // Preserve the edited prompt
@@ -142,36 +147,40 @@ class ImageCreatedViewModel extends ChangeNotifier {
             imageUrl: updatedWallpaper.imageUrl, // Use the new image URL
             createdAt: updatedWallpaper.createdAt,
           );
-          
+
           isPolling = false;
           _stopProgressAnimation();
           creationProgress = 1.0;
           _currentStage = 'Complete!';
           _pollingStartTime = null;
           _pollingAttempts = 0;
-          
-          final elapsedTime = _pollingStartTime != null 
-              ? DateTime.now().difference(_pollingStartTime!).inSeconds 
+
+          final elapsedTime = _pollingStartTime != null
+              ? DateTime.now().difference(_pollingStartTime!).inSeconds
               : 0;
-          
+
           if (kDebugMode) {
             print('✅ Image is ready! URL: ${updatedWallpaper.imageUrl}');
-            print('⏱️ Total generation time: ${elapsedTime}s (${_pollingAttempts} polling attempts)');
+            print(
+              '⏱️ Total generation time: ${elapsedTime}s (${_pollingAttempts} polling attempts)',
+            );
             print('📝 Preserved prompt: $preservedPrompt');
           }
-          
+
           notifyListeners();
         } else {
           // Still generating, keep polling
-          final elapsedTime = _pollingStartTime != null 
-              ? DateTime.now().difference(_pollingStartTime!).inSeconds 
+          final elapsedTime = _pollingStartTime != null
+              ? DateTime.now().difference(_pollingStartTime!).inSeconds
               : 0;
-          
+
           if (kDebugMode && _pollingAttempts % 12 == 0) {
             // Log every minute (12 attempts * 5 seconds)
-            print('⏳ Still generating... Elapsed: ${elapsedTime}s, Attempts: $_pollingAttempts');
+            print(
+              '⏳ Still generating... Elapsed: ${elapsedTime}s, Attempts: $_pollingAttempts',
+            );
           }
-          
+
           isPolling = true;
           notifyListeners();
         }
@@ -189,18 +198,18 @@ class ImageCreatedViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   void _startProgressAnimation() {
     _progressTimer?.cancel();
     creationProgress = 0.0;
     _currentStage = 'Generating your masterpiece...';
-    
+
     _progressTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (!isPolling) {
         timer.cancel();
         return;
       }
-      
+
       // Simple progress animation from 0 to 99%
       // Will reach 100% only when image is ready
       if (creationProgress < 0.99) {
@@ -208,22 +217,22 @@ class ImageCreatedViewModel extends ChangeNotifier {
       } else {
         creationProgress = 0.99; // Cap at 99% until image is ready
       }
-      
+
       notifyListeners();
     });
   }
-  
+
   void _stopProgressAnimation() {
     _progressTimer?.cancel();
     _progressTimer = null;
   }
-  
+
   // Get elapsed time in seconds
   int get elapsedPollingTime {
     if (_pollingStartTime == null) return 0;
     return DateTime.now().difference(_pollingStartTime!).inSeconds;
   }
-  
+
   // Get elapsed time as formatted string (e.g., "2m 30s")
   String get elapsedPollingTimeFormatted {
     final seconds = elapsedPollingTime;
@@ -251,20 +260,20 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
     try {
       final oldWallpaperId = wallpaper!.id;
-      
+
       // Use edited prompt if provided, otherwise use original prompt
       // Always use the same size and style from the original wallpaper
       final promptToUse = editedPrompt?.trim() ?? wallpaper!.prompt;
       final sizeToUse = wallpaper!.size;
       final styleToUse = wallpaper!.style;
-      
+
       if (kDebugMode) {
         print('🔄 Recreating wallpaper with:');
         print('   Prompt: $promptToUse');
         print('   Size: $sizeToUse');
         print('   Style: $styleToUse');
       }
-      
+
       final recreatedWallpaper = await _wallpaperRepository.recreateWallpaper(
         wallpaperId: oldWallpaperId,
         accessToken: accessToken,
@@ -272,16 +281,20 @@ class ImageCreatedViewModel extends ChangeNotifier {
         size: sizeToUse,
         style: styleToUse,
       );
-      
+
       // Check if API returned a different prompt than what we sent
       if (kDebugMode && recreatedWallpaper.prompt != promptToUse) {
         print('⚠️ WARNING: API returned different prompt!');
         print('   Sent prompt: "$promptToUse"');
         print('   API returned: "${recreatedWallpaper.prompt}"');
-        print('   This indicates the backend is not using the prompt from the request body.');
-        print('   The generated image will be based on the old prompt, not the edited one.');
+        print(
+          '   This indicates the backend is not using the prompt from the request body.',
+        );
+        print(
+          '   The generated image will be based on the old prompt, not the edited one.',
+        );
       }
-      
+
       // Update the wallpaper with the edited prompt if it was provided
       // (API might not return the updated prompt, so we override it)
       wallpaper = Wallpaper(
@@ -295,31 +308,38 @@ class ImageCreatedViewModel extends ChangeNotifier {
         imageUrl: recreatedWallpaper.imageUrl,
         createdAt: recreatedWallpaper.createdAt,
       );
-      
+
       // Reset polling state and start checking for the new image
       isPolling = true;
-      _pollingStartTime = DateTime.now(); // Reset polling start time for new generation
+      _pollingStartTime =
+          DateTime.now(); // Reset polling start time for new generation
       _pollingAttempts = 0; // Reset polling attempts counter
-      
+
       // Start progress animation
       _startProgressAnimation();
-      
+
       if (kDebugMode) {
         print('✅ Wallpaper recreated with new ID: ${wallpaper!.id}');
         print('New prompt: ${wallpaper!.prompt}');
         print('New image URL: ${wallpaper!.imageUrl}');
       }
-      
-      _showMessage(context, 'New version is being created! This may take a moment...', isError: false);
-      
+
+      _showMessage(
+        context,
+        'New version is being created! This may take a moment...',
+        isError: false,
+      );
+
       // Start checking status immediately
       if (wallpaper!.imageUrl.isEmpty || wallpaper!.imageUrl == 'null') {
         // Image is still generating, will be polled by the screen
         if (kDebugMode) {
-          print('⏳ New wallpaper image is still generating, polling will start...');
+          print(
+            '⏳ New wallpaper image is still generating, polling will start...',
+          );
         }
       }
-      
+
       notifyListeners();
     } on ApiException catch (e) {
       errorMessage = e.message;
@@ -327,7 +347,8 @@ class ImageCreatedViewModel extends ChangeNotifier {
       _showMessage(context, e.message);
       notifyListeners();
     } catch (_) {
-      errorMessage = 'Hmm, something unexpected happened. Let\'s try that again!';
+      errorMessage =
+          'Hmm, something unexpected happened. Let\'s try that again!';
       isPolling = false;
       _showMessage(context, errorMessage!);
       notifyListeners();
@@ -401,20 +422,25 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
       // Download image bytes from URL
       final response = await http.get(Uri.parse(imageUrl));
-      
+
       if (response.statusCode != 200) {
         throw Exception('Failed to download image: ${response.statusCode}');
       }
 
       // Save image to device
       await _saveImageToDevice(context, response.bodyBytes, wallpaper!.id);
-      
-      _showMessage(context, 'Saved to your device! Enjoy your new wallpaper', isError: false);
+
+      _showMessage(
+        context,
+        'Saved to your device! Enjoy your new wallpaper',
+        isError: false,
+      );
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);
     } catch (e) {
-      errorMessage = 'Couldn\'t save your wallpaper right now. Let\'s try again!';
+      errorMessage =
+          'Couldn\'t save your wallpaper right now. Let\'s try again!';
       _showMessage(context, errorMessage!);
     } finally {
       isDownloading = false;
@@ -446,23 +472,27 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
       final imageUrl = wallpaperData.imageUrl;
       if (imageUrl.isEmpty || imageUrl == 'null') {
-        _showMessage(context, 'Image is not ready yet. Please try again in a moment');
+        _showMessage(
+          context,
+          'Image is not ready yet. Please try again in a moment',
+        );
         return;
       }
 
       // Download the image to a temporary file
       final response = await http.get(Uri.parse(imageUrl));
-      
+
       if (response.statusCode != 200) {
         throw Exception('Failed to download image: ${response.statusCode}');
       }
 
       // Save to temporary file
       final directory = await getTemporaryDirectory();
-      final extension = imageUrl.contains('.') 
-          ? imageUrl.split('.').last.split('?').first 
+      final extension = imageUrl.contains('.')
+          ? imageUrl.split('.').last.split('?').first
           : 'jpg';
-      final fileName = 'wallpaper_share_${DateTime.now().millisecondsSinceEpoch}.$extension';
+      final fileName =
+          'wallpaper_share_${DateTime.now().millisecondsSinceEpoch}.$extension';
       final filePath = '${directory.path}/$fileName';
       final file = File(filePath);
       await file.writeAsBytes(response.bodyBytes);
@@ -472,8 +502,11 @@ class ImageCreatedViewModel extends ChangeNotifier {
       await Share.shareXFiles(
         [xFile],
         text: 'Check out this amazing wallpaper!',
-        subject: 'Wallpaper from GenWalls',
+        subject: 'Wallpaper from imagifyai',
       );
+
+      InAppReviewService.recordShareAndMaybeReview(context);
+      AnalyticsService.logImageShared();
 
       // Clean up temporary file after a delay
       Future.delayed(const Duration(seconds: 5), () {
@@ -501,34 +534,34 @@ class ImageCreatedViewModel extends ChangeNotifier {
     try {
       // Get the directory for saving images
       final directory = await getApplicationDocumentsDirectory();
-      final imageDir = Directory('${directory.path}/Genwalls/Wallpapers');
-      
+      final imageDir = Directory('${directory.path}/imagifyai/Wallpapers');
+
       // Create directory if it doesn't exist
       if (!await imageDir.exists()) {
         await imageDir.create(recursive: true);
       }
 
-      // Determine file extension (default to jpg)
-      // imageUrl is non-nullable in Wallpaper model, but we check anyway for safety
       final imageUrl = wallpaper!.imageUrl;
       final extension = imageUrl.isNotEmpty && imageUrl.contains('.')
           ? imageUrl.split('.').last
           : 'jpg';
-      final fileName = 'wallpaper_${wallpaperId}_${DateTime.now().millisecondsSinceEpoch}.$extension';
+      final fileName =
+          'wallpaper_${wallpaperId}_${DateTime.now().millisecondsSinceEpoch}.$extension';
       final filePath = '${imageDir.path}/$fileName';
 
       // Write image bytes to file
       final file = File(filePath);
       await file.writeAsBytes(imageBytes);
-
-      // Note: To save to gallery on mobile, you would need image_gallery_saver package
-      // For now, we save to app's documents directory
     } catch (e) {
       throw Exception('Failed to save image: ${e.toString()}');
     }
   }
 
-  void _showMessage(BuildContext context, String message, {bool isError = true}) {
+  void _showMessage(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
 }
@@ -560,7 +593,7 @@ class _DownloadShareDialog extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-             SizedBox(height: context.h(20)),
+                SizedBox(height: context.h(20)),
                 // Display the generated image preview - Full screen
                 Expanded(
                   child: imageUrl.isNotEmpty && imageUrl != 'null'
@@ -568,146 +601,153 @@ class _DownloadShareDialog extends StatelessWidget {
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.black,
-                            borderRadius: BorderRadius.circular(context.radius(12)),
+                            borderRadius: BorderRadius.circular(
+                              context.radius(12),
+                            ),
                             border: Border.all(
-                              color:context.primaryColor.withOpacity(0.3),
+                              color: context.primaryColor.withOpacity(0.3),
                               width: 1,
                             ),
                           ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(context.radius(12)),
-                  child: Image.network(
-                    imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: AppLoadingIndicator.medium(
-                               color:context.primaryColor
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.black,
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: Colors.red,
-                                size: 40,
-                              ),
-                              SizedBox(height: context.h(8)),
-                              Text(
-                                'Couldn\'t load image. Please try again',
-                                style: GoogleFonts.poppins(
-                                  color: Colors.white70,
-                                  fontSize: context.text(12),
-                                ),
-                              ),
-                            ],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              context.radius(12),
+                            ),
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Center(
+                                      child: AppLoadingIndicator.medium(
+                                        color: context.primaryColor,
+                                      ),
+                                    );
+                                  },
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.black,
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: Colors.red,
+                                          size: 40,
+                                        ),
+                                        SizedBox(height: context.h(8)),
+                                        Text(
+                                          'Couldn\'t load image. Please try again',
+                                          style: GoogleFonts.poppins(
+                                            color: Colors.white70,
+                                            fontSize: context.text(12),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                      )
+                        )
                       : Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.black,
-                            borderRadius: BorderRadius.circular(context.radius(12)),
+                            borderRadius: BorderRadius.circular(
+                              context.radius(12),
+                            ),
                           ),
                           child: Center(
                             child: AppLoadingIndicator.medium(
-                               color:context.primaryColor
+                              color: context.primaryColor,
                             ),
                           ),
                         ),
                 ),
                 SizedBox(height: context.h(20)),
-            Text(
-              'What would you like to do?',
-              style: GoogleFonts.poppins(
-                color: AppColors.whiteColor,
-                fontSize: context.text(16),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: context.h(16)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      Container(
-                        height: context.h(60),
-                        width: context.w(60),
-                        decoration: BoxDecoration(
-                          color:context.primaryColor.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.download,
-                            color:context.primaryColor,
-                            size: 30,
-                          ),
-                          onPressed: onDownload,
-                        ),
-                      ),
-                      SizedBox(height: context.h(8)),
-                      Text(
-                        'Save to Device',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.whiteColor,
-                          fontSize: context.text(14),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                Text(
+                  'What would you like to do?',
+                  style: GoogleFonts.poppins(
+                    color: AppColors.whiteColor,
+                    fontSize: context.text(16),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(width: context.w(20)),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Container(
-                        height: context.h(60),
-                        width: context.w(60),
-                        decoration: BoxDecoration(
-                          color:context.primaryColor.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.share,
-                                color:context.primaryColor,
-                            size: 30,
+                SizedBox(height: context.h(16)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Container(
+                            height: context.h(60),
+                            width: context.w(60),
+                            decoration: BoxDecoration(
+                              color: context.primaryColor.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.download,
+                                color: context.primaryColor,
+                                size: 30,
+                              ),
+                              onPressed: onDownload,
+                            ),
                           ),
-                          onPressed: onShare,
-                        ),
+                          SizedBox(height: context.h(8)),
+                          Text(
+                            'Save to Device',
+                            style: GoogleFonts.poppins(
+                              color: AppColors.whiteColor,
+                              fontSize: context.text(14),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: context.h(8)),
-                      Text(
-                        'Share with Friends',
-                        style: GoogleFonts.poppins(
-                          color: AppColors.whiteColor,
-                          fontSize: context.text(14),
-                          fontWeight: FontWeight.w500,
-                        ),
+                    ),
+                    SizedBox(width: context.w(20)),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Container(
+                            height: context.h(60),
+                            width: context.w(60),
+                            decoration: BoxDecoration(
+                              color: context.primaryColor.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.share,
+                                color: context.primaryColor,
+                                size: 30,
+                              ),
+                              onPressed: onShare,
+                            ),
+                          ),
+                          SizedBox(height: context.h(8)),
+                          Text(
+                            'Share with Friends',
+                            style: GoogleFonts.poppins(
+                              color: AppColors.whiteColor,
+                              fontSize: context.text(14),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          
-          ],
             ),
           ),
         ),
@@ -715,4 +755,3 @@ class _DownloadShareDialog extends StatelessWidget {
     );
   }
 }
-

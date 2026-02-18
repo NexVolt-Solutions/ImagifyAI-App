@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/CustomWidget/full_screen_image_viewer.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/full_screen_image_viewer.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 
 class CustomListView extends StatelessWidget {
   final String? image;
   final List<Wallpaper>? wallpapers;
-  
-  const CustomListView({
-    super.key,
-    this.image,
-    this.wallpapers,
-  });
+
+  const CustomListView({super.key, this.image, this.wallpapers});
 
   @override
   Widget build(BuildContext context) {
     // If wallpapers list is provided, use it; otherwise use image or placeholder
-    final itemCount = wallpapers != null ? wallpapers!.length : (image != null ? 1 : 9);
-    
+    final itemCount = wallpapers != null
+        ? wallpapers!.length
+        : (image != null ? 1 : 9);
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.h(10)),
       child: SizedBox(
@@ -31,10 +29,12 @@ class CustomListView extends StatelessWidget {
             // If wallpapers are provided, display them
             if (wallpapers != null && wallpapers!.isNotEmpty) {
               final wallpaper = wallpapers![index];
-              final imageUrl = wallpaper.imageUrl.isNotEmpty 
-                  ? wallpaper.imageUrl 
-                  : (wallpaper.thumbnailUrl.isNotEmpty ? wallpaper.thumbnailUrl : null);
-              
+              final imageUrl = wallpaper.imageUrl.isNotEmpty
+                  ? wallpaper.imageUrl
+                  : (wallpaper.thumbnailUrl.isNotEmpty
+                        ? wallpaper.thumbnailUrl
+                        : null);
+
               return GestureDetector(
                 onTap: () {
                   if (imageUrl != null && imageUrl.isNotEmpty) {
@@ -71,27 +71,31 @@ class CustomListView extends StatelessWidget {
                                   color: context.colorScheme.surface,
                                   child: Icon(
                                     Icons.image_not_supported,
-                                    color: context.colorScheme.onSurface.withOpacity(0.5),
+                                    color: context.colorScheme.onSurface
+                                        .withOpacity(0.5),
                                     size: 40,
                                   ),
                                 );
                               },
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  color: context.colorScheme.surface,
-                                  child: Center(
-                                    child: AppLoadingIndicator.medium(),
-                                  ),
-                                );
-                              },
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return Container(
+                                      color: context.colorScheme.surface,
+                                      child: Center(
+                                        child: AppLoadingIndicator.medium(),
+                                      ),
+                                    );
+                                  },
                             ),
                           )
                         : Container(
                             color: context.colorScheme.surface,
                             child: Icon(
                               Icons.image_not_supported,
-                              color: context.colorScheme.onSurface.withOpacity(0.5),
+                              color: context.colorScheme.onSurface.withOpacity(
+                                0.5,
+                              ),
                               size: 40,
                             ),
                           ),
@@ -99,7 +103,7 @@ class CustomListView extends StatelessWidget {
                 ),
               );
             }
-            
+
             // Fallback to image or placeholder
             return Container(
               height: context.h(131),

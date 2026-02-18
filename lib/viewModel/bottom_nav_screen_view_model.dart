@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/view/Home/home.dart';
-import 'package:genwalls/view/ImageGenerate/image_generate_screen.dart';
-import 'package:genwalls/view/ProfileScreen/profile_screen.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/view/Home/home.dart';
+import 'package:imagifyai/view/ImageGenerate/image_generate_screen.dart';
+import 'package:imagifyai/view/ProfileScreen/profile_screen.dart';
 
 class BottomNavScreenViewModel extends ChangeNotifier {
   int _currentIndex = 0;

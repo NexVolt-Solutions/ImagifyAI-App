@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
- import 'package:genwalls/Core/Constants/size_extension.dart';
- import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class CustomTextRich extends StatelessWidget {
   const CustomTextRich({
@@ -28,7 +28,7 @@ class CustomTextRich extends StatelessWidget {
             children: [
               TextSpan(
                 text: text1,
-                style: context.appTextStyles?.customTextRichText1 .copyWith(
+                style: context.appTextStyles?.customTextRichText1.copyWith(
                   fontSize: textSize1 ?? textSize2 ?? context.text(14),
                 ),
               ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class PasswordText extends StatelessWidget {
   final String text;
@@ -23,10 +23,7 @@ class PasswordText extends StatelessWidget {
         children: [
           Icon(icon, color: iconColor, size: context.text(18)),
           SizedBox(width: context.w(8)),
-          Text(
-            text,
-            style: context.appTextStyles?.passwordTextStyle,
-          ),
+          Text(text, style: context.appTextStyles?.passwordTextStyle),
         ],
       ),
     );

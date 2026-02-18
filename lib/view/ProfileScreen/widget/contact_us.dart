@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -27,33 +27,33 @@ class _ContactUsState extends State<ContactUs> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.backgroundColor,
-         //with arrow 
-        appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(65),
+      //with arrow
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(65),
 
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
-                  Positioned(
-                    left: 0,
-                     child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        color: Theme.of(context).iconTheme.color,
-                        size: 20,
-                      ),
-                    ),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
+              SvgPicture.asset(AppAssets.imagifyaiLogo, fit: BoxFit.cover),
+              Positioned(
+                left: 0,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    color: Theme.of(context).iconTheme.color,
+                    size: 20,
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-          
+        ),
+      ),
+
       body: SafeArea(
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: context.h(20)),
@@ -71,7 +71,7 @@ class _ContactUsState extends State<ContactUs> {
                   ),
                   SizedBox(height: context.h(4)),
                   Text(
-                    "Manage your GENWALLS account settings",
+                    "Manage your imagifyai account settings",
                     style: context.appTextStyles?.profileScreenSubtitle,
                     textAlign: TextAlign.center,
                   ),
@@ -180,7 +180,9 @@ class _ContactUsState extends State<ContactUs> {
                               border: Border.all(
                                 color: isSelected
                                     ? context.primaryColor
-                                    : context.colorScheme.onSurface.withOpacity(0.5),
+                                    : context.colorScheme.onSurface.withOpacity(
+                                        0.5,
+                                      ),
                                 width: 2,
                               ),
                             ),
@@ -203,11 +205,14 @@ class _ContactUsState extends State<ContactUs> {
                           SizedBox(width: context.w(8)),
                           Text(
                             subjects[index],
-                            style: (context.appTextStyles?.profileContactInfo ?? TextStyle()).copyWith(
-                              color: isSelected
-                                  ? context.primaryColor
-                                  : context.textColor,
-                            ),
+                            style:
+                                (context.appTextStyles?.profileContactInfo ??
+                                        TextStyle())
+                                    .copyWith(
+                                      color: isSelected
+                                          ? context.primaryColor
+                                          : context.textColor,
+                                    ),
                           ),
                         ],
                       ),
@@ -226,7 +231,6 @@ class _ContactUsState extends State<ContactUs> {
             ),
             SizedBox(height: context.h(100)),
             CustomButton(
-               
               width: context.w(350),
               text: "Save Changes",
               borderColor: null,

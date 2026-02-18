@@ -2,17 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/custom_textField.dart';
-import 'package:genwalls/Core/CustomWidget/custom_text_rich.dart';
-import 'package:genwalls/Core/CustomWidget/password_text.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/viewModel/sign_up_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_text_rich.dart';
+import 'package:imagifyai/Core/CustomWidget/password_text.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/viewModel/sign_up_view_model.dart';
 import 'package:provider/provider.dart';
 
 class SignUp extends StatefulWidget {
@@ -31,8 +31,8 @@ class _SignUpState extends State<SignUp> {
       builder: (context, signUpViewModel, _) {
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          //with arrow 
-        appBar: PreferredSize(
+          //with arrow
+          appBar: PreferredSize(
             preferredSize: const Size.fromHeight(65),
 
             child: Align(
@@ -41,10 +41,10 @@ class _SignUpState extends State<SignUp> {
                 alignment: Alignment.center,
                 children: [
                   SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                  SvgPicture.asset(AppAssets.genWallsLogo, fit: BoxFit.cover),
+                  SvgPicture.asset(AppAssets.imagifyaiLogo, fit: BoxFit.cover),
                   Positioned(
                     left: 0,
-                     child: GestureDetector(
+                    child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Icon(
                         Icons.arrow_back_ios,
@@ -57,7 +57,7 @@ class _SignUpState extends State<SignUp> {
               ),
             ),
           ),
-           body: SafeArea(
+          body: SafeArea(
             child: Form(
               key: _formKey,
               child: ListView(
@@ -97,14 +97,18 @@ class _SignUpState extends State<SignUp> {
                             : Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                Icon(Icons.camera_alt_outlined, size: context.h(40), color: context.colorScheme.onSurface,),
+                                  Icon(
+                                    Icons.camera_alt_outlined,
+                                    size: context.h(40),
+                                    color: context.colorScheme.onSurface,
+                                  ),
+
                                   // SizedBox(height: context.h(8)),
                                   // Text(
                                   //   'Add profile image',
                                   //   style: context.appTextStyles?.authBodyMedium,
                                   //   textAlign: TextAlign.center,
                                   // ),
-                                  
                                 ],
                               ),
                       ),
@@ -115,9 +119,9 @@ class _SignUpState extends State<SignUp> {
                     controller: signUpViewModel.usernameController,
                     prefixIcon: Icon(Icons.person),
                     validatorType: "name",
-                        hintText: 'Create your username',
+                    hintText: 'Create your username',
                     hintStyle: context.appTextStyles?.authHintText,
-                      label: "User Name",
+                    label: "User Name",
                     enabledBorderColor: context.colorScheme.onSurface,
                   ),
                   SizedBox(height: context.h(24)),
@@ -220,7 +224,9 @@ class _SignUpState extends State<SignUp> {
                           border: Border.all(
                             color: context.colorScheme.onSurface,
                           ),
-                          borderRadius: BorderRadius.circular(context.radius(8)),
+                          borderRadius: BorderRadius.circular(
+                            context.radius(8),
+                          ),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -265,7 +271,10 @@ class _SignUpState extends State<SignUp> {
                     textSize1: context.text(14),
                     textSize2: context.text(14),
                     onTap2: () {
-                      Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
+                      Navigator.pushReplacementNamed(
+                        context,
+                        RoutesName.SignInScreen,
+                      );
                     },
                   ),
                   SizedBox(height: context.h(20)),

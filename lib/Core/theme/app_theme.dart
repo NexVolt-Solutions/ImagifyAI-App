@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
@@ -24,7 +24,7 @@ class AppTheme {
         onBackground: AppColors.lightTextPrimary, // Dark brown
         onError: Colors.white,
       ),
-      
+
       // AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.lightBackground,
@@ -33,7 +33,7 @@ class AppTheme {
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColors.lightTextPrimary),
       ),
-      
+
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -61,16 +61,14 @@ class AppTheme {
         labelStyle: const TextStyle(color: AppColors.lightTextTertiary),
         hintStyle: const TextStyle(color: AppColors.lightTextTertiary),
       ),
-      
+
       // Card Theme
       cardTheme: CardThemeData(
         color: AppColors.lightCardBackground,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      
+
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -78,31 +76,25 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
-      
+
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primeryColor,
-        ),
+        style: TextButton.styleFrom(foregroundColor: AppColors.primeryColor),
       ),
-      
+
       // Icon Theme
-      iconTheme: const IconThemeData(
-        color: AppColors.lightTextPrimary,
-      ),
-      
+      iconTheme: const IconThemeData(color: AppColors.lightTextPrimary),
+
       // Text Theme with Google Fonts Poppins (Golden/Warm Theme)
       textTheme: TextTheme(
         // Display styles
         displayLarge: GoogleFonts.poppins(color: AppColors.lightTextPrimary),
         displayMedium: GoogleFonts.poppins(color: AppColors.lightTextPrimary),
         displaySmall: GoogleFonts.poppins(color: AppColors.lightTextPrimary),
-        
+
         // Headline styles
         headlineLarge: GoogleFonts.poppins(
           color: AppColors.lightTextPrimary,
@@ -119,7 +111,7 @@ class AppTheme {
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
-        
+
         // Title styles
         titleLarge: GoogleFonts.poppins(
           color: AppColors.lightTextPrimary,
@@ -136,7 +128,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        
+
         // Body styles
         bodyLarge: GoogleFonts.poppins(
           color: AppColors.lightTextPrimary,
@@ -153,7 +145,7 @@ class AppTheme {
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
-        
+
         // Label styles
         labelLarge: GoogleFonts.poppins(
           color: AppColors.lightTextPrimary,
@@ -171,32 +163,29 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
-      
+
       // Custom Text Styles Extension (accessible via Theme.of(context).extension<AppTextStyles>())
-      extensions: <ThemeExtension<dynamic>>[
-        AppTextStyles.light,
-      ],
-      
+      extensions: <ThemeExtension<dynamic>>[AppTextStyles.light],
+
       // Divider Theme
       dividerTheme: const DividerThemeData(
         color: AppColors.textFieldBoderColor,
         thickness: 1,
       ),
-      
+
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: AppColors.lightBackground  ,
+        backgroundColor: AppColors.lightBackground,
         selectedItemColor: AppColors.primeryColor,
         unselectedItemColor: AppColors.bottomBarIconColor,
         type: BottomNavigationBarType.fixed,
 
-
         selectedLabelStyle: TextStyle(
-           fontSize: 10,
+          fontSize: 10,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: TextStyle(
-           fontSize: 10,
+          fontSize: 10,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -222,7 +211,7 @@ class AppTheme {
         onBackground: Colors.white,
         onError: Colors.white,
       ),
-      
+
       // AppBar Theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.blackColor,
@@ -231,7 +220,7 @@ class AppTheme {
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
       ),
-      
+
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -259,16 +248,14 @@ class AppTheme {
         labelStyle: const TextStyle(color: AppColors.textFieldSubTitleColor),
         hintStyle: const TextStyle(color: AppColors.textFieldSubTitleColor),
       ),
-      
+
       // Card Theme
       cardTheme: CardThemeData(
         color: AppColors.containerColor,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      
+
       // Elevated Button Theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -276,31 +263,25 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
-      
+
       // Text Button Theme
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: AppColors.primeryColor,
-        ),
+        style: TextButton.styleFrom(foregroundColor: AppColors.primeryColor),
       ),
-      
+
       // Icon Theme
-      iconTheme: const IconThemeData(
-        color: Colors.white,
-      ),
-      
+      iconTheme: const IconThemeData(color: Colors.white),
+
       // Text Theme with Google Fonts Poppins
       textTheme: TextTheme(
         // Display styles
         displayLarge: GoogleFonts.poppins(color: Colors.white),
         displayMedium: GoogleFonts.poppins(color: Colors.white),
         displaySmall: GoogleFonts.poppins(color: Colors.white),
-        
+
         // Headline styles
         headlineLarge: GoogleFonts.poppins(
           color: Colors.white,
@@ -317,7 +298,7 @@ class AppTheme {
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
-        
+
         // Title styles
         titleLarge: GoogleFonts.poppins(
           color: Colors.white,
@@ -334,7 +315,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        
+
         // Body styles
         bodyLarge: GoogleFonts.poppins(
           color: Colors.white,
@@ -351,7 +332,7 @@ class AppTheme {
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
-        
+
         // Label styles
         labelLarge: GoogleFonts.poppins(
           color: Colors.white,
@@ -369,18 +350,16 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
-      
+
       // Custom Text Styles Extension (accessible via Theme.of(context).extension<AppTextStyles>())
-      extensions: <ThemeExtension<dynamic>>[
-        AppTextStyles.dark,
-      ],
-      
+      extensions: <ThemeExtension<dynamic>>[AppTextStyles.dark],
+
       // Divider Theme
       dividerTheme: const DividerThemeData(
         color: AppColors.textFieldBoderColor,
         thickness: 1,
       ),
-      
+
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.bottomBarColor,
@@ -395,71 +374,105 @@ class AppTheme {
 /// Custom Text Styles Extension for Auth screens and app-wide usage
 /// All styles use Google Fonts Poppins
 class AppTextStyles extends ThemeExtension<AppTextStyles> {
-  final TextStyle authTitlePrimary;      // 20px, w600, primary color (Sign Up, Sign In, etc.)
-  final TextStyle authTitleWhite;       // 20px, w600, white
-  final TextStyle authSubtitlePrimary;  // 14px, w500, primary color
-  final TextStyle authSubtitleWhite;   // 14px, w500, white
-  final TextStyle authBodyRegular;      // 14px, w400, white with opacity
-  final TextStyle authBodyMedium;      // 14px, w500, white
-  final TextStyle authBodyGray;        // 14px, w500, gray
-  final TextStyle authBodyPrimary;      // 14px, w600, primary color
-  final TextStyle authHintText;        // 12px, w500, textFieldSubTitleColor
-  final TextStyle authOTPText;         // 14px, w500, white
-  final TextStyle authOTPLarge;        // 20px, w600, gray
-  final TextStyle authTimerText;       // 16px, w500, white
-  final TextStyle authResendText;      // 16px, w600, primary color
-  final TextStyle authPasswordTitle;   // 16px, w500, primary color
-  final TextStyle authGoogleButton;    // 14px, w500, gray/white
+  final TextStyle
+  authTitlePrimary; // 20px, w600, primary color (Sign Up, Sign In, etc.)
+  final TextStyle authTitleWhite; // 20px, w600, white
+  final TextStyle authSubtitlePrimary; // 14px, w500, primary color
+  final TextStyle authSubtitleWhite; // 14px, w500, white
+  final TextStyle authBodyRegular; // 14px, w400, white with opacity
+  final TextStyle authBodyMedium; // 14px, w500, white
+  final TextStyle authBodyGray; // 14px, w500, gray
+  final TextStyle authBodyPrimary; // 14px, w600, primary color
+  final TextStyle authHintText; // 12px, w500, textFieldSubTitleColor
+  final TextStyle authOTPText; // 14px, w500, white
+  final TextStyle authOTPLarge; // 20px, w600, gray
+  final TextStyle authTimerText; // 16px, w500, white
+  final TextStyle authResendText; // 16px, w600, primary color
+  final TextStyle authPasswordTitle; // 16px, w500, primary color
+  final TextStyle authGoogleButton; // 14px, w500, gray/white
   final TextStyle bottomNavLabelSelected; // 10px, w600, primary color (Manrope)
-  final TextStyle bottomNavLabelUnselected; // 10px, w600, bottomBarIconColor (Manrope)
-  final TextStyle homeGreetingTitle;   // 20px, w500, white/black (greeting title)
-  final TextStyle homeGreetingSubtitle; // 14px, w500, textFieldIconColor (greeting subtitle)
-  final TextStyle homeCardTitle;       // 20px, w600, white/black (card title)
-  final TextStyle homeCardDescription; // 14px, w500, white/black (card description)
-  final TextStyle imageCreatedTitle;  // 16px, w500, white/black (screen title)
-  final TextStyle imageCreatedError;  // 12px, w500, white/black (error message)
-  final TextStyle imageCreatedPollingTitle; // 14px, w500, white/black (polling title)
-  final TextStyle imageCreatedPollingTime; // 12px, w400, textFieldIconColor (elapsed time)
-  final TextStyle imageCreatedPollingSubtitle; // 10px, w400, textFieldIconColor (polling subtitle)
-  final TextStyle imageCreatedPromptText; // 14px, w500, white/black (prompt text)
-  final TextStyle imageCreatedPromptHint; // 14px, w500, textFieldIconColor (prompt hint)
-  final TextStyle imageGenerateSectionTitle; // 16px, w500, white/black (section titles)
-  final TextStyle imageGeneratePromptText; // 12px, w500, white/black (prompt text field)
-  final TextStyle imageGeneratePromptHint; // 12px, w500, textFieldIconColor (prompt hint)
-  final TextStyle imageGenerateAISuggestion; // 12px, w500, white/black (AI suggestion button)
-  final TextStyle imageGenerateLoadingPercent; // 48px, w600, white/black (loading percentage)
-  final TextStyle imageGenerateLoadingTitle; // 20px, w600, white/black (loading main title)
-  final TextStyle imageGenerateLoadingStage; // 16px, w500, primary/white (loading stage)
-  final TextStyle imageGenerateLoadingTime; // 12px, w400, white with opacity (elapsed time)
-  final TextStyle imageGenerateStageLabel; // 10px, w400/w600, primary/white with opacity (stage labels)
+  final TextStyle
+  bottomNavLabelUnselected; // 10px, w600, bottomBarIconColor (Manrope)
+  final TextStyle homeGreetingTitle; // 20px, w500, white/black (greeting title)
+  final TextStyle
+  homeGreetingSubtitle; // 14px, w500, textFieldIconColor (greeting subtitle)
+  final TextStyle homeCardTitle; // 20px, w600, white/black (card title)
+  final TextStyle
+  homeCardDescription; // 14px, w500, white/black (card description)
+  final TextStyle imageCreatedTitle; // 16px, w500, white/black (screen title)
+  final TextStyle imageCreatedError; // 12px, w500, white/black (error message)
+  final TextStyle
+  imageCreatedPollingTitle; // 14px, w500, white/black (polling title)
+  final TextStyle
+  imageCreatedPollingTime; // 12px, w400, textFieldIconColor (elapsed time)
+  final TextStyle
+  imageCreatedPollingSubtitle; // 10px, w400, textFieldIconColor (polling subtitle)
+  final TextStyle
+  imageCreatedPromptText; // 14px, w500, white/black (prompt text)
+  final TextStyle
+  imageCreatedPromptHint; // 14px, w500, textFieldIconColor (prompt hint)
+  final TextStyle
+  imageGenerateSectionTitle; // 16px, w500, white/black (section titles)
+  final TextStyle
+  imageGeneratePromptText; // 12px, w500, white/black (prompt text field)
+  final TextStyle
+  imageGeneratePromptHint; // 12px, w500, textFieldIconColor (prompt hint)
+  final TextStyle
+  imageGenerateAISuggestion; // 12px, w500, white/black (AI suggestion button)
+  final TextStyle
+  imageGenerateLoadingPercent; // 48px, w600, white/black (loading percentage)
+  final TextStyle
+  imageGenerateLoadingTitle; // 20px, w600, white/black (loading main title)
+  final TextStyle
+  imageGenerateLoadingStage; // 16px, w500, primary/white (loading stage)
+  final TextStyle
+  imageGenerateLoadingTime; // 12px, w400, white with opacity (elapsed time)
+  final TextStyle
+  imageGenerateStageLabel; // 10px, w400/w600, primary/white with opacity (stage labels)
   final TextStyle onboardingTitle; // 22px, w600, white/black (onboarding title)
-  final TextStyle onboardingSubtitle; // 16px, w400, white70/black54 (onboarding subtitle)
-  final TextStyle onboardingButton; // 16px, w500, white/black (onboarding button)
+  final TextStyle
+  onboardingSubtitle; // 16px, w400, white70/black54 (onboarding subtitle)
+  final TextStyle
+  onboardingButton; // 16px, w500, white/black (onboarding button)
   final TextStyle profileName; // 16px, w500, primary/black (profile name)
   final TextStyle profileEmail; // 12px, w500, white/black (profile email)
-  final TextStyle profileListItemTitle; // 14px, w500, white/black (list item title)
-  final TextStyle profileListItemSubtitle; // 13px, w400, subTitleColor/black54 (list item subtitle)
+  final TextStyle
+  profileListItemTitle; // 14px, w500, white/black (list item title)
+  final TextStyle
+  profileListItemSubtitle; // 13px, w400, subTitleColor/black54 (list item subtitle)
   final TextStyle profileScreenTitle; // 20px, w600, white/black (screen title)
-  final TextStyle profileScreenSubtitle; // 14px, w500, textFieldSubTitleColor (screen subtitle)
-  final TextStyle profileSectionTitle; // 16px, w600, white/black (section title)
+  final TextStyle
+  profileScreenSubtitle; // 14px, w500, textFieldSubTitleColor (screen subtitle)
+  final TextStyle
+  profileSectionTitle; // 16px, w600, white/black (section title)
   final TextStyle profileHelperText; // 12px, w500, white/black (helper text)
   final TextStyle profileContactInfo; // 12px, w500, white/black (contact info)
   final TextStyle profileCardTitle; // 11px, w700, white/black (card title)
   final TextStyle profileBodyText; // 12px, w500, white/black (body text)
   final TextStyle profileDateText; // 10px, w400, errorColor/black54 (date text)
   // Custom Widget Text Styles
-  final TextStyle customTextFieldLabel; // 14px, w500, white/black (text field label)
-  final TextStyle customTextFieldInput; // 14px, w500, white/black (text field input)
+  final TextStyle
+  customTextFieldLabel; // 14px, w500, white/black (text field label)
+  final TextStyle
+  customTextFieldInput; // 14px, w500, white/black (text field input)
   final TextStyle customButtonText; // 16px, w500, white (button text)
-  final TextStyle normalTextTitle; // 16px, w500, white/black (normal text title)
-  final TextStyle normalTextSubtitle; // 14px, w400, white/black (normal text subtitle)
-  final TextStyle promptContainerText; // 10px, w400, white/black (prompt container text)
-  final TextStyle sizeContainerText; // 11px, w500, white/black (size container text)
-  final TextStyle customTextRichText1; // 14px, w500, textFieldSubTitleColor/black54 (text rich part 1)
-  final TextStyle customTextRichText2; // 14px, w500, primary/primary (text rich part 2)
-  final TextStyle passwordTextStyle; // 10px, w400, white/black (password requirement text)
+  final TextStyle
+  normalTextTitle; // 16px, w500, white/black (normal text title)
+  final TextStyle
+  normalTextSubtitle; // 14px, w400, white/black (normal text subtitle)
+  final TextStyle
+  promptContainerText; // 10px, w400, white/black (prompt container text)
+  final TextStyle
+  sizeContainerText; // 11px, w500, white/black (size container text)
+  final TextStyle
+  customTextRichText1; // 14px, w500, textFieldSubTitleColor/black54 (text rich part 1)
+  final TextStyle
+  customTextRichText2; // 14px, w500, primary/primary (text rich part 2)
+  final TextStyle
+  passwordTextStyle; // 10px, w400, white/black (password requirement text)
   final TextStyle homeAlignText; // 16px, w500, white/black (home align text)
-  final TextStyle alignTextStyle; // variable, variable, white/black (aligned text)
+  final TextStyle
+  alignTextStyle; // variable, variable, white/black (aligned text)
 
   const AppTextStyles({
     required this.authTitlePrimary,
@@ -597,7 +610,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
         color: AppColors.primeryColor,
       ),
       authPasswordTitle: GoogleFonts.poppins(
-        fontSize: 14  ,
+        fontSize: 14,
         fontWeight: FontWeight.w500,
         color: AppColors.lightTextPrimary,
       ),
@@ -1245,37 +1258,55 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       authResendText: authResendText ?? this.authResendText,
       authPasswordTitle: authPasswordTitle ?? this.authPasswordTitle,
       authGoogleButton: authGoogleButton ?? this.authGoogleButton,
-      bottomNavLabelSelected: bottomNavLabelSelected ?? this.bottomNavLabelSelected,
-      bottomNavLabelUnselected: bottomNavLabelUnselected ?? this.bottomNavLabelUnselected,
+      bottomNavLabelSelected:
+          bottomNavLabelSelected ?? this.bottomNavLabelSelected,
+      bottomNavLabelUnselected:
+          bottomNavLabelUnselected ?? this.bottomNavLabelUnselected,
       homeGreetingTitle: homeGreetingTitle ?? this.homeGreetingTitle,
       homeGreetingSubtitle: homeGreetingSubtitle ?? this.homeGreetingSubtitle,
       homeCardTitle: homeCardTitle ?? this.homeCardTitle,
       homeCardDescription: homeCardDescription ?? this.homeCardDescription,
       imageCreatedTitle: imageCreatedTitle ?? this.imageCreatedTitle,
       imageCreatedError: imageCreatedError ?? this.imageCreatedError,
-      imageCreatedPollingTitle: imageCreatedPollingTitle ?? this.imageCreatedPollingTitle,
-      imageCreatedPollingTime: imageCreatedPollingTime ?? this.imageCreatedPollingTime,
-      imageCreatedPollingSubtitle: imageCreatedPollingSubtitle ?? this.imageCreatedPollingSubtitle,
-      imageCreatedPromptText: imageCreatedPromptText ?? this.imageCreatedPromptText,
-      imageCreatedPromptHint: imageCreatedPromptHint ?? this.imageCreatedPromptHint,
-      imageGenerateSectionTitle: imageGenerateSectionTitle ?? this.imageGenerateSectionTitle,
-      imageGeneratePromptText: imageGeneratePromptText ?? this.imageGeneratePromptText,
-      imageGeneratePromptHint: imageGeneratePromptHint ?? this.imageGeneratePromptHint,
-      imageGenerateAISuggestion: imageGenerateAISuggestion ?? this.imageGenerateAISuggestion,
-      imageGenerateLoadingPercent: imageGenerateLoadingPercent ?? this.imageGenerateLoadingPercent,
-      imageGenerateLoadingTitle: imageGenerateLoadingTitle ?? this.imageGenerateLoadingTitle,
-      imageGenerateLoadingStage: imageGenerateLoadingStage ?? this.imageGenerateLoadingStage,
-      imageGenerateLoadingTime: imageGenerateLoadingTime ?? this.imageGenerateLoadingTime,
-      imageGenerateStageLabel: imageGenerateStageLabel ?? this.imageGenerateStageLabel,
+      imageCreatedPollingTitle:
+          imageCreatedPollingTitle ?? this.imageCreatedPollingTitle,
+      imageCreatedPollingTime:
+          imageCreatedPollingTime ?? this.imageCreatedPollingTime,
+      imageCreatedPollingSubtitle:
+          imageCreatedPollingSubtitle ?? this.imageCreatedPollingSubtitle,
+      imageCreatedPromptText:
+          imageCreatedPromptText ?? this.imageCreatedPromptText,
+      imageCreatedPromptHint:
+          imageCreatedPromptHint ?? this.imageCreatedPromptHint,
+      imageGenerateSectionTitle:
+          imageGenerateSectionTitle ?? this.imageGenerateSectionTitle,
+      imageGeneratePromptText:
+          imageGeneratePromptText ?? this.imageGeneratePromptText,
+      imageGeneratePromptHint:
+          imageGeneratePromptHint ?? this.imageGeneratePromptHint,
+      imageGenerateAISuggestion:
+          imageGenerateAISuggestion ?? this.imageGenerateAISuggestion,
+      imageGenerateLoadingPercent:
+          imageGenerateLoadingPercent ?? this.imageGenerateLoadingPercent,
+      imageGenerateLoadingTitle:
+          imageGenerateLoadingTitle ?? this.imageGenerateLoadingTitle,
+      imageGenerateLoadingStage:
+          imageGenerateLoadingStage ?? this.imageGenerateLoadingStage,
+      imageGenerateLoadingTime:
+          imageGenerateLoadingTime ?? this.imageGenerateLoadingTime,
+      imageGenerateStageLabel:
+          imageGenerateStageLabel ?? this.imageGenerateStageLabel,
       onboardingTitle: onboardingTitle ?? this.onboardingTitle,
       onboardingSubtitle: onboardingSubtitle ?? this.onboardingSubtitle,
       onboardingButton: onboardingButton ?? this.onboardingButton,
       profileName: profileName ?? this.profileName,
       profileEmail: profileEmail ?? this.profileEmail,
       profileListItemTitle: profileListItemTitle ?? this.profileListItemTitle,
-      profileListItemSubtitle: profileListItemSubtitle ?? this.profileListItemSubtitle,
+      profileListItemSubtitle:
+          profileListItemSubtitle ?? this.profileListItemSubtitle,
       profileScreenTitle: profileScreenTitle ?? this.profileScreenTitle,
-      profileScreenSubtitle: profileScreenSubtitle ?? this.profileScreenSubtitle,
+      profileScreenSubtitle:
+          profileScreenSubtitle ?? this.profileScreenSubtitle,
       profileSectionTitle: profileSectionTitle ?? this.profileSectionTitle,
       profileHelperText: profileHelperText ?? this.profileHelperText,
       profileContactInfo: profileContactInfo ?? this.profileContactInfo,
@@ -1307,71 +1338,274 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
     }
 
     return AppTextStyles(
-      authTitlePrimary: TextStyle.lerp(authTitlePrimary, other.authTitlePrimary, t)!,
+      authTitlePrimary: TextStyle.lerp(
+        authTitlePrimary,
+        other.authTitlePrimary,
+        t,
+      )!,
       authTitleWhite: TextStyle.lerp(authTitleWhite, other.authTitleWhite, t)!,
-      authSubtitlePrimary: TextStyle.lerp(authSubtitlePrimary, other.authSubtitlePrimary, t)!,
-      authSubtitleWhite: TextStyle.lerp(authSubtitleWhite, other.authSubtitleWhite, t)!,
-      authBodyRegular: TextStyle.lerp(authBodyRegular, other.authBodyRegular, t)!,
+      authSubtitlePrimary: TextStyle.lerp(
+        authSubtitlePrimary,
+        other.authSubtitlePrimary,
+        t,
+      )!,
+      authSubtitleWhite: TextStyle.lerp(
+        authSubtitleWhite,
+        other.authSubtitleWhite,
+        t,
+      )!,
+      authBodyRegular: TextStyle.lerp(
+        authBodyRegular,
+        other.authBodyRegular,
+        t,
+      )!,
       authBodyMedium: TextStyle.lerp(authBodyMedium, other.authBodyMedium, t)!,
       authBodyGray: TextStyle.lerp(authBodyGray, other.authBodyGray, t)!,
-      authBodyPrimary: TextStyle.lerp(authBodyPrimary, other.authBodyPrimary, t)!,
+      authBodyPrimary: TextStyle.lerp(
+        authBodyPrimary,
+        other.authBodyPrimary,
+        t,
+      )!,
       authHintText: TextStyle.lerp(authHintText, other.authHintText, t)!,
       authOTPText: TextStyle.lerp(authOTPText, other.authOTPText, t)!,
       authOTPLarge: TextStyle.lerp(authOTPLarge, other.authOTPLarge, t)!,
       authTimerText: TextStyle.lerp(authTimerText, other.authTimerText, t)!,
       authResendText: TextStyle.lerp(authResendText, other.authResendText, t)!,
-      authPasswordTitle: TextStyle.lerp(authPasswordTitle, other.authPasswordTitle, t)!,
-      authGoogleButton: TextStyle.lerp(authGoogleButton, other.authGoogleButton, t)!,
-      bottomNavLabelSelected: TextStyle.lerp(bottomNavLabelSelected, other.bottomNavLabelSelected, t)!,
-      bottomNavLabelUnselected: TextStyle.lerp(bottomNavLabelUnselected, other.bottomNavLabelUnselected, t)!,
-      homeGreetingTitle: TextStyle.lerp(homeGreetingTitle, other.homeGreetingTitle, t)!,
-      homeGreetingSubtitle: TextStyle.lerp(homeGreetingSubtitle, other.homeGreetingSubtitle, t)!,
+      authPasswordTitle: TextStyle.lerp(
+        authPasswordTitle,
+        other.authPasswordTitle,
+        t,
+      )!,
+      authGoogleButton: TextStyle.lerp(
+        authGoogleButton,
+        other.authGoogleButton,
+        t,
+      )!,
+      bottomNavLabelSelected: TextStyle.lerp(
+        bottomNavLabelSelected,
+        other.bottomNavLabelSelected,
+        t,
+      )!,
+      bottomNavLabelUnselected: TextStyle.lerp(
+        bottomNavLabelUnselected,
+        other.bottomNavLabelUnselected,
+        t,
+      )!,
+      homeGreetingTitle: TextStyle.lerp(
+        homeGreetingTitle,
+        other.homeGreetingTitle,
+        t,
+      )!,
+      homeGreetingSubtitle: TextStyle.lerp(
+        homeGreetingSubtitle,
+        other.homeGreetingSubtitle,
+        t,
+      )!,
       homeCardTitle: TextStyle.lerp(homeCardTitle, other.homeCardTitle, t)!,
-      homeCardDescription: TextStyle.lerp(homeCardDescription, other.homeCardDescription, t)!,
-      imageCreatedTitle: TextStyle.lerp(imageCreatedTitle, other.imageCreatedTitle, t)!,
-      imageCreatedError: TextStyle.lerp(imageCreatedError, other.imageCreatedError, t)!,
-      imageCreatedPollingTitle: TextStyle.lerp(imageCreatedPollingTitle, other.imageCreatedPollingTitle, t)!,
-      imageCreatedPollingTime: TextStyle.lerp(imageCreatedPollingTime, other.imageCreatedPollingTime, t)!,
-      imageCreatedPollingSubtitle: TextStyle.lerp(imageCreatedPollingSubtitle, other.imageCreatedPollingSubtitle, t)!,
-      imageCreatedPromptText: TextStyle.lerp(imageCreatedPromptText, other.imageCreatedPromptText, t)!,
-      imageCreatedPromptHint: TextStyle.lerp(imageCreatedPromptHint, other.imageCreatedPromptHint, t)!,
-      imageGenerateSectionTitle: TextStyle.lerp(imageGenerateSectionTitle, other.imageGenerateSectionTitle, t)!,
-      imageGeneratePromptText: TextStyle.lerp(imageGeneratePromptText, other.imageGeneratePromptText, t)!,
-      imageGeneratePromptHint: TextStyle.lerp(imageGeneratePromptHint, other.imageGeneratePromptHint, t)!,
-      imageGenerateAISuggestion: TextStyle.lerp(imageGenerateAISuggestion, other.imageGenerateAISuggestion, t)!,
-      imageGenerateLoadingPercent: TextStyle.lerp(imageGenerateLoadingPercent, other.imageGenerateLoadingPercent, t)!,
-      imageGenerateLoadingTitle: TextStyle.lerp(imageGenerateLoadingTitle, other.imageGenerateLoadingTitle, t)!,
-      imageGenerateLoadingStage: TextStyle.lerp(imageGenerateLoadingStage, other.imageGenerateLoadingStage, t)!,
-      imageGenerateLoadingTime: TextStyle.lerp(imageGenerateLoadingTime, other.imageGenerateLoadingTime, t)!,
-      imageGenerateStageLabel: TextStyle.lerp(imageGenerateStageLabel, other.imageGenerateStageLabel, t)!,
-      onboardingTitle: TextStyle.lerp(onboardingTitle, other.onboardingTitle, t)!,
-      onboardingSubtitle: TextStyle.lerp(onboardingSubtitle, other.onboardingSubtitle, t)!,
-      onboardingButton: TextStyle.lerp(onboardingButton, other.onboardingButton, t)!,
+      homeCardDescription: TextStyle.lerp(
+        homeCardDescription,
+        other.homeCardDescription,
+        t,
+      )!,
+      imageCreatedTitle: TextStyle.lerp(
+        imageCreatedTitle,
+        other.imageCreatedTitle,
+        t,
+      )!,
+      imageCreatedError: TextStyle.lerp(
+        imageCreatedError,
+        other.imageCreatedError,
+        t,
+      )!,
+      imageCreatedPollingTitle: TextStyle.lerp(
+        imageCreatedPollingTitle,
+        other.imageCreatedPollingTitle,
+        t,
+      )!,
+      imageCreatedPollingTime: TextStyle.lerp(
+        imageCreatedPollingTime,
+        other.imageCreatedPollingTime,
+        t,
+      )!,
+      imageCreatedPollingSubtitle: TextStyle.lerp(
+        imageCreatedPollingSubtitle,
+        other.imageCreatedPollingSubtitle,
+        t,
+      )!,
+      imageCreatedPromptText: TextStyle.lerp(
+        imageCreatedPromptText,
+        other.imageCreatedPromptText,
+        t,
+      )!,
+      imageCreatedPromptHint: TextStyle.lerp(
+        imageCreatedPromptHint,
+        other.imageCreatedPromptHint,
+        t,
+      )!,
+      imageGenerateSectionTitle: TextStyle.lerp(
+        imageGenerateSectionTitle,
+        other.imageGenerateSectionTitle,
+        t,
+      )!,
+      imageGeneratePromptText: TextStyle.lerp(
+        imageGeneratePromptText,
+        other.imageGeneratePromptText,
+        t,
+      )!,
+      imageGeneratePromptHint: TextStyle.lerp(
+        imageGeneratePromptHint,
+        other.imageGeneratePromptHint,
+        t,
+      )!,
+      imageGenerateAISuggestion: TextStyle.lerp(
+        imageGenerateAISuggestion,
+        other.imageGenerateAISuggestion,
+        t,
+      )!,
+      imageGenerateLoadingPercent: TextStyle.lerp(
+        imageGenerateLoadingPercent,
+        other.imageGenerateLoadingPercent,
+        t,
+      )!,
+      imageGenerateLoadingTitle: TextStyle.lerp(
+        imageGenerateLoadingTitle,
+        other.imageGenerateLoadingTitle,
+        t,
+      )!,
+      imageGenerateLoadingStage: TextStyle.lerp(
+        imageGenerateLoadingStage,
+        other.imageGenerateLoadingStage,
+        t,
+      )!,
+      imageGenerateLoadingTime: TextStyle.lerp(
+        imageGenerateLoadingTime,
+        other.imageGenerateLoadingTime,
+        t,
+      )!,
+      imageGenerateStageLabel: TextStyle.lerp(
+        imageGenerateStageLabel,
+        other.imageGenerateStageLabel,
+        t,
+      )!,
+      onboardingTitle: TextStyle.lerp(
+        onboardingTitle,
+        other.onboardingTitle,
+        t,
+      )!,
+      onboardingSubtitle: TextStyle.lerp(
+        onboardingSubtitle,
+        other.onboardingSubtitle,
+        t,
+      )!,
+      onboardingButton: TextStyle.lerp(
+        onboardingButton,
+        other.onboardingButton,
+        t,
+      )!,
       profileName: TextStyle.lerp(profileName, other.profileName, t)!,
       profileEmail: TextStyle.lerp(profileEmail, other.profileEmail, t)!,
-      profileListItemTitle: TextStyle.lerp(profileListItemTitle, other.profileListItemTitle, t)!,
-      profileListItemSubtitle: TextStyle.lerp(profileListItemSubtitle, other.profileListItemSubtitle, t)!,
-      profileScreenTitle: TextStyle.lerp(profileScreenTitle, other.profileScreenTitle, t)!,
-      profileScreenSubtitle: TextStyle.lerp(profileScreenSubtitle, other.profileScreenSubtitle, t)!,
-      profileSectionTitle: TextStyle.lerp(profileSectionTitle, other.profileSectionTitle, t)!,
-      profileHelperText: TextStyle.lerp(profileHelperText, other.profileHelperText, t)!,
-      profileContactInfo: TextStyle.lerp(profileContactInfo, other.profileContactInfo, t)!,
-      profileCardTitle: TextStyle.lerp(profileCardTitle, other.profileCardTitle, t)!,
-      profileBodyText: TextStyle.lerp(profileBodyText, other.profileBodyText, t)!,
-      profileDateText: TextStyle.lerp(profileDateText, other.profileDateText, t)!,
-      customTextFieldLabel: TextStyle.lerp(customTextFieldLabel, other.customTextFieldLabel, t)!,
-      customTextFieldInput: TextStyle.lerp(customTextFieldInput, other.customTextFieldInput, t)!,
-      customButtonText: TextStyle.lerp(customButtonText, other.customButtonText, t)!,
-      normalTextTitle: TextStyle.lerp(normalTextTitle, other.normalTextTitle, t)!,
-      normalTextSubtitle: TextStyle.lerp(normalTextSubtitle, other.normalTextSubtitle, t)!,
-      promptContainerText: TextStyle.lerp(promptContainerText, other.promptContainerText, t)!,
-      sizeContainerText: TextStyle.lerp(sizeContainerText, other.sizeContainerText, t)!,
-      customTextRichText1: TextStyle.lerp(customTextRichText1, other.customTextRichText1, t)!,
-      customTextRichText2: TextStyle.lerp(customTextRichText2, other.customTextRichText2, t)!,
-      passwordTextStyle: TextStyle.lerp(passwordTextStyle, other.passwordTextStyle, t)!,
+      profileListItemTitle: TextStyle.lerp(
+        profileListItemTitle,
+        other.profileListItemTitle,
+        t,
+      )!,
+      profileListItemSubtitle: TextStyle.lerp(
+        profileListItemSubtitle,
+        other.profileListItemSubtitle,
+        t,
+      )!,
+      profileScreenTitle: TextStyle.lerp(
+        profileScreenTitle,
+        other.profileScreenTitle,
+        t,
+      )!,
+      profileScreenSubtitle: TextStyle.lerp(
+        profileScreenSubtitle,
+        other.profileScreenSubtitle,
+        t,
+      )!,
+      profileSectionTitle: TextStyle.lerp(
+        profileSectionTitle,
+        other.profileSectionTitle,
+        t,
+      )!,
+      profileHelperText: TextStyle.lerp(
+        profileHelperText,
+        other.profileHelperText,
+        t,
+      )!,
+      profileContactInfo: TextStyle.lerp(
+        profileContactInfo,
+        other.profileContactInfo,
+        t,
+      )!,
+      profileCardTitle: TextStyle.lerp(
+        profileCardTitle,
+        other.profileCardTitle,
+        t,
+      )!,
+      profileBodyText: TextStyle.lerp(
+        profileBodyText,
+        other.profileBodyText,
+        t,
+      )!,
+      profileDateText: TextStyle.lerp(
+        profileDateText,
+        other.profileDateText,
+        t,
+      )!,
+      customTextFieldLabel: TextStyle.lerp(
+        customTextFieldLabel,
+        other.customTextFieldLabel,
+        t,
+      )!,
+      customTextFieldInput: TextStyle.lerp(
+        customTextFieldInput,
+        other.customTextFieldInput,
+        t,
+      )!,
+      customButtonText: TextStyle.lerp(
+        customButtonText,
+        other.customButtonText,
+        t,
+      )!,
+      normalTextTitle: TextStyle.lerp(
+        normalTextTitle,
+        other.normalTextTitle,
+        t,
+      )!,
+      normalTextSubtitle: TextStyle.lerp(
+        normalTextSubtitle,
+        other.normalTextSubtitle,
+        t,
+      )!,
+      promptContainerText: TextStyle.lerp(
+        promptContainerText,
+        other.promptContainerText,
+        t,
+      )!,
+      sizeContainerText: TextStyle.lerp(
+        sizeContainerText,
+        other.sizeContainerText,
+        t,
+      )!,
+      customTextRichText1: TextStyle.lerp(
+        customTextRichText1,
+        other.customTextRichText1,
+        t,
+      )!,
+      customTextRichText2: TextStyle.lerp(
+        customTextRichText2,
+        other.customTextRichText2,
+        t,
+      )!,
+      passwordTextStyle: TextStyle.lerp(
+        passwordTextStyle,
+        other.passwordTextStyle,
+        t,
+      )!,
       homeAlignText: TextStyle.lerp(homeAlignText, other.homeAlignText, t)!,
       alignTextStyle: TextStyle.lerp(alignTextStyle, other.alignTextStyle, t)!,
     );
   }
 }
-

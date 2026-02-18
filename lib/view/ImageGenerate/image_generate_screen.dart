@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/Constants/app_colors.dart';
-import 'package:genwalls/Core/Constants/size_extension.dart';
-import 'package:genwalls/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:genwalls/Core/CustomWidget/custom_button.dart';
-import 'package:genwalls/Core/CustomWidget/home_align.dart';
-import 'package:genwalls/Core/CustomWidget/prompt_continer.dart';
-import 'package:genwalls/Core/CustomWidget/size_continer.dart';
-import 'package:genwalls/Core/theme/theme_extensions.dart';
-import 'package:genwalls/viewModel/image_generate_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/home_align.dart';
+import 'package:imagifyai/Core/CustomWidget/prompt_continer.dart';
+import 'package:imagifyai/Core/CustomWidget/size_continer.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ImageGenerateScreen extends StatefulWidget {
@@ -43,20 +43,21 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     // Wait for the next frame to ensure the ListView is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_styleScrollController.hasClients && styleIndex >= 0) {
-       
-        final baseItemWidth = 140.0; // Base width (padding + border + some text)
+        final baseItemWidth =
+            140.0; // Base width (padding + border + some text)
         final scrollPosition = (styleIndex * baseItemWidth).clamp(
           0.0,
           _styleScrollController.position.maxScrollExtent,
         );
-        
+
         // Center the selected item in the viewport if possible
         final viewportWidth = MediaQuery.of(context).size.width;
-        final centeredPosition = (scrollPosition - viewportWidth / 2 + baseItemWidth / 2).clamp(
-          0.0,
-          _styleScrollController.position.maxScrollExtent,
-        );
-        
+        final centeredPosition =
+            (scrollPosition - viewportWidth / 2 + baseItemWidth / 2).clamp(
+              0.0,
+              _styleScrollController.position.maxScrollExtent,
+            );
+
         _styleScrollController.animateTo(
           centeredPosition,
           duration: const Duration(milliseconds: 300),
@@ -65,7 +66,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
       }
     });
   }
-  
+
   void _scrollToStyleByName(String styleName, BuildContext context) {
     final viewModel = context.read<ImageGenerateViewModel>();
     final styleIndex = viewModel.getStyleIndexByName(styleName);
@@ -236,62 +237,66 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                       spacing: context.w(8),
                       runSpacing: context.h(4),
                       children: [
-                         PromptContiner(
-                           text: 'Abstract neon cityscape at night',
-                           onTap: () {
-                             // Set prompt, auto-select Square size, and Cyberpunk style
-                             imageGenerateViewModel.setPromptWithDefaults(
-                               'Abstract neon cityscape at night',
-                               'Cyberpunk', // Style name
-                               0, // Prompt index 
-                             );
-                             // Scroll to the selected style
-                             _scrollToStyleByName('Cyberpunk', context);
-                           },
-                           isSelected: imageGenerateViewModel.selectedPromptIndex == 0,
-                         ),
-                         PromptContiner(
-                           text: 'Serene mountain landscape with sunset',
-                           onTap: () {
-                             // Set prompt, auto-select Square size, and Photorealistic style
-                             imageGenerateViewModel.setPromptWithDefaults(
-                               'Serene mountain landscape with sunset',
-                               'Photorealistic', // Style name
-                               1, // Prompt index
-                             );
-                             // Scroll to the selected style
-                             _scrollToStyleByName('Photorealistic', context);
-                           },
-                           isSelected: imageGenerateViewModel.selectedPromptIndex == 1,
-                         ),
-                         PromptContiner(
-                           text: 'Cosmic galaxy with stars and nebula',
-                           onTap: () {
-                             // Set prompt, auto-select Square size, and 3D Render style
-                             imageGenerateViewModel.setPromptWithDefaults(
-                               'Cosmic galaxy with stars and nebula',
-                               '3D Render', // Style name
-                               2, // Prompt index
-                             );
-                             // Scroll to the selected style
-                             _scrollToStyleByName('3D Render', context);
-                           },
-                           isSelected: imageGenerateViewModel.selectedPromptIndex == 2,
-                         ),
-                         PromptContiner(
-                           text: 'Minimalist geometric patterns',
-                           onTap: () {
-                             // Set prompt, auto-select Square size, and Illustration style
-                             imageGenerateViewModel.setPromptWithDefaults(
-                               'Minimalist geometric patterns',
-                               'Illustration', // Style name
-                               3, // Prompt index
-                             );
-                             // Scroll to the selected style
-                             _scrollToStyleByName('Illustration', context);
-                           },
-                           isSelected: imageGenerateViewModel.selectedPromptIndex == 3,
-                         ),
+                        PromptContiner(
+                          text: 'Abstract neon cityscape at night',
+                          onTap: () {
+                            // Set prompt, auto-select Square size, and Cyberpunk style
+                            imageGenerateViewModel.setPromptWithDefaults(
+                              'Abstract neon cityscape at night',
+                              'Cyberpunk', // Style name
+                              0, // Prompt index
+                            );
+                            // Scroll to the selected style
+                            _scrollToStyleByName('Cyberpunk', context);
+                          },
+                          isSelected:
+                              imageGenerateViewModel.selectedPromptIndex == 0,
+                        ),
+                        PromptContiner(
+                          text: 'Serene mountain landscape with sunset',
+                          onTap: () {
+                            // Set prompt, auto-select Square size, and Photorealistic style
+                            imageGenerateViewModel.setPromptWithDefaults(
+                              'Serene mountain landscape with sunset',
+                              'Photorealistic', // Style name
+                              1, // Prompt index
+                            );
+                            // Scroll to the selected style
+                            _scrollToStyleByName('Photorealistic', context);
+                          },
+                          isSelected:
+                              imageGenerateViewModel.selectedPromptIndex == 1,
+                        ),
+                        PromptContiner(
+                          text: 'Cosmic galaxy with stars and nebula',
+                          onTap: () {
+                            // Set prompt, auto-select Square size, and 3D Render style
+                            imageGenerateViewModel.setPromptWithDefaults(
+                              'Cosmic galaxy with stars and nebula',
+                              '3D Render', // Style name
+                              2, // Prompt index
+                            );
+                            // Scroll to the selected style
+                            _scrollToStyleByName('3D Render', context);
+                          },
+                          isSelected:
+                              imageGenerateViewModel.selectedPromptIndex == 2,
+                        ),
+                        PromptContiner(
+                          text: 'Minimalist geometric patterns',
+                          onTap: () {
+                            // Set prompt, auto-select Square size, and Illustration style
+                            imageGenerateViewModel.setPromptWithDefaults(
+                              'Minimalist geometric patterns',
+                              'Illustration', // Style name
+                              3, // Prompt index
+                            );
+                            // Scroll to the selected style
+                            _scrollToStyleByName('Illustration', context);
+                          },
+                          isSelected:
+                              imageGenerateViewModel.selectedPromptIndex == 3,
+                        ),
                       ],
                     ),
                     SizedBox(height: context.h(20)),
@@ -339,9 +344,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                         if (vm.isLoadingStyles) {
                           return SizedBox(
                             height: context.h(100),
-                            child: Center(
-                              child: AppLoadingIndicator.medium(),
-                            ),
+                            child: Center(child: AppLoadingIndicator.medium()),
                           );
                         }
                         if (vm.stylesError != null) {
@@ -350,7 +353,8 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                             child: Center(
                               child: Text(
                                 'Failed to load styles',
-                                style: context.appTextStyles?.homeCardDescription,
+                                style:
+                                    context.appTextStyles?.homeCardDescription,
                               ),
                             ),
                           );
@@ -363,16 +367,14 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                             itemCount: vm.styles.length,
                             itemBuilder: (context, index) {
                               final style = vm.styles[index];
-                              final isSelected =
-                                  vm.selectedStyleIndex == index;
+                              final isSelected = vm.selectedStyleIndex == index;
                               return Padding(
                                 padding: EdgeInsets.only(right: context.w(10)),
                                 child: PromptContiner(
                                   text: style,
                                   isSelected: isSelected,
                                   onTap: () {
-                                    vm.setSelectedStyle(index);
-                                    // Scroll to selected style when manually tapped
+                                    vm.setSelectedStyle(index, context);
                                     if (!isSelected) {
                                       _scrollToSelectedStyle(index, context);
                                     }
@@ -388,7 +390,6 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                     CustomButton(
                       onPressed: () =>
                           imageGenerateViewModel.createWallpaper(context),
-
                       width: context.w(350),
                       iconHeight: 24,
                       iconWidth: 24,
@@ -519,7 +520,8 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                           value: widget.progress,
                           strokeWidth: context.w(20),
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.transparent, // This will be masked by the gradient
+                            Colors
+                                .transparent, // This will be masked by the gradient
                           ),
                           backgroundColor: Colors.transparent,
                           strokeCap: StrokeCap.round,
@@ -535,8 +537,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                 ),
               ),
               SizedBox(height: context.h(32)),
-            
-              
+
               FadeTransition(
                 opacity: _fadeController,
                 child: Text(
@@ -545,7 +546,7 @@ class _LoadingOverlayState extends State<_LoadingOverlay>
                   textAlign: TextAlign.center,
                 ),
               ),
-          
+
               SizedBox(height: context.h(40)),
               // Progress stages indicator
               Row(

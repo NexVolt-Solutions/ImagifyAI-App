@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/auth/forgot_password_response.dart';
-import 'package:genwalls/repositories/auth_repository.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/auth/forgot_password_response.dart';
+import 'package:imagifyai/repositories/auth_repository.dart';
 
 class ForgorVerificationViewModel extends ChangeNotifier {
   ForgorVerificationViewModel({AuthRepository? authRepository})
-      : _authRepository = authRepository ?? AuthRepository() {
+    : _authRepository = authRepository ?? AuthRepository() {
     _startTimer();
   }
 
@@ -20,14 +20,14 @@ class ForgorVerificationViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
   String? _email;
-  
+
   Timer? _timer;
   int _remainingSeconds = 120; // 2 minutes = 120 seconds
   bool _canResend = false;
 
   int get remainingSeconds => _remainingSeconds;
   bool get canResend => _canResend;
-  
+
   String get timerText {
     if (_canResend) return '';
     final minutes = _remainingSeconds ~/ 60;
@@ -62,7 +62,10 @@ class ForgorVerificationViewModel extends ChangeNotifier {
 
     // Validate that code is exactly 6 digits
     if (code.isEmpty || code.length != 6) {
-      _showMessage(context, 'Please enter the complete 6-digit verification code');
+      _showMessage(
+        context,
+        'Please enter the complete 6-digit verification code',
+      );
       return;
     }
 
@@ -79,10 +82,10 @@ class ForgorVerificationViewModel extends ChangeNotifier {
     try {
       // Call the verify-forgot-otp API endpoint
       final response = await _authRepository.verifyForgotOtp(code: code);
-      final message = response['message']?.toString() ?? 
-                     'OTP verified successfully';
+      final message =
+          response['message']?.toString() ?? 'OTP verified successfully';
       _showMessage(context, message, isError: false);
-      
+
       // Navigate to set new password screen
       Navigator.pushNamed(context, RoutesName.SetNewPasswordScreen);
     } on ApiException catch (e) {
@@ -99,7 +102,7 @@ class ForgorVerificationViewModel extends ChangeNotifier {
 
   Future<void> resendCode(BuildContext context) async {
     if (isLoading || !_canResend) return;
-    
+
     if (_email == null || _email!.isEmpty) {
       _showMessage(context, 'Email not found. Please go back and try again.');
       return;
@@ -111,11 +114,11 @@ class ForgorVerificationViewModel extends ChangeNotifier {
 
     try {
       // For forgot password, we need to call forgot-password endpoint again with email
-      final ForgotPasswordResponse response = await _authRepository.forgotPassword(email: _email!);
-      final message = response.message ?? 
-                     'Verification code has been resent';
+      final ForgotPasswordResponse response = await _authRepository
+          .forgotPassword(email: _email!);
+      final message = response.message ?? 'Verification code has been resent';
       _showMessage(context, message, isError: false);
-      
+
       // Restart the timer
       _startTimer();
     } on ApiException catch (e) {
@@ -130,7 +133,11 @@ class ForgorVerificationViewModel extends ChangeNotifier {
     }
   }
 
-  void _showMessage(BuildContext context, String message, {bool isError = true}) {
+  void _showMessage(
+    BuildContext context,
+    String message, {
+    bool isError = true,
+  }) {
     SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
 

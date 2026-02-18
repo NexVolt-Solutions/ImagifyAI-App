@@ -1,20 +1,22 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:genwalls/Core/Constants/app_assets.dart';
-import 'package:genwalls/Core/services/api_service.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
-import 'package:genwalls/Core/utils/jwt_decoder.dart';
-import 'package:genwalls/Core/utils/snackbar_util.dart';
-import 'package:genwalls/models/user/user.dart';
-import 'package:genwalls/models/wallpaper/suggest_response.dart';
-import 'package:genwalls/models/wallpaper/wallpaper.dart';
-import 'package:genwalls/repositories/auth_repository.dart';
-import 'package:genwalls/repositories/wallpaper_repository.dart';
-import 'package:genwalls/viewModel/bottom_nav_screen_view_model.dart';
-import 'package:genwalls/viewModel/sign_in_view_model.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/in_app_review_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/Core/utils/jwt_decoder.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/user/user.dart';
+import 'package:imagifyai/models/wallpaper/suggest_response.dart';
+import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
+import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
+
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
     WallpaperRepository? wallpaperRepository,
@@ -486,6 +488,7 @@ class HomeViewModel extends ChangeNotifier {
         accessToken: accessToken,
       );
       _showMessage(context, 'Wallpaper created successfully', isError: false);
+      InAppReviewService.recordCompletedGenerationAndMaybeReview(context);
       Navigator.pushNamed(
         context,
         RoutesName.ImageCreatedScreen,
@@ -523,27 +526,27 @@ class HomeViewModel extends ChangeNotifier {
     if (kDebugMode) {
       print('🔄 Refreshing home data...');
     }
-    
+
     // Load all data in parallel for faster refresh
     await Future.wait([
       loadCurrentUser(context, forceReload: true),
       loadStyles(context),
       loadGroupedWallpapers(context),
     ]);
-    
+
     if (kDebugMode) {
       print('✅ Home data refreshed');
     }
   }
-  
+
   /// Load styles from the API
   Future<void> loadStyles(BuildContext context) async {
     if (isLoadingStyles || _stylesMap.isNotEmpty) return;
-    
+
     // Get access token from SignInViewModel
     final signInViewModel = context.read<SignInViewModel>();
     String? accessToken = signInViewModel.accessToken;
-    
+
     // If not available in SignInViewModel, try loading from storage
     if (accessToken == null || accessToken.isEmpty) {
       try {
@@ -554,29 +557,29 @@ class HomeViewModel extends ChangeNotifier {
         }
       }
     }
-    
+
     if (accessToken == null || accessToken.isEmpty) {
       if (kDebugMode) {
         print('⚠️  No access token available for loading styles');
       }
       return;
     }
-    
+
     isLoadingStyles = true;
     stylesError = null;
     notifyListeners();
-    
+
     try {
       if (kDebugMode) {
         print('═══════════════════════════════════════════════════════════');
         print('=== LOAD STYLES (HOME): START ===');
         print('═══════════════════════════════════════════════════════════');
       }
-      
+
       _stylesMap = await _wallpaperRepository.fetchStyles(
         accessToken: accessToken,
       );
-      
+
       if (kDebugMode) {
         print('✅ Styles loaded successfully');
         print('Total styles: ${_stylesMap.length}');
@@ -612,7 +615,9 @@ class HomeViewModel extends ChangeNotifier {
     // If not available in SignInViewModel, try loading from storage
     if (accessToken == null || accessToken.isEmpty) {
       if (kDebugMode) {
-        print('⚠️  SignInViewModel token not available, trying to load from storage...');
+        print(
+          '⚠️  SignInViewModel token not available, trying to load from storage...',
+        );
       }
       try {
         accessToken = await TokenStorageService.getAccessToken();
@@ -647,7 +652,7 @@ class HomeViewModel extends ChangeNotifier {
       );
       groupedWallpapers = grouped;
       errorMessage = null;
-      
+
       if (kDebugMode) {
         print('✅ Grouped wallpapers loaded successfully');
         print('Categories: ${groupedWallpapers.keys.toList()}');

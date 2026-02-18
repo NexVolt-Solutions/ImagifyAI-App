@@ -1,18 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:genwalls/Core/services/token_storage_service.dart';
-import 'package:genwalls/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
+import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 
 class SplashScreenViewModel extends ChangeNotifier {
   void splashService(BuildContext context) async {
-     await Future.delayed(const Duration(milliseconds: 500));
-    
- 
+    await Future.delayed(const Duration(milliseconds: 500));
+
     bool isLoggedIn = false;
     try {
       isLoggedIn = await TokenStorageService.isLoggedIn();
     } catch (e) {
-       await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 500));
       try {
         isLoggedIn = await TokenStorageService.isLoggedIn();
       } catch (retryError) {
@@ -20,7 +19,7 @@ class SplashScreenViewModel extends ChangeNotifier {
         isLoggedIn = false;
       }
     }
-    
+
     Future.delayed(const Duration(seconds: 3), () async {
       if (context.mounted) {
         if (isLoggedIn) {
@@ -34,13 +33,14 @@ class SplashScreenViewModel extends ChangeNotifier {
           // Check if onboarding has been completed
           bool onboardingCompleted = false;
           try {
-            onboardingCompleted = await TokenStorageService.isOnboardingCompleted();
+            onboardingCompleted =
+                await TokenStorageService.isOnboardingCompleted();
           } catch (e) {
             if (kDebugMode) {
               print('Error checking onboarding status: $e');
             }
           }
-          
+
           if (onboardingCompleted) {
             // Onboarding completed, navigate to sign in screen
             if (kDebugMode) {
@@ -54,7 +54,10 @@ class SplashScreenViewModel extends ChangeNotifier {
               print('=== SPLASH SCREEN: ONBOARDING NOT COMPLETED ===');
               print('Navigating to OnboardingScreen...');
             }
-            Navigator.pushReplacementNamed(context, RoutesName.OnboardingScreen);
+            Navigator.pushReplacementNamed(
+              context,
+              RoutesName.OnboardingScreen,
+            );
           }
         }
       }

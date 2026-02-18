@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:genwalls/Core/Constants/api_constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:imagifyai/Core/Constants/api_constants.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -54,7 +54,7 @@ class ApiService {
       retryCallback: (newToken) async {
         final updatedHeaders = Map<String, String>.from(headers ?? {});
         updatedHeaders['Authorization'] = 'Bearer $newToken';
-    final uri = _buildUri(path, query);
+        final uri = _buildUri(path, query);
         return await _client.get(
           uri,
           headers: _withDefaultHeaders(updatedHeaders),
@@ -74,25 +74,25 @@ class ApiService {
       uri,
       headers: _withDefaultHeaders(headers),
     );
-    
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return response.bodyBytes;
     }
-    
+
     // If error, parse as JSON for error message
     final decoded = jsonDecode(response.body);
     final errorMessage =
         decoded['message']?.toString() ??
-                        decoded['msg']?.toString() ?? 
-                        decoded['error']?.toString();
-    
+        decoded['msg']?.toString() ??
+        decoded['error']?.toString();
+
     if (errorMessage == null || errorMessage.isEmpty) {
       throw ApiException(
         'Failed to download wallpaper',
         statusCode: response.statusCode,
       );
     }
-    
+
     throw ApiException(errorMessage, statusCode: response.statusCode);
   }
 
@@ -105,13 +105,13 @@ class ApiService {
   }) async {
     return _executeWithTokenRefresh(
       () async {
-    final uri = _buildUri(path, query);
-    final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
-    final response = await _client.post(
-      uri,
-      headers: mergedHeaders,
-      body: body != null ? jsonEncode(body) : null,
-    );
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
+        final response = await _client.post(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
         return response;
       },
       retryOnTokenExpiry: retryOnTokenExpiry,
@@ -139,13 +139,13 @@ class ApiService {
   }) async {
     return _executeWithTokenRefresh(
       () async {
-    final uri = _buildUri(path, query);
-    final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
-    final response = await _client.put(
-      uri,
-      headers: mergedHeaders,
-      body: body != null ? jsonEncode(body) : null,
-    );
+        final uri = _buildUri(path, query);
+        final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
+        final response = await _client.put(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
         return response;
       },
       retryOnTokenExpiry: retryOnTokenExpiry,
@@ -212,16 +212,16 @@ class ApiService {
   }) async {
     return _executeWithTokenRefresh(
       () async {
-    final uri = _buildUri(path, query);
+        final uri = _buildUri(path, query);
         final mergedHeaders = _withDefaultHeaders(
           headers,
           isJson: body != null,
         );
-    final response = await _client.delete(
-      uri,
-      headers: mergedHeaders,
-      body: body != null ? jsonEncode(body) : null,
-    );
+        final response = await _client.delete(
+          uri,
+          headers: mergedHeaders,
+          body: body != null ? jsonEncode(body) : null,
+        );
         return response;
       },
       retryOnTokenExpiry: retryOnTokenExpiry,
@@ -281,25 +281,25 @@ class ApiService {
         final filename = file.path.split('/').last;
         final fileExtension = filename.split('.').last.toLowerCase();
         final contentType = _getContentType(fileExtension);
-        
+
         if (kDebugMode) {
           print('Filename: $filename');
           print('Content-Type: $contentType');
         }
-        
+
         // Read file bytes and create MultipartFile with explicit content-type
         // Some servers require explicit content-type in the multipart file
         final fileBytes = await file.readAsBytes();
         final mediaType = http.MediaType.parse(contentType);
         request.files.add(
           http.MultipartFile.fromBytes(
-          fileFieldName,
-          fileBytes,
-          filename: filename,
-          contentType: mediaType,
+            fileFieldName,
+            fileBytes,
+            filename: filename,
+            contentType: mediaType,
           ),
         );
-        
+
         if (kDebugMode) {
           print('File added successfully');
           print('File bytes length: ${fileBytes.length}');
@@ -339,7 +339,7 @@ class ApiService {
       }
       return _executeWithTokenRefresh(
         () async {
-    final streamedResponse = await _client.send(request);
+          final streamedResponse = await _client.send(request);
           return await http.Response.fromStream(streamedResponse);
         },
         retryOnTokenExpiry: true,
@@ -425,25 +425,25 @@ class ApiService {
         final filename = file.path.split('/').last;
         final fileExtension = filename.split('.').last.toLowerCase();
         final contentType = _getContentType(fileExtension);
-        
+
         if (kDebugMode) {
           print('Filename: $filename');
           print('Content-Type: $contentType');
         }
-        
+
         // Read file bytes and create MultipartFile with explicit content-type
         // Some servers require explicit content-type in the multipart file
         final fileBytes = await file.readAsBytes();
         final mediaType = http.MediaType.parse(contentType);
         request.files.add(
           http.MultipartFile.fromBytes(
-          fileFieldName,
+            fileFieldName,
             fileBytes,
-          filename: filename,
+            filename: filename,
             contentType: mediaType,
           ),
         );
-        
+
         if (kDebugMode) {
           print('File added successfully');
         }
@@ -466,16 +466,16 @@ class ApiService {
 
       return _executeWithTokenRefresh(
         () async {
-    final streamedResponse = await _client.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-      
-      if (kDebugMode) {
-        print('=== HTTP RESPONSE ===');
-        print('Status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        print('Response headers: ${response.headers}');
-      }
-      
+          final streamedResponse = await _client.send(request);
+          final response = await http.Response.fromStream(streamedResponse);
+
+          if (kDebugMode) {
+            print('=== HTTP RESPONSE ===');
+            print('Status code: ${response.statusCode}');
+            print('Response body: ${response.body}');
+            print('Response headers: ${response.headers}');
+          }
+
           return response;
         },
         retryOnTokenExpiry: true,
@@ -497,7 +497,7 @@ class ApiService {
             final contentType = _getContentType(fileExtension);
             final fileBytes = await file.readAsBytes();
             final mediaType = http.MediaType.parse(contentType);
-            
+
             if (kDebugMode) {
               print('=== RETRY: Adding file ===');
               print('Filename: $filename');
@@ -505,7 +505,7 @@ class ApiService {
               print('Content-Type: $contentType');
               print('File bytes length: ${fileBytes.length}');
             }
-            
+
             retryRequest.files.add(
               http.MultipartFile.fromBytes(
                 fileFieldName,
@@ -662,13 +662,13 @@ class ApiService {
       print('Status code: ${response.statusCode}');
       print('Response body: ${response.body}');
     }
-    
+
     final decoded = _decodeResponseBody(response);
-    
+
     if (kDebugMode) {
       print('Decoded response: $decoded');
     }
-    
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (kDebugMode) {
         print('Status code is success (200-299), returning decoded response');
@@ -678,7 +678,7 @@ class ApiService {
 
     // Extract error message - check multiple possible fields
     String? errorMessage;
-    
+
     // Check 'detail' field first (can be string or array)
     if (decoded.containsKey('detail')) {
       final detail = decoded['detail'];
@@ -698,25 +698,25 @@ class ApiService {
         errorMessage = detail?.toString();
       }
     }
-    
+
     // Check 'msg' field (used by some APIs)
     if ((errorMessage == null || errorMessage.isEmpty) &&
         decoded.containsKey('msg')) {
       errorMessage = decoded['msg']?.toString();
     }
-    
+
     // Check 'message' field
     if ((errorMessage == null || errorMessage.isEmpty) &&
         decoded.containsKey('message')) {
       errorMessage = decoded['message']?.toString();
     }
-    
+
     // Check 'error' field
     if ((errorMessage == null || errorMessage.isEmpty) &&
         decoded.containsKey('error')) {
       errorMessage = decoded['error']?.toString();
     }
-    
+
     // If no error message found, throw with status code only
     if (errorMessage == null || errorMessage.isEmpty) {
       if (kDebugMode) {
@@ -729,7 +729,7 @@ class ApiService {
         statusCode: response.statusCode,
       );
     }
-    
+
     if (kDebugMode) {
       print('=== THROWING API EXCEPTION ===');
       print('Status code: ${response.statusCode}');
@@ -746,25 +746,25 @@ class ApiService {
       print('Body length: ${response.body.length}');
       print('Body empty: ${response.body.isEmpty}');
     }
-    
+
     if (response.body.isEmpty) {
       if (kDebugMode) {
         print('Response body is empty, returning empty map');
       }
       return {};
     }
-    
+
     try {
       if (kDebugMode) {
         print('Attempting to JSON decode response body...');
       }
       final dynamic decoded = jsonDecode(response.body);
-      
+
       if (kDebugMode) {
         print('JSON decoded successfully');
         print('Decoded type: ${decoded.runtimeType}');
       }
-      
+
       if (decoded is Map<String, dynamic>) {
         if (kDebugMode) {
           print('Decoded is Map, returning as-is');
@@ -788,7 +788,7 @@ class ApiService {
         print('Stack trace: $stackTrace');
         print('Response body: ${response.body}');
       }
-      
+
       // If JSON parsing fails, try to extract error message from response
       final body = response.body;
       if (body.isNotEmpty) {
@@ -800,7 +800,7 @@ class ApiService {
           return {'message': body, 'status': false};
         }
       }
-      
+
       if (kDebugMode) {
         print('Throwing ApiException for JSON parse error');
       }
