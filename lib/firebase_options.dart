@@ -51,19 +51,19 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCkbJ4-l08iZGq1K2tVDHRODISdwIFnlHU',
-    appId: '1:725660898004:android:54702659a74d021da12141',
-    messagingSenderId: '725660898004',
-    projectId: 'imagifyai-453d3',
-    storageBucket: 'imagifyai-453d3.firebasestorage.app',
+    apiKey: 'AIzaSyBl3mUnYnTbLvDU1SgFB3T83fWx6M-64r4',
+    appId: '1:687032857486:android:6c47b9a8e0d78db67c2adf',
+    messagingSenderId: '687032857486',
+    projectId: 'imagifyai-f8cad',
+    storageBucket: 'imagifyai-f8cad.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBNdfMIbYYKq-sFSD2ajfHREpmzG5jZS1I',
-    appId: '1:725660898004:ios:f7f3c9bd4b8887d7a12141',
-    messagingSenderId: '725660898004',
-    projectId: 'imagifyai-453d3',
-    storageBucket: 'imagifyai-453d3.firebasestorage.app',
+    apiKey: 'AIzaSyCuTC93Ag3Mg9iyFpxNTdG4Y9uA9-WoVN8',
+    appId: '1:687032857486:ios:0fd16f01728e12477c2adf',
+    messagingSenderId: '687032857486',
+    projectId: 'imagifyai-f8cad',
+    storageBucket: 'imagifyai-f8cad.firebasestorage.app',
     iosBundleId: 'com.imagifyai.app',
   );
 

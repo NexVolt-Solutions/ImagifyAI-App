@@ -212,11 +212,12 @@ class _SignUpState extends State<SignUp> {
                   ),
                   SizedBox(height: context.h(24)),
                   GestureDetector(
-                    onTap: signUpViewModel.isLoading
+                    onTap: (signUpViewModel.isLoading ||
+                            signUpViewModel.isGoogleLoading)
                         ? null
                         : () => signUpViewModel.signInWithGoogle(context),
                     child: Opacity(
-                      opacity: signUpViewModel.isLoading ? 0.7 : 1.0,
+                      opacity: signUpViewModel.isGoogleLoading ? 0.7 : 1.0,
                       child: Container(
                         height: context.h(47.9),
                         width: context.w(350),
@@ -231,7 +232,7 @@ class _SignUpState extends State<SignUp> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            if (signUpViewModel.isLoading)
+                            if (signUpViewModel.isGoogleLoading)
                               const AppLoadingIndicator.medium()
                             else
                               Image.asset(
@@ -241,7 +242,7 @@ class _SignUpState extends State<SignUp> {
                               ),
                             SizedBox(width: context.w(8)),
                             Text(
-                              signUpViewModel.isLoading
+                              signUpViewModel.isGoogleLoading
                                   ? 'Signing in...'
                                   : 'Continue with Google',
                               style: context.appTextStyles?.authGoogleButton,
@@ -254,8 +255,12 @@ class _SignUpState extends State<SignUp> {
 
                   SizedBox(height: context.h(20)),
                   CustomButton(
-                    onPressed: () =>
-                        signUpViewModel.register(context, formKey: _formKey),
+                    onPressed: signUpViewModel.isGoogleLoading
+                        ? null
+                        : () => signUpViewModel.register(
+                              context,
+                              formKey: _formKey,
+                            ),
                     width: context.w(350),
                     gradient: AppColors.gradient,
                     text: signUpViewModel.isLoading

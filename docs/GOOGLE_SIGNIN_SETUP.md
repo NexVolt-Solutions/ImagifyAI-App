@@ -1,13 +1,13 @@
 # Google Sign-In Setup (Firebase project)
 
-**This app uses Firebase.** Google Sign-In is configured from your **Firebase project** (e.g. `imagifyai-453d3`), so you do **not** need a separate Google Cloud Console project—use the same project as Firebase.
+**This app uses Firebase project `imagifyai-f8cad`** (configured via FlutterFire CLI). Google Sign-In uses this same project.
 
 ## Use Firebase for Google Sign-In
 
-1. **Firebase Console** → your project → **Authentication** → **Sign-in method** → enable **Google** (and add support email if prompted).
-2. **Web Client ID:** In [Google Cloud Console](https://console.cloud.google.com/) **select the same project as Firebase** (e.g. `imagifyai-453d3`) → **APIs & Services** → **Credentials** → under **OAuth 2.0 Client IDs** find **"Web client (auto created by Google Service)"** → copy the **Client ID** (e.g. `725660898004-xxxx.apps.googleusercontent.com`).
+1. **Firebase Console** → project **imagifyai** (ID: `imagifyai-f8cad`) → **Authentication** → **Sign-in method** → enable **Google** (and add support email if prompted).
+2. **Web Client ID:** In [Google Cloud Console](https://console.cloud.google.com/) select project **imagifyai-f8cad** → **APIs & Services** → **Credentials** → **"Web client (auto created by Google Service)"** → copy the **Client ID** (e.g. `687032857486-xxxx.apps.googleusercontent.com`).
 3. **Update the app:** In `lib/Core/Constants/api_constants.dart` set `googleWebClientId` to that Web client ID.
-4. **SHA-1 (Android):** In **Firebase Console** → **Project settings** → **Your apps** → Android app `com.imagifyai.app` → **Add fingerprint** and add your **debug** and **release** SHA-1. No need to add SHA-1 in Cloud Console separately when using Firebase.
+4. **SHA-1 (Android):** In **Firebase Console** → **Project settings** → **Your apps** → Android app `com.imagifyai.app` → **Add fingerprint** and add your **debug** and **release** SHA-1.
 
 After that, Google Sign-In uses the Firebase project; no separate Cloud Console OAuth setup is required.
 
@@ -66,6 +66,21 @@ After changing credentials, wait a few minutes and try sign-in again. No code ch
 | Google sign-in | Firebase Console → **Authentication** → **Sign-in method** → **Google** enabled. |
 | Web client ID | Cloud Console (same project) → **Credentials** → "Web client (auto created by Google Service)" → copy to `api_constants.dart` → `googleWebClientId`. |
 | SHA-1 | Firebase Console → **Project settings** → Android app → **Fingerprints** (debug + release). |
+
+---
+
+## Firebase warning: "SHA-1 and package name already in use"
+
+If Firebase shows **"One or more of your Android apps have a SHA-1 fingerprint and package name combination that's already in use"**, the same app is registered in **two** projects (e.g. imagifyai-453d3 and genwalls-482410). Google allows that combo in only one project.
+
+**Fix:** Remove the duplicate from the **other** project.
+
+1. Open [Firebase Console](https://console.firebase.google.com) and switch to the **other** project (e.g. **genwalls** / genwalls-482410).
+2. Go to **Project settings** → **Your apps** → find the Android app with package `com.imagifyai.app`.
+3. Remove that Android app (or remove its SHA-1 fingerprints) so that only **imagifyai-453d3** has this app.
+4. Wait 5–10 minutes, then try Google Sign-In again.
+
+**Use the right Web Client ID:** Your app must use the **Web client ID from imagifyai-453d3**, not from genwalls. In [Google Cloud Console](https://console.cloud.google.com) select project **imagifyai-453d3** → **APIs & Services** → **Credentials** → copy the **Web client (auto created by Google Service)** Client ID and set it in `lib/Core/Constants/api_constants.dart` as `googleWebClientId`.
 
 ---
 

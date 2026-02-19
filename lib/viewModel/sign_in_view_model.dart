@@ -361,9 +361,10 @@ class SignInViewModel extends ChangeNotifier {
       // The serverClientId (Web Client ID) is required to get ID tokens for server-side verification
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile', 'openid'],
-        // serverClientId is the Web Client ID from Google Cloud Console
-        // This is REQUIRED to get ID tokens for server-side verification
-        serverClientId: ApiConstants.googleWebClientId,
+        // serverClientId is the Web Client ID from Google Cloud Console (project imagifyai-f8cad)
+        serverClientId: ApiConstants.googleWebClientId.isEmpty
+            ? null
+            : ApiConstants.googleWebClientId,
       );
 
       // Always sign out/disconnect first so the account picker shows every time
@@ -403,7 +404,7 @@ class SignInViewModel extends ChangeNotifier {
         print('Email: ${googleUser.email}');
         print('Display Name: ${googleUser.displayName}');
         print(
-          'Server Client ID configured: ${ApiConstants.googleWebClientId != null}',
+          'Server Client ID configured: ${ApiConstants.googleWebClientId.isNotEmpty}',
         );
       }
 
@@ -435,9 +436,9 @@ class SignInViewModel extends ChangeNotifier {
         }
 
         String errorMessage = 'Failed to get ID token from Google.\n\n';
-        if (ApiConstants.googleWebClientId == null) {
+        if (ApiConstants.googleWebClientId.isEmpty) {
           errorMessage +=
-              'Web Client ID is not configured. Please add it in api_constants.dart';
+              'Web Client ID is not configured. Please add it in api_constants.dart (from project imagifyai-f8cad).';
         } else {
           errorMessage += 'Please check:\n';
           errorMessage += '1. OAuth consent screen configuration\n';
@@ -735,7 +736,9 @@ class SignInViewModel extends ChangeNotifier {
       try {
         final GoogleSignIn googleSignIn = GoogleSignIn(
           scopes: ['email', 'profile', 'openid'],
-          serverClientId: ApiConstants.googleWebClientId,
+          serverClientId: ApiConstants.googleWebClientId.isEmpty
+              ? null
+              : ApiConstants.googleWebClientId,
         );
         await googleSignIn.signOut();
         if (kDebugMode) {

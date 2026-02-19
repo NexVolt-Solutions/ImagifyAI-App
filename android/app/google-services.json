@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "725660898004",
-    "project_id": "imagifyai-453d3",
-    "storage_bucket": "imagifyai-453d3.firebasestorage.app"
+    "project_number": "687032857486",
+    "project_id": "imagifyai-f8cad",
+    "storage_bucket": "imagifyai-f8cad.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:725660898004:android:54702659a74d021da12141",
+        "mobilesdk_app_id": "1:687032857486:android:6c47b9a8e0d78db67c2adf",
         "android_client_info": {
           "package_name": "com.imagifyai.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCkbJ4-l08iZGq1K2tVDHRODISdwIFnlHU"
+          "current_key": "AIzaSyBl3mUnYnTbLvDU1SgFB3T83fWx6M-64r4"
         }
       ],
       "services": {

@@ -1,7 +1,8 @@
 class ApiConstants {
   ApiConstants._();
-  // Note: If 404 errors occur, the API might require /api/v1 prefix
-  static const String baseUrl = 'https://imagifyai.io/api/v1';
+
+  /// Base URL for the API (register, login, Google sign-in, etc.).
+  static const String baseUrl = 'https://api.imagifyai.io/api/v1';
   // Authentication endpoints
   static const String register = '/auth/register';
   static const String verifyEmail = '/auth/verify';
@@ -35,11 +36,8 @@ class ApiConstants {
   static const String deleteWallpaper =
       '/wallpapers'; // Will be /wallpapers/{wallpaper_id}
 
-  /// Web Client ID for Google Sign-In. Use the one from your **Firebase project** so you
-  /// don't need a separate Google Cloud Console setup: Firebase Console → Project settings
-  /// → Your apps → Web app → copy "Web client ID", or in Google Cloud Console (same project
-  /// as Firebase, e.g. imagifyai-453d3) → Credentials → "Web client (auto created by Google Service)".
-  /// From OAuth client (project imagifyai-482410). Used as serverClientId for Google Sign-In.
+  /// Web Client ID for Google Sign-In (serverClientId). From Firebase project imagifyai-f8cad
+  /// (Web client auto created by Google Service).
   static const String googleWebClientId =
-      '247136119306-doc657heguufi8vd1enaau2dqu834fsv.apps.googleusercontent.com';
+      '687032857486-dtgppeu5qk5jfb7ckocrakqsddh8kd67.apps.googleusercontent.com';
 }

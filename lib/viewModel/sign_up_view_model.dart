@@ -26,7 +26,10 @@ class SignUpViewModel extends ChangeNotifier {
   final confirmPasswordController = TextEditingController();
 
   int selectedIndex = -1;
+  /// Loading state for email/password registration only.
   bool isLoading = false;
+  /// Loading state for Google sign-in only (so Create Account doesn't show Google loading).
+  bool isGoogleLoading = false;
   String? errorMessage;
   File? profileImage;
 
@@ -101,7 +104,7 @@ class SignUpViewModel extends ChangeNotifier {
     BuildContext context, {
     required GlobalKey<FormState> formKey,
   }) async {
-    if (isLoading) return;
+    if (isLoading || isGoogleLoading) return;
 
     // Validate form - if validation fails, stop here
     if (formKey.currentState == null) {
@@ -344,9 +347,9 @@ class SignUpViewModel extends ChangeNotifier {
   }
 
   Future<void> signInWithGoogle(BuildContext context) async {
-    if (isLoading) return;
+    if (isGoogleLoading || isLoading) return;
 
-    isLoading = true;
+    isGoogleLoading = true;
     errorMessage = null;
     notifyListeners();
 
@@ -357,7 +360,9 @@ class SignUpViewModel extends ChangeNotifier {
       // Initialize Google Sign-In with server client ID for ID token generation
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile', 'openid'],
-        serverClientId: ApiConstants.googleWebClientId,
+        serverClientId: ApiConstants.googleWebClientId.isEmpty
+            ? null
+            : ApiConstants.googleWebClientId,
       );
 
       // Always sign out/disconnect first so the account picker shows every time
@@ -380,7 +385,7 @@ class SignUpViewModel extends ChangeNotifier {
 
       if (googleUser == null) {
         // User cancelled the sign-in
-        isLoading = false;
+        isGoogleLoading = false;
         notifyListeners();
         return;
       }
@@ -398,7 +403,7 @@ class SignUpViewModel extends ChangeNotifier {
         print('Email: ${googleUser.email}');
         print('Display Name: ${googleUser.displayName}');
         print(
-          'Server Client ID configured: ${ApiConstants.googleWebClientId != null}',
+          'Server Client ID configured: ${ApiConstants.googleWebClientId.isNotEmpty}',
         );
 
         // Decode and log ID token payload for backend debugging
@@ -432,9 +437,9 @@ class SignUpViewModel extends ChangeNotifier {
         }
 
         String errorMessage = 'Failed to get ID token from Google.\n\n';
-        if (ApiConstants.googleWebClientId == null) {
+        if (ApiConstants.googleWebClientId.isEmpty) {
           errorMessage +=
-              'Web Client ID is not configured. Please add it in api_constants.dart';
+              'Web Client ID is not configured. Please add it in api_constants.dart (from project imagifyai-f8cad).';
         } else {
           errorMessage += 'Please check OAuth consent screen configuration';
         }
@@ -581,7 +586,7 @@ class SignUpViewModel extends ChangeNotifier {
       }
       _showMessage(context, errorMessage!);
     } finally {
-      isLoading = false;
+      isGoogleLoading = false;
       notifyListeners();
     }
   }

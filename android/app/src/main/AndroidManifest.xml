@@ -8,7 +8,8 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:label="Imagify AI"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -36,10 +37,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <!-- Google Sign-In OAuth Client ID -->
-        <meta-data
-            android:name="com.google.android.gms.auth.api.signin.clientId"
-            android:value="247136119306-doc657heguufi8vd1enaau2dqu834fsv.apps.googleusercontent.com" />
+        <!-- Google Sign-In: Web Client ID from imagifyai-f8cad set in code (ApiConstants.googleWebClientId). -->
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

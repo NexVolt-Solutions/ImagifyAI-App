@@ -754,6 +754,28 @@ class ApiService {
       return {};
     }
 
+    // Server returned HTML (e.g. website page) instead of JSON – usually wrong URL or redirect
+    final trimmed = response.body
+        .replaceFirst(RegExp(r'^\uFEFF'), '')
+        .trimLeft()
+        .toLowerCase();
+    final looksLikeHtml =
+        trimmed.startsWith('<!') ||
+        trimmed.startsWith('<html') ||
+        trimmed.contains('<!doctype') ||
+        (trimmed.length > 10 && trimmed.substring(0, 10).contains('<'));
+    if (looksLikeHtml) {
+      if (kDebugMode) {
+        print(
+          'Server returned HTML instead of JSON (wrong endpoint or redirect)',
+        );
+      }
+      throw ApiException(
+        'The server returned a web page instead of API data. The API URL may be wrong or the server may be misconfigured. Please try again later.',
+        statusCode: response.statusCode,
+      );
+    }
+
     try {
       if (kDebugMode) {
         print('Attempting to JSON decode response body...');
@@ -789,16 +811,26 @@ class ApiService {
         print('Response body: ${response.body}');
       }
 
-      // If JSON parsing fails, try to extract error message from response
-      final body = response.body;
-      if (body.isNotEmpty) {
-        // Try to find error message in plain text response
-        if (body.contains('message') || body.contains('error')) {
-          if (kDebugMode) {
-            print('Found message/error in plain text, returning as message');
-          }
-          return {'message': body, 'status': false};
+      final body = response.body.toLowerCase();
+      // Server returned HTML instead of JSON (e.g. redirect to website)
+      if (body.contains('<!doctype') || body.contains('<html')) {
+        if (kDebugMode) {
+          print('Response is HTML; throwing friendly API exception');
         }
+        throw ApiException(
+          'The server returned a web page instead of API data. The API URL may be wrong or the server may be misconfigured. Please try again later.',
+          statusCode: response.statusCode,
+        );
+      }
+
+      // Try to extract error message from plain text response
+      if (response.body.isNotEmpty &&
+          (response.body.contains('message') ||
+              response.body.contains('error'))) {
+        if (kDebugMode) {
+          print('Found message/error in plain text, returning as message');
+        }
+        return {'message': response.body, 'status': false};
       }
 
       if (kDebugMode) {
