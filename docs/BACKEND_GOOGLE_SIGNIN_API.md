@@ -28,7 +28,7 @@ The Flutter app sends the Google ID token to your backend. The backend must **ve
   }
   ```
 
-- Test: `curl -X POST https://imagifyai.io/api/v1/auth/google -H "Content-Type: application/json" -d '{}'` should return **JSON** (e.g. `{"detail":"..."}` or your error format), **not** HTML.
+- Test: `curl -X POST https://api.imagifyai.io/api/v1/auth/google -H "Content-Type: application/json" -d '{}'` should return **JSON** (e.g. `{"detail":"..."}` or your error format), **not** HTML.
 
 ---
 
@@ -37,7 +37,7 @@ The Flutter app sends the Google ID token to your backend. The backend must **ve
 | Item | Value |
 |------|--------|
 | **Method** | `POST` |
-| **URL** | `https://imagifyai.io/api/v1/auth/google` |
+| **URL** | `https://api.imagifyai.io/api/v1/auth/google` |
 | **Content-Type** | `application/json` |
 
 **Request body (JSON):**
@@ -195,3 +195,25 @@ Optional but useful: **token_type**, **status**, **message**, **data** (e.g. use
 - [ ] `Content-Type: application/json` and no HTML/redirect for this route.
 
 Once this is in place, the app’s Google Sign-In will complete successfully.
+
+---
+
+## 8. Troubleshooting: Backend returns "Invalid Google token" (400)
+
+If the backend responds with `{"msg":"Invalid Google token"}` or similar:
+
+**Cause:** Token verification is failing. The ID token from the app is valid (it has the correct `aud`, `iss`, `exp`). The backend must verify it using the **same Web Client ID** the app uses.
+
+**Fix on the backend:**
+
+1. **Use the Web Client ID for verification** (not the Android client ID):
+   ```
+   687032857486-dtgppeu5qk5jfb7ckocrakqsddh8kd67.apps.googleusercontent.com
+   ```
+2. **Tokeninfo (quick check):**  
+   `GET https://oauth2.googleapis.com/tokeninfo?id_token=<ID_TOKEN>`  
+   – Response `aud` must equal the Web Client ID above. If your backend uses a different audience, change it to this Web Client ID.
+3. **JWT verification:** When verifying the JWT (e.g. with `google-auth-library`, PyJWT, or similar), set **audience** (or **aud**) to the Web Client ID above. Do **not** use the Android OAuth client ID for server-side verification of this token.
+4. **Request body:** The app sends JSON: `{"id_token": "<jwt>", "name": "...", "picture": "..."}`. Ensure the backend reads `id_token` from the JSON body (not `idToken` or a header) and passes that exact string to the verifier.
+
+After updating the backend to verify with the Web Client ID, Google Sign-In should succeed.

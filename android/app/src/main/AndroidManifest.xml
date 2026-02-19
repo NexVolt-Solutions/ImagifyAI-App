@@ -2,6 +2,8 @@
     <!-- Internet permission required for API calls -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Required for Android 13+ (API 33+) when using advertising ID (e.g. Firebase Analytics). -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
     
     <application
         android:usesCleartextTraffic="false"
