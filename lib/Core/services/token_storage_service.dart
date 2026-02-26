@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:imagifyai/models/user/user.dart';
 
 class TokenStorageService {
   static const String _accessTokenKey = 'access_token';
@@ -7,6 +9,7 @@ class TokenStorageService {
   static const String _userIdKey = 'user_id';
   static const String _onboardingCompletedKey = 'onboarding_completed';
   static const String _rememberedEmailKey = 'remembered_email';
+  static const String _userDataKey = 'user_data';
 
   /// Save access token to SharedPreferences
   static Future<bool> saveAccessToken(String token) async {
@@ -240,6 +243,85 @@ class TokenStorageService {
     }
   }
 
+  /// Save user data to SharedPreferences
+  static Future<bool> saveUserData(User user) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 100));
+      final prefs = await SharedPreferences.getInstance();
+      final userJson = jsonEncode(user.toJson());
+      final saved = await prefs.setString(_userDataKey, userJson);
+      
+      if (kDebugMode) {
+        print('=== USER DATA SAVED ===');
+        print('User ID: ${user.id}');
+        print('Username: ${user.username}');
+        print('Email: ${user.email}');
+        print('Saved: $saved');
+      }
+      
+      return saved;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving user data: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Get user data from SharedPreferences
+  static Future<User?> getUserData() async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 100));
+      final prefs = await SharedPreferences.getInstance();
+      final userJsonString = prefs.getString(_userDataKey);
+      
+      if (userJsonString == null || userJsonString.isEmpty) {
+        if (kDebugMode) {
+          print('=== GETTING USER DATA ===');
+          print('User data not found in cache');
+        }
+        return null;
+      }
+      
+      final userJson = jsonDecode(userJsonString) as Map<String, dynamic>;
+      final user = User.fromJson(userJson);
+      
+      if (kDebugMode) {
+        print('=== USER DATA RETRIEVED FROM CACHE ===');
+        print('User ID: ${user.id}');
+        print('Username: ${user.username}');
+        print('Email: ${user.email}');
+      }
+      
+      return user;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting user data: $e');
+      }
+      return null;
+    }
+  }
+
+  /// Clear user data from SharedPreferences
+  static Future<bool> clearUserData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final removed = await prefs.remove(_userDataKey);
+      
+      if (kDebugMode) {
+        print('=== USER DATA CLEARED ===');
+        print('User data removed: $removed');
+      }
+      
+      return removed;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error clearing user data: $e');
+      }
+      return false;
+    }
+  }
+
   /// Clear all tokens (logout)
   /// Note: This does NOT clear remembered email - that's handled separately
   static Future<bool> clearTokens() async {
@@ -248,15 +330,17 @@ class TokenStorageService {
       final accessRemoved = await prefs.remove(_accessTokenKey);
       final refreshRemoved = await prefs.remove(_refreshTokenKey);
       final userIdRemoved = await prefs.remove(_userIdKey);
+      final userDataRemoved = await prefs.remove(_userDataKey);
       
       if (kDebugMode) {
         print('=== TOKENS CLEARED ===');
         print('Access token removed: $accessRemoved');
         print('Refresh token removed: $refreshRemoved');
         print('User ID removed: $userIdRemoved');
+        print('User data removed: $userDataRemoved');
       }
       
-      return accessRemoved && refreshRemoved && userIdRemoved;
+      return accessRemoved && refreshRemoved && userIdRemoved && userDataRemoved;
     } catch (e) {
       if (kDebugMode) {
         print('Error clearing tokens: $e');

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
@@ -26,8 +25,10 @@ class SignUpViewModel extends ChangeNotifier {
   final confirmPasswordController = TextEditingController();
 
   int selectedIndex = -1;
+
   /// Loading state for email/password registration only.
   bool isLoading = false;
+
   /// Loading state for Google sign-in only (so Create Account doesn't show Google loading).
   bool isGoogleLoading = false;
   String? errorMessage;
@@ -458,6 +459,35 @@ class SignUpViewModel extends ChangeNotifier {
       String? refreshToken = response.refreshToken;
       String? accessToken = response.accessToken;
 
+      // Extract user_id from login response
+      String? userIdFromResponse = response.userId;
+
+      // Fallback: Try to extract user_id from JWT token if not in response
+      String? userIdFromJwt;
+      if (userIdFromResponse == null &&
+          accessToken != null &&
+          accessToken.isNotEmpty) {
+        try {
+          final decoded = JwtDecoder.decode(accessToken);
+          if (decoded != null) {
+            userIdFromJwt =
+                decoded['user_id']?.toString() ??
+                decoded['userId']?.toString() ??
+                decoded['id']?.toString();
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('❌ Failed to decode JWT: $e');
+          }
+        }
+      }
+
+      // Save user_id if found
+      final userIdToSave = userIdFromResponse ?? userIdFromJwt;
+      if (userIdToSave != null && userIdToSave.isNotEmpty) {
+        await TokenStorageService.saveUserId(userIdToSave);
+      }
+
       if (kDebugMode) {
         print('=== GOOGLE SIGN-UP SUCCESSFUL ===');
         print(
@@ -466,36 +496,7 @@ class SignUpViewModel extends ChangeNotifier {
         print(
           'Refresh token received: ${refreshToken != null && refreshToken.isNotEmpty}',
         );
-
-        // Extract user_id from login response
-        String? userIdFromResponse = response.userId;
-
-        // Fallback: Try to extract user_id from JWT token if not in response
-        String? userIdFromJwt;
-        if (userIdFromResponse == null &&
-            accessToken != null &&
-            accessToken.isNotEmpty) {
-          try {
-            final decoded = JwtDecoder.decode(accessToken);
-            if (decoded != null) {
-              userIdFromJwt =
-                  decoded['user_id']?.toString() ??
-                  decoded['userId']?.toString() ??
-                  decoded['id']?.toString();
-
-              if (userIdFromJwt != null) {
-                print('✅ User ID found in JWT: $userIdFromJwt');
-              }
-            }
-          } catch (e) {
-            print('❌ Failed to decode JWT: $e');
-          }
-        }
-
-        // Save user_id if found
-        final userIdToSave = userIdFromResponse ?? userIdFromJwt;
         if (userIdToSave != null && userIdToSave.isNotEmpty) {
-          await TokenStorageService.saveUserId(userIdToSave);
           print('✅ User ID saved to storage: $userIdToSave');
         }
       }
@@ -508,6 +509,31 @@ class SignUpViewModel extends ChangeNotifier {
       // Save email for "Remember Me"
       if (googleUser.email.isNotEmpty) {
         await TokenStorageService.saveRememberedEmail(googleUser.email);
+      }
+
+      // Fetch and save user data after successful Google sign-in
+      if (userIdToSave != null && 
+          userIdToSave.isNotEmpty && 
+          accessToken != null && 
+          accessToken.isNotEmpty) {
+        try {
+          if (kDebugMode) {
+            print('=== FETCHING USER DATA AFTER GOOGLE SIGN-UP ===');
+          }
+          // User data is automatically saved to cache in getCurrentUser
+          await _authRepository.getCurrentUser(
+            accessToken: accessToken,
+            userId: userIdToSave,
+          );
+          if (kDebugMode) {
+            print('✅ User data fetched and cached after Google sign-up');
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Failed to fetch user data after Google sign-up: $e');
+            print('   User can still use the app, data will be fetched when needed');
+          }
+        }
       }
 
       notifyListeners();

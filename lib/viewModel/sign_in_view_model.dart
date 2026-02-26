@@ -244,6 +244,35 @@ class SignInViewModel extends ChangeNotifier {
       _refreshToken = response.refreshToken;
       _accessToken = response.accessToken;
 
+      // Extract user_id from login response (API returns it at root level)
+      String? userIdFromResponse = response.userId;
+
+      // Fallback: Try to extract user_id from JWT token if not in response
+      String? userIdFromJwt;
+      if (userIdFromResponse == null &&
+          _accessToken != null &&
+          _accessToken!.isNotEmpty) {
+        try {
+          final decoded = JwtDecoder.decode(_accessToken!);
+          if (decoded != null) {
+            userIdFromJwt =
+                decoded['user_id']?.toString() ??
+                decoded['userId']?.toString() ??
+                decoded['id']?.toString();
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('❌ Failed to decode JWT: $e');
+          }
+        }
+      }
+
+      // Save user_id if found in either response or JWT
+      final userIdToSave = userIdFromResponse ?? userIdFromJwt;
+      if (userIdToSave != null && userIdToSave.isNotEmpty) {
+        await TokenStorageService.saveUserId(userIdToSave);
+      }
+
       if (kDebugMode) {
         print('=== LOGIN SUCCESSFUL ===');
         print(
@@ -254,60 +283,31 @@ class SignInViewModel extends ChangeNotifier {
         );
         print('Access token length: ${_accessToken?.length ?? 0}');
         print('Login response data: ${response.data}');
-
-        // Extract user_id from login response (API returns it at root level)
-        String? userIdFromResponse = response.userId;
-
-        // Fallback: Try to extract user_id from JWT token if not in response
-        String? userIdFromJwt;
-        if (userIdFromResponse == null &&
-            _accessToken != null &&
-            _accessToken!.isNotEmpty) {
+        print('=== JWT TOKEN PAYLOAD ===');
+        if (_accessToken != null && _accessToken!.isNotEmpty) {
           try {
             final decoded = JwtDecoder.decode(_accessToken!);
             if (decoded != null) {
-              print('=== JWT TOKEN PAYLOAD ===');
               print('JWT Payload keys: ${decoded.keys.toList()}');
               print('JWT Payload: $decoded');
-
-              // Try to get user_id from JWT
-              userIdFromJwt =
-                  decoded['user_id']?.toString() ??
-                  decoded['userId']?.toString() ??
-                  decoded['id']?.toString();
-
-              if (userIdFromJwt != null) {
-                print('✅ User ID found in JWT: $userIdFromJwt');
-              } else {
-                print('❌ User ID NOT found in JWT');
-                print('JWT only contains: ${decoded.keys.toList()}');
-              }
             }
           } catch (e) {
             print('❌ Failed to decode JWT: $e');
           }
         }
-
-        // Save user_id if found in either response or JWT
-        final userIdToSave = userIdFromResponse ?? userIdFromJwt;
         if (userIdToSave != null && userIdToSave.isNotEmpty) {
-          await TokenStorageService.saveUserId(userIdToSave);
-          if (kDebugMode) {
-            print('=== USER ID SAVED ===');
-            print('User ID: $userIdToSave');
-            print('Saved: true');
-            print('✅ User ID saved to storage: $userIdToSave');
-            print(
-              '   Source: ${userIdFromResponse != null ? "Login Response" : "JWT Token"}',
-            );
-          }
+          print('=== USER ID SAVED ===');
+          print('User ID: $userIdToSave');
+          print('Saved: true');
+          print('✅ User ID saved to storage: $userIdToSave');
+          print(
+            '   Source: ${userIdFromResponse != null ? "Login Response" : "JWT Token"}',
+          );
         } else {
-          if (kDebugMode) {
-            print(
-              '❌ CRITICAL: User ID not found in login response or JWT token!',
-            );
-            print('❌ Cannot fetch user profile without user_id');
-          }
+          print(
+            '❌ CRITICAL: User ID not found in login response or JWT token!',
+          );
+          print('❌ Cannot fetch user profile without user_id');
         }
       }
 
@@ -327,6 +327,31 @@ class SignInViewModel extends ChangeNotifier {
         await TokenStorageService.clearRememberedEmail();
         if (kDebugMode) {
           print('✅ Remembered email cleared (Remember Me unchecked)');
+        }
+      }
+
+      // Fetch and save user data after successful login
+      if (userIdToSave != null && 
+          userIdToSave.isNotEmpty && 
+          _accessToken != null && 
+          _accessToken!.isNotEmpty) {
+        try {
+          if (kDebugMode) {
+            print('=== FETCHING USER DATA AFTER LOGIN ===');
+          }
+          // User data is automatically saved to cache in getCurrentUser
+          await _authRepository.getCurrentUser(
+            accessToken: _accessToken!,
+            userId: userIdToSave,
+          );
+          if (kDebugMode) {
+            print('✅ User data fetched and cached after login');
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Failed to fetch user data after login: $e');
+            print('   User can still use the app, data will be fetched when needed');
+          }
         }
       }
 
@@ -495,6 +520,35 @@ class SignInViewModel extends ChangeNotifier {
       _refreshToken = response.refreshToken;
       _accessToken = response.accessToken;
 
+      // Extract user_id from login response (API returns it at root level)
+      String? userIdFromResponse = response.userId;
+
+      // Fallback: Try to extract user_id from JWT token if not in response
+      String? userIdFromJwt;
+      if (userIdFromResponse == null &&
+          _accessToken != null &&
+          _accessToken!.isNotEmpty) {
+        try {
+          final decoded = JwtDecoder.decode(_accessToken!);
+          if (decoded != null) {
+            userIdFromJwt =
+                decoded['user_id']?.toString() ??
+                decoded['userId']?.toString() ??
+                decoded['id']?.toString();
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('❌ Failed to decode JWT: $e');
+          }
+        }
+      }
+
+      // Save user_id if found in either response or JWT
+      final userIdToSave = userIdFromResponse ?? userIdFromJwt;
+      if (userIdToSave != null && userIdToSave.isNotEmpty) {
+        await TokenStorageService.saveUserId(userIdToSave);
+      }
+
       if (kDebugMode) {
         print('=== GOOGLE SIGN-IN SUCCESSFUL ===');
         print(
@@ -504,60 +558,31 @@ class SignInViewModel extends ChangeNotifier {
           'Refresh token received: ${_refreshToken != null && _refreshToken!.isNotEmpty}',
         );
         print('Access token length: ${_accessToken?.length ?? 0}');
-
-        // Extract user_id from login response (API returns it at root level)
-        String? userIdFromResponse = response.userId;
-
-        // Fallback: Try to extract user_id from JWT token if not in response
-        String? userIdFromJwt;
-        if (userIdFromResponse == null &&
-            _accessToken != null &&
-            _accessToken!.isNotEmpty) {
+        print('=== JWT TOKEN PAYLOAD ===');
+        if (_accessToken != null && _accessToken!.isNotEmpty) {
           try {
             final decoded = JwtDecoder.decode(_accessToken!);
             if (decoded != null) {
-              print('=== JWT TOKEN PAYLOAD ===');
               print('JWT Payload keys: ${decoded.keys.toList()}');
               print('JWT Payload: $decoded');
-
-              // Try to get user_id from JWT
-              userIdFromJwt =
-                  decoded['user_id']?.toString() ??
-                  decoded['userId']?.toString() ??
-                  decoded['id']?.toString();
-
-              if (userIdFromJwt != null) {
-                print('✅ User ID found in JWT: $userIdFromJwt');
-              } else {
-                print('❌ User ID NOT found in JWT');
-                print('JWT only contains: ${decoded.keys.toList()}');
-              }
             }
           } catch (e) {
             print('❌ Failed to decode JWT: $e');
           }
         }
-
-        // Save user_id if found in either response or JWT
-        final userIdToSave = userIdFromResponse ?? userIdFromJwt;
         if (userIdToSave != null && userIdToSave.isNotEmpty) {
-          await TokenStorageService.saveUserId(userIdToSave);
-          if (kDebugMode) {
-            print('=== USER ID SAVED ===');
-            print('User ID: $userIdToSave');
-            print('Saved: true');
-            print('✅ User ID saved to storage: $userIdToSave');
-            print(
-              '   Source: ${userIdFromResponse != null ? "Google Sign-In Response" : "JWT Token"}',
-            );
-          }
+          print('=== USER ID SAVED ===');
+          print('User ID: $userIdToSave');
+          print('Saved: true');
+          print('✅ User ID saved to storage: $userIdToSave');
+          print(
+            '   Source: ${userIdFromResponse != null ? "Google Sign-In Response" : "JWT Token"}',
+          );
         } else {
-          if (kDebugMode) {
-            print(
-              '❌ CRITICAL: User ID not found in Google sign-in response or JWT token!',
-            );
-            print('❌ Cannot fetch user profile without user_id');
-          }
+          print(
+            '❌ CRITICAL: User ID not found in Google sign-in response or JWT token!',
+          );
+          print('❌ Cannot fetch user profile without user_id');
         }
       }
 
@@ -571,6 +596,31 @@ class SignInViewModel extends ChangeNotifier {
         await TokenStorageService.saveRememberedEmail(googleUser.email);
         if (kDebugMode) {
           print('✅ Email saved for "Remember Me": ${googleUser.email}');
+        }
+      }
+
+      // Fetch and save user data after successful Google login
+      if (userIdToSave != null && 
+          userIdToSave.isNotEmpty && 
+          _accessToken != null && 
+          _accessToken!.isNotEmpty) {
+        try {
+          if (kDebugMode) {
+            print('=== FETCHING USER DATA AFTER GOOGLE LOGIN ===');
+          }
+          // User data is automatically saved to cache in getCurrentUser
+          await _authRepository.getCurrentUser(
+            accessToken: _accessToken!,
+            userId: userIdToSave,
+          );
+          if (kDebugMode) {
+            print('✅ User data fetched and cached after Google login');
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Failed to fetch user data after Google login: $e');
+            print('   User can still use the app, data will be fetched when needed');
+          }
         }
       }
 

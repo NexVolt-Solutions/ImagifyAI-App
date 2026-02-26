@@ -188,6 +188,7 @@ class AuthRepository {
   Future<User> getCurrentUser({
     required String accessToken,
     required String userId,
+    bool forceRefresh = false,
   }) async {
     if (kDebugMode) {
       print('═══════════════════════════════════════════════════════════');
@@ -196,6 +197,7 @@ class AuthRepository {
       print('Endpoint: GET /api/v1/users/{user_id}');
       print('Has access token: ${accessToken.isNotEmpty}');
       print('User ID: $userId');
+      print('Force refresh: $forceRefresh');
     }
 
     if (userId.isEmpty) {
@@ -203,6 +205,38 @@ class AuthRepository {
         'User ID is required for GET /api/v1/users/{user_id}',
         statusCode: 400,
       );
+    }
+
+    // Check cache first if not forcing refresh
+    if (!forceRefresh) {
+      try {
+        final cachedUser = await TokenStorageService.getUserData();
+        if (cachedUser != null && cachedUser.id == userId) {
+          if (kDebugMode) {
+            print('✅ User data found in cache, returning cached data');
+            print('Cached User ID: ${cachedUser.id}');
+            print('Cached Username: ${cachedUser.username}');
+            print('Cached Email: ${cachedUser.email}');
+          }
+          return cachedUser;
+        } else if (cachedUser != null && cachedUser.id != userId) {
+          if (kDebugMode) {
+            print('⚠️ Cached user ID (${cachedUser.id}) does not match requested ID ($userId), fetching from API');
+          }
+        } else {
+          if (kDebugMode) {
+            print('ℹ️ No cached user data found, fetching from API');
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Error checking cache, proceeding with API call: $e');
+        }
+      }
+    } else {
+      if (kDebugMode) {
+        print('🔄 Force refresh requested, skipping cache');
+      }
     }
 
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
@@ -286,6 +320,18 @@ class AuthRepository {
           if (kDebugMode) {
             print('⚠️  Failed to save user_id: $e');
           }
+        }
+      }
+
+      // Save full user data to cache
+      try {
+        await TokenStorageService.saveUserData(user);
+        if (kDebugMode) {
+          print('✅ User data saved to cache');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️  Failed to save user data to cache: $e');
         }
       }
 
