@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:imagifyai/Core/Constants/app_assets.dart';
-import 'package:imagifyai/Core/Constants/size_extension.dart';
-import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/splash_screen_view_model.dart';
 
+/// Minimal entry screen: black only so it matches the native splash.
+/// Navigation logic runs in SplashScreenViewModel (onboarding / sign in / home).
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -23,16 +21,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.backgroundColor,
-      body: Center(
-        child: SvgPicture.asset(
-          AppAssets.imagifyaiLogo,
-          fit: BoxFit.cover,
-          height: context.h(80),
-          width: context.w(80),
-        ),
-      ),
+    return const Scaffold(
+      backgroundColor: Colors.black,
+      body: SizedBox.shrink(),
     );
   }
 }

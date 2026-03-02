@@ -19,7 +19,7 @@ class SplashScreenViewModel extends ChangeNotifier {
       }
     }
 
-    Future.delayed(const Duration(seconds: 3), () async {
+    Future.delayed(const Duration(milliseconds: 800), () async {
       if (context.mounted) {
         if (isLoggedIn) {
           Navigator.pushReplacementNamed(context, RoutesName.BottomNavScreen);
