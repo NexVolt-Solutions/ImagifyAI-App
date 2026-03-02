@@ -514,7 +514,7 @@ class HomeViewModel extends ChangeNotifier {
     SnackbarUtil.showTopSnackBar(context, message, isError: isError);
   }
 
-  void navigateToGenarateWallpaperScreen(BuildContext context) {
+  void navigateToGenerateWallpaperScreen(BuildContext context) {
     // Update BottomNavScreenViewModel's index to 1 (Create Image tab)
     // This will change the displayed screen and update the bottom navigation bar
     final bottomNavViewModel = context.read<BottomNavScreenViewModel>();

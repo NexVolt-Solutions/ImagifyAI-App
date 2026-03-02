@@ -200,7 +200,7 @@ class _HomeState extends State<Home> {
                             SizedBox(height: context.h(12)),
                             CustomButton(
                               onPressed: () => homeViewModel
-                                  .navigateToGenarateWallpaperScreen(context),
+                                  .navigateToGenerateWallpaperScreen(context),
                               height: context.h(47),
                               width: context.w(160),
                               gradient: AppColors.gradient,
