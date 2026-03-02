@@ -361,9 +361,7 @@ class _EditProfileState extends State<EditProfile> {
                         );
                       }
                     },
-                    text: editProfileViewModel.isLoading
-                        ? "Saving..."
-                        : "Save Changes",
+                    text: "Save Changes",
                     isLoading: editProfileViewModel.isLoading,
                     gradient: AppColors.gradient,
                   ),

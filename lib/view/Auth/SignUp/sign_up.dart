@@ -263,9 +263,7 @@ class _SignUpState extends State<SignUp> {
                             ),
                     width: context.w(350),
                     gradient: AppColors.gradient,
-                    text: signUpViewModel.isLoading
-                        ? 'Creating your account...'
-                        : 'Create Account',
+                    text: 'Create Account',
                     isLoading: signUpViewModel.isLoading,
                   ),
 

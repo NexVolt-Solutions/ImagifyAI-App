@@ -114,7 +114,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                     onPressed: () =>
                         viewModel.setNewPassword(context, _formKey),
                     gradient: AppColors.gradient,
-                    text: viewModel.isLoading ? 'Saving...' : 'Save',
+                    text: 'Save',
                     isLoading: viewModel.isLoading,
                   ),
                   SizedBox(height: context.h(32)),

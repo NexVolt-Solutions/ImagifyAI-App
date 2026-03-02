@@ -204,9 +204,7 @@ class _HomeState extends State<Home> {
                               height: context.h(47),
                               width: context.w(160),
                               gradient: AppColors.gradient,
-                              text: homeViewModel.isLoading
-                                  ? 'Creating...'
-                                  : 'Generate Now',
+                              text: 'Generate Now',
                               isLoading: homeViewModel.isLoading,
                             ),
                           ],

@@ -396,10 +396,9 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                       iconHeight: 24,
                       iconWidth: 24,
                       gradient: AppColors.gradient,
-                      text: imageGenerateViewModel.isCreating
-                          ? 'Crafting Your Masterpiece...'
-                          : 'Create Magic',
+                      text: 'Create Magic',
                       icon: AppAssets.magicStarIcon,
+                      isLoading: imageGenerateViewModel.isCreating,
                     ),
                     SizedBox(height: context.h(12)),
                     const _WatchAdButton(),

@@ -188,9 +188,7 @@ class _VerificationState extends State<Verification> {
                       formKey: _formKey,
                     ),
                     gradient: AppColors.gradient,
-                    text: verificationViewModel.isLoading
-                        ? 'Verifying...'
-                        : 'Verify Account',
+                    text: 'Verify Account',
                     isLoading: verificationViewModel.isLoading,
                   ),
                 ],

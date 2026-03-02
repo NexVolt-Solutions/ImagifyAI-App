@@ -607,9 +607,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                           iconHeight: 24,
                           iconWidth: 24,
                           gradient: AppColors.gradient,
-                          text: imageCreatedViewModel.isLoading
-                              ? 'Regenerating...'
-                              : 'Try Again',
+                          text: 'Try Again',
                           isLoading: imageCreatedViewModel.isLoading,
                           icon: AppAssets.reCreateIcon,
                         ),
@@ -620,9 +618,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                           iconHeight: 24,
                           iconWidth: 24,
                           gradient: AppColors.gradient,
-                          text: imageCreatedViewModel.isDownloading
-                              ? 'Preparing...'
-                              : 'Get Wallpaper',
+                          text: 'Get Wallpaper',
                           isLoading: imageCreatedViewModel.isDownloading,
                           icon: AppAssets.downloadIcon,
                         ),

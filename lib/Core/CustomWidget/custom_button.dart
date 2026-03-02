@@ -58,36 +58,46 @@ class CustomButton extends StatelessWidget {
             border: Border.all(color: borderColor ?? context.backgroundColor),
             borderRadius: BorderRadius.circular(context.radius(8)),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              if (isLoading) ...[
-                const AppLoadingIndicator.medium(color: Colors.white),
-                SizedBox(width: context.w(8)),
-              ] else if (icon != null) ...[
-                Image.asset(
-                  icon!,
-                  height: iconHeight ?? context.h(20),
-                  width: iconWidth ?? context.w(20),
-                  color: Colors.white,
-                  fit: BoxFit.cover,
+          child: isLoading
+              ? Center(
+                  child: AppLoadingIndicator.medium(
+                    color:
+                        context.appTextStyles?.customButtonText.color ??
+                        context.colorScheme.onPrimary,
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    if (icon != null) ...[
+                      Image.asset(
+                        icon!,
+                        height: iconHeight ?? context.h(20),
+                        width: iconWidth ?? context.w(20),
+                        color:
+                            context.appTextStyles?.customButtonText.color ??
+                            context.colorScheme.onPrimary,
+                        fit: BoxFit.cover,
+                      ),
+                      SizedBox(width: context.w(5)),
+                    ],
+                    Flexible(
+                      child: Text(
+                        text ?? "",
+                        style:
+                            (context.appTextStyles?.customButtonText ??
+                                    TextStyle())
+                                .copyWith(
+                                  fontSize: fontSize ?? context.text(16),
+                                ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(width: context.w(5)),
-              ],
-              Flexible(
-                child: Text(
-                  text ?? "",
-                  style:
-                      (context.appTextStyles?.customButtonText ?? TextStyle())
-                          .copyWith(fontSize: fontSize ?? context.text(16)),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
         );
 
         // If width is infinity and we have bounded constraints, wrap in SizedBox
