@@ -6,8 +6,8 @@ import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/auth/forgot_password_response.dart';
 import 'package:imagifyai/repositories/auth_repository.dart';
 
-class ForgorVerificationViewModel extends ChangeNotifier {
-  ForgorVerificationViewModel({AuthRepository? authRepository})
+class ForgotVerificationViewModel extends ChangeNotifier {
+  ForgotVerificationViewModel({AuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository() {
     _startTimer();
   }

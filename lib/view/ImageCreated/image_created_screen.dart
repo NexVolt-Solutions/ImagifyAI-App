@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -70,10 +69,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
             _pollingTimer = null;
             _elapsedTimeController?.close();
             _elapsedTimeController = null;
-            if (kDebugMode) {
-              print('✅ Image already available, skipping polling');
-              print('Image URL: ${args.imageUrl}');
-            }
           }
         }
       }
@@ -142,11 +137,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
       // If image is not ready, start polling
       if (currentWallpaper.imageUrl.isEmpty ||
           currentWallpaper.imageUrl == 'null') {
-        if (kDebugMode) {
-          print(
-            '🔄 Wallpaper ID changed, restarting polling for new wallpaper: ${currentWallpaper.id}',
-          );
-        }
         _startPolling(viewModel);
       }
     } else if (viewModel.isPolling &&
@@ -155,11 +145,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
       // Wallpaper ID didn't change but polling should be active
       // Make sure polling is running
       if (_pollingTimer == null || !_pollingTimer!.isActive) {
-        if (kDebugMode) {
-          print(
-            '🔄 Polling should be active but timer not running, restarting...',
-          );
-        }
         _startPolling(viewModel);
       }
     }
@@ -388,20 +373,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                           errorMsg =
                                               'Connection error\nPlease check your internet';
                                           isNetworkError = true;
-                                        }
-
-                                        if (kDebugMode) {
-                                          print(
-                                            '❌ Error loading image: $error',
-                                          );
-                                          print('Image URL: $imageUrl');
-                                          print(
-                                            'Error type: ${error.runtimeType}',
-                                          );
-                                          print(
-                                            'Is network error: $isNetworkError',
-                                          );
-                                          print('Retry count: $_retryCount');
                                         }
 
                                         // Auto-retry for network errors (up to 3 times)

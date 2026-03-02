@@ -1,8 +1,10 @@
+import 'package:imagifyai/Core/Constants/env_constants.dart';
+
 class ApiConstants {
   ApiConstants._();
 
   /// Base URL for the API (register, login, Google sign-in, etc.).
-  static const String baseUrl = 'https://api.imagifyai.io/api/v1';
+  static String get baseUrl => EnvConstants.apiBaseUrl;
   // Authentication endpoints
   static const String register = '/auth/register';
   static const String verifyEmail = '/auth/verify';
@@ -37,7 +39,5 @@ class ApiConstants {
       '/wallpapers'; // Will be /wallpapers/{wallpaper_id}
 
   /// Web Client ID for Google Sign-In (serverClientId). From Firebase project imagifyai-f8cad
-  /// (Web client auto created by Google Service).
-  static const String googleWebClientId =
-      '687032857486-dtgppeu5qk5jfb7ckocrakqsddh8kd67.apps.googleusercontent.com';
+  static String get googleWebClientId => EnvConstants.googleWebClientId;
 }

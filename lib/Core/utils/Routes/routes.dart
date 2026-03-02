@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
-import 'package:imagifyai/view/Auth/ForgotScreen/Widget/AccountCreated/accound_created.dart';
+import 'package:imagifyai/view/Auth/ForgotScreen/Widget/AccountCreated/account_created.dart';
 import 'package:imagifyai/view/Auth/ForgotScreen/Widget/ConfirmEmail/confirm_email.dart';
 import 'package:imagifyai/view/Auth/ForgotScreen/Widget/SetNewPassword/set_new_password_screen.dart';
 import 'package:imagifyai/view/Auth/ForgotScreen/Widget/Verification/forgot_verification_screen.dart';
@@ -18,7 +18,7 @@ import 'package:imagifyai/view/ProfileScreen/widget/edit_profile.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/library.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/privacy_policy.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/term_of_use.dart';
-import 'package:imagifyai/view/SplahScrren/splash_screen.dart';
+import 'package:imagifyai/view/SplashScreen/splash_screen.dart';
 import 'package:imagifyai/view/Verification/verification.dart';
 
 class Routes {
@@ -110,7 +110,7 @@ class Routes {
       case RoutesName.AccountCreatedScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AccoundCreated(),
+          builder: (_) => const AccountCreated(),
         );
       case RoutesName.LibraryScreen:
         return MaterialPageRoute(settings: settings, builder: (_) => Library());

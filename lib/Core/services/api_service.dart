@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:imagifyai/Core/Constants/api_constants.dart';
 
@@ -28,10 +28,6 @@ class ApiService {
   // Set the token refresh callback
   static void setTokenRefreshCallback(Future<String?> Function() callback) {
     _onTokenExpired = callback;
-    if (kDebugMode) {
-      print('✅ ApiService: Token refresh callback has been set');
-      print('   Callback is null: ${_onTokenExpired == null}');
-    }
   }
 
   Future<Map<String, dynamic>> get(
@@ -251,15 +247,6 @@ class ApiService {
     Map<String, String>? headers,
   }) async {
     final uri = _buildUri(path);
-
-    if (kDebugMode) {
-      print('=== API SERVICE: POST MULTIPART ===');
-      print('URL: $uri');
-      print('Fields: $fields');
-      print('File: ${file?.path}');
-      print('File field name: $fileFieldName');
-    }
-
     final request = http.MultipartRequest('POST', uri)..fields.addAll(fields);
 
     // For multipart requests, only add non-content-type headers
@@ -273,22 +260,10 @@ class ApiService {
     request.headers.addAll(defaultHeaders);
 
     if (file != null) {
-      if (kDebugMode) {
-        print('Adding file to request: ${file.path}');
-      }
       try {
-        // Extract filename from path
         final filename = file.path.split('/').last;
         final fileExtension = filename.split('.').last.toLowerCase();
         final contentType = _getContentType(fileExtension);
-
-        if (kDebugMode) {
-          print('Filename: $filename');
-          print('Content-Type: $contentType');
-        }
-
-        // Read file bytes and create MultipartFile with explicit content-type
-        // Some servers require explicit content-type in the multipart file
         final fileBytes = await file.readAsBytes();
         final mediaType = http.MediaType.parse(contentType);
         request.files.add(
@@ -299,44 +274,12 @@ class ApiService {
             contentType: mediaType,
           ),
         );
-
-        if (kDebugMode) {
-          print('File added successfully');
-          print('File bytes length: ${fileBytes.length}');
-        }
       } catch (e) {
-        if (kDebugMode) {
-          print('ERROR adding file: $e');
-        }
         rethrow;
       }
     }
 
-    if (kDebugMode) {
-      print('Request headers: ${request.headers}');
-      print('Request fields count: ${request.fields.length}');
-      print('Request files count: ${request.files.length}');
-      print('Request fields: ${request.fields}');
-      if (request.files.isNotEmpty) {
-        for (var file in request.files) {
-          print(
-            'File in request: field=${file.field}, filename=${file.filename}, length=${file.length}, contentType=${file.contentType}',
-          );
-        }
-      }
-      if (file != null) {
-        final fileSize = await file.length();
-        print('Actual file size: $fileSize bytes');
-        print('File exists: ${await file.exists()}');
-      }
-      print('Full request URL: ${request.url}');
-      print('Request method: ${request.method}');
-    }
-
     try {
-      if (kDebugMode) {
-        print('Sending multipart request...');
-      }
       return _executeWithTokenRefresh(
         () async {
           final streamedResponse = await _client.send(request);
@@ -376,13 +319,7 @@ class ApiService {
           return await http.Response.fromStream(streamedResponse);
         },
       );
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('=== ERROR IN POST MULTIPART ===');
-        print('Exception type: ${e.runtimeType}');
-        print('Exception: $e');
-        print('Stack trace: $stackTrace');
-      }
+    } catch (e) {
       rethrow;
     }
   }
@@ -395,15 +332,6 @@ class ApiService {
     Map<String, String>? query,
   }) async {
     final uri = _buildUri(path, query);
-
-    if (kDebugMode) {
-      print('=== API SERVICE: PATCH MULTIPART ===');
-      print('URL: $uri');
-      print('Query parameters: $query');
-      print('File: ${file?.path}');
-      print('File field name: $fileFieldName');
-    }
-
     final request = http.MultipartRequest('PATCH', uri);
 
     // For multipart requests, only add non-content-type headers
@@ -417,22 +345,10 @@ class ApiService {
     request.headers.addAll(defaultHeaders);
 
     if (file != null) {
-      if (kDebugMode) {
-        print('Adding file to request: ${file.path}');
-      }
       try {
-        // Extract filename from path
         final filename = file.path.split('/').last;
         final fileExtension = filename.split('.').last.toLowerCase();
         final contentType = _getContentType(fileExtension);
-
-        if (kDebugMode) {
-          print('Filename: $filename');
-          print('Content-Type: $contentType');
-        }
-
-        // Read file bytes and create MultipartFile with explicit content-type
-        // Some servers require explicit content-type in the multipart file
         final fileBytes = await file.readAsBytes();
         final mediaType = http.MediaType.parse(contentType);
         request.files.add(
@@ -443,40 +359,16 @@ class ApiService {
             contentType: mediaType,
           ),
         );
-
-        if (kDebugMode) {
-          print('File added successfully');
-        }
       } catch (e) {
-        if (kDebugMode) {
-          print('ERROR adding file: $e');
-        }
         rethrow;
       }
     }
 
-    if (kDebugMode) {
-      print('Request headers: ${request.headers}');
-    }
-
     try {
-      if (kDebugMode) {
-        print('Sending multipart request...');
-      }
-
       return _executeWithTokenRefresh(
         () async {
           final streamedResponse = await _client.send(request);
-          final response = await http.Response.fromStream(streamedResponse);
-
-          if (kDebugMode) {
-            print('=== HTTP RESPONSE ===');
-            print('Status code: ${response.statusCode}');
-            print('Response body: ${response.body}');
-            print('Response headers: ${response.headers}');
-          }
-
-          return response;
+          return await http.Response.fromStream(streamedResponse);
         },
         retryOnTokenExpiry: true,
         originalHeaders: headers,
@@ -497,15 +389,6 @@ class ApiService {
             final contentType = _getContentType(fileExtension);
             final fileBytes = await file.readAsBytes();
             final mediaType = http.MediaType.parse(contentType);
-
-            if (kDebugMode) {
-              print('=== RETRY: Adding file ===');
-              print('Filename: $filename');
-              print('File extension: $fileExtension');
-              print('Content-Type: $contentType');
-              print('File bytes length: ${fileBytes.length}');
-            }
-
             retryRequest.files.add(
               http.MultipartFile.fromBytes(
                 fileFieldName,
@@ -517,26 +400,10 @@ class ApiService {
           }
 
           final streamedResponse = await _client.send(retryRequest);
-          final retryResponse = await http.Response.fromStream(
-            streamedResponse,
-          );
-
-          if (kDebugMode) {
-            print('=== RETRY HTTP RESPONSE ===');
-            print('Status code: ${retryResponse.statusCode}');
-            print('Response body: ${retryResponse.body}');
-          }
-
-          return retryResponse;
+          return await http.Response.fromStream(streamedResponse);
         },
       );
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('=== ERROR IN PUT MULTIPART ===');
-        print('Exception type: ${e.runtimeType}');
-        print('Exception: $e');
-        print('Stack trace: $stackTrace');
-      }
+    } catch (e) {
       rethrow;
     }
   }
@@ -555,43 +422,11 @@ class ApiService {
       if (retryOnTokenExpiry &&
           response.statusCode == 401 &&
           _isTokenExpiredError(response)) {
-        if (kDebugMode) {
-          print('🔄 Token expired (401), attempting to refresh...');
-        }
-
-        // Try to refresh token
-        if (kDebugMode) {
-          print('   Checking token refresh callback...');
-          print('   Callback is null: ${_onTokenExpired == null}');
-        }
         if (_onTokenExpired != null) {
           final newToken = await _onTokenExpired!();
-
-          if (newToken != null && newToken.isNotEmpty) {
-            if (kDebugMode) {
-              print('✅ Token refreshed, retrying request...');
-            }
-
-            // Retry the request with new token
-            if (retryCallback != null) {
-              final retryResponse = await retryCallback(newToken);
-              return _handleResponse(retryResponse);
-            } else {
-              if (kDebugMode) {
-                print('⚠️  No retry callback provided, cannot retry request');
-              }
-            }
-          } else {
-            if (kDebugMode) {
-              print('❌ Token refresh failed or returned null');
-            }
-          }
-        } else {
-          if (kDebugMode) {
-            print('⚠️  No token refresh callback set');
-            print('   Attempting to set callback again...');
-            // Try to set it again - might have been reset by hot reload
-            // This is a fallback, but the callback should be set in main() and initState()
+          if (newToken != null && newToken.isNotEmpty && retryCallback != null) {
+            final retryResponse = await retryCallback(newToken);
+            return _handleResponse(retryResponse);
           }
         }
       }
@@ -657,22 +492,8 @@ class ApiService {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    if (kDebugMode) {
-      print('=== HANDLING RESPONSE ===');
-      print('Status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
-    }
-
     final decoded = _decodeResponseBody(response);
-
-    if (kDebugMode) {
-      print('Decoded response: $decoded');
-    }
-
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (kDebugMode) {
-        print('Status code is success (200-299), returning decoded response');
-      }
       return decoded;
     }
 
@@ -717,44 +538,20 @@ class ApiService {
       errorMessage = decoded['error']?.toString();
     }
 
-    // If no error message found, throw with status code only
     if (errorMessage == null || errorMessage.isEmpty) {
-      if (kDebugMode) {
-        print('⚠️  No error message found in response');
-        print('Response keys: ${decoded.keys.toList()}');
-        print('Full response: $decoded');
-      }
       throw ApiException(
         'API request failed with status ${response.statusCode}',
         statusCode: response.statusCode,
       );
     }
-
-    if (kDebugMode) {
-      print('=== THROWING API EXCEPTION ===');
-      print('Status code: ${response.statusCode}');
-      print('Decoded response keys: ${decoded.keys.toList()}');
-      print('Error message found: $errorMessage');
-    }
-
     throw ApiException(errorMessage, statusCode: response.statusCode);
   }
 
   Map<String, dynamic> _decodeResponseBody(http.Response response) {
-    if (kDebugMode) {
-      print('=== DECODING RESPONSE BODY ===');
-      print('Body length: ${response.body.length}');
-      print('Body empty: ${response.body.isEmpty}');
-    }
-
     if (response.body.isEmpty) {
-      if (kDebugMode) {
-        print('Response body is empty, returning empty map');
-      }
       return {};
     }
 
-    // Server returned HTML (e.g. website page) instead of JSON – usually wrong URL or redirect
     final trimmed = response.body
         .replaceFirst(RegExp(r'^\uFEFF'), '')
         .trimLeft()
@@ -765,11 +562,6 @@ class ApiService {
         trimmed.contains('<!doctype') ||
         (trimmed.length > 10 && trimmed.substring(0, 10).contains('<'));
     if (looksLikeHtml) {
-      if (kDebugMode) {
-        print(
-          'Server returned HTML instead of JSON (wrong endpoint or redirect)',
-        );
-      }
       throw ApiException(
         'The server returned a web page instead of API data. The API URL may be wrong or the server may be misconfigured. Please try again later.',
         statusCode: response.statusCode,
@@ -777,64 +569,26 @@ class ApiService {
     }
 
     try {
-      if (kDebugMode) {
-        print('Attempting to JSON decode response body...');
-      }
       final dynamic decoded = jsonDecode(response.body);
-
-      if (kDebugMode) {
-        print('JSON decoded successfully');
-        print('Decoded type: ${decoded.runtimeType}');
-      }
-
       if (decoded is Map<String, dynamic>) {
-        if (kDebugMode) {
-          print('Decoded is Map, returning as-is');
-        }
         return decoded;
       }
       if (decoded is List) {
-        if (kDebugMode) {
-          print('Decoded is List, wrapping in data field');
-        }
         return {'data': decoded};
       }
-      if (kDebugMode) {
-        print('Decoded is other type, wrapping in data field');
-      }
       return {'data': decoded};
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('=== ERROR DECODING JSON ===');
-        print('Exception: $e');
-        print('Stack trace: $stackTrace');
-        print('Response body: ${response.body}');
-      }
-
+    } catch (e) {
       final body = response.body.toLowerCase();
-      // Server returned HTML instead of JSON (e.g. redirect to website)
       if (body.contains('<!doctype') || body.contains('<html')) {
-        if (kDebugMode) {
-          print('Response is HTML; throwing friendly API exception');
-        }
         throw ApiException(
           'The server returned a web page instead of API data. The API URL may be wrong or the server may be misconfigured. Please try again later.',
           statusCode: response.statusCode,
         );
       }
-
-      // Try to extract error message from plain text response
       if (response.body.isNotEmpty &&
           (response.body.contains('message') ||
               response.body.contains('error'))) {
-        if (kDebugMode) {
-          print('Found message/error in plain text, returning as message');
-        }
         return {'message': response.body, 'status': false};
-      }
-
-      if (kDebugMode) {
-        print('Throwing ApiException for JSON parse error');
       }
       throw ApiException(
         'Unable to parse server response: ${e.toString()}',

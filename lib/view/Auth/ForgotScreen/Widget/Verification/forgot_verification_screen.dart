@@ -5,7 +5,7 @@ import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
-import 'package:imagifyai/viewModel/forgor_verification_view_model.dart';
+import 'package:imagifyai/viewModel/forgot_verification_view_model.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,7 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
     // Set email in view model when screen loads
     final email = ModalRoute.of(context)?.settings.arguments as String? ?? '';
     if (email.isNotEmpty) {
-      Provider.of<ForgorVerificationViewModel>(
+      Provider.of<ForgotVerificationViewModel>(
         context,
         listen: false,
       ).setEmail(email);
@@ -35,7 +35,7 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
   Widget build(BuildContext context) {
     final email = ModalRoute.of(context)?.settings.arguments as String? ?? '';
 
-    return Consumer<ForgorVerificationViewModel>(
+    return Consumer<ForgotVerificationViewModel>(
       builder: (context, viewModel, _) {
         final defaultPinTheme = PinTheme(
           width: context.h(45),

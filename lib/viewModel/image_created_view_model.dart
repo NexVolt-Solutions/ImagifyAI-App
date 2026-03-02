@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
@@ -9,6 +7,7 @@ import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
+import 'package:imagifyai/Core/services/interstitial_ad_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
@@ -20,7 +19,6 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:cross_file/cross_file.dart';
 
 class ImageCreatedViewModel extends ChangeNotifier {
   ImageCreatedViewModel({WallpaperRepository? wallpaperRepository})
@@ -435,6 +433,9 @@ class ImageCreatedViewModel extends ChangeNotifier {
         'Saved to your device! Enjoy your new wallpaper',
         isError: false,
       );
+
+      // Show interstitial ad after successful download (natural break)
+      await InterstitialAdService.showInterstitialAd();
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);

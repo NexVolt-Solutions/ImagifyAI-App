@@ -1,5 +1,4 @@
 import 'package:dotted_border/dotted_border.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
@@ -53,9 +52,6 @@ class _HomeState extends State<Home> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
-        if (kDebugMode) {
-          print('✅ Starting parallel data loading...');
-        }
         // Record first open (for 5-day review trigger)
         await InAppReviewService.recordFirstOpenIfNeeded();
         // Gentle review reminder in 3 days if not yet asked

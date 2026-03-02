@@ -1,28 +1,3 @@
-import 'package:flutter/foundation.dart';
-
-/// Retention & engagement analytics. Track session length, images per session,
-/// style exploration, and shares to trigger review prompts or unlock achievements.
-///
-/// **Plug in Firebase Analytics or AppsFlyer:**
-/// 1. Add `firebase_analytics` or `appsflyer_sdk` to pubspec.yaml.
-/// 2. Implement [AppAnalyticsDelegate] and forward to the SDK, e.g.:
-///    ```dart
-///    class FirebaseAnalyticsDelegate extends AppAnalyticsDelegate {
-///      final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
-///      @override
-///      void logEvent(String name, [Map<String, Object?>? params]) {
-///        _analytics.logEvent(name: name, parameters: params);
-///      }
-///    }
-///    ```
-/// 3. In main() or MyApp.initState(): `AnalyticsService.delegate = FirebaseAnalyticsDelegate();`
-///
-/// Events: [sessionStart], [sessionEnd] (with duration), [imageGenerated] (session + total count),
-/// [styleSelected] (style name + is_new_style), [imageShared]. Use these in Firebase/AppsFlyer
-/// to build audiences and trigger review or share prompts.
-
-/// Event names for retention & engagement tracking.
-/// Use with Firebase Analytics, AppsFlyer, or any backend.
 class AnalyticsEvents {
   AnalyticsEvents._();
 
@@ -79,7 +54,9 @@ class AnalyticsService {
   static void endSession() {
     if (_sessionStart != null) {
       final duration = DateTime.now().difference(_sessionStart!).inSeconds;
-      _log(AnalyticsEvents.sessionEnd, {AnalyticsParams.durationSeconds: duration});
+      _log(AnalyticsEvents.sessionEnd, {
+        AnalyticsParams.durationSeconds: duration,
+      });
       _sessionStart = null;
     }
   }
@@ -89,25 +66,19 @@ class AnalyticsService {
   /// Logs [AnalyticsEvents.imageGenerated] with session count and total → use to trigger review/share.
   static void logImageGenerated(int totalCount) {
     _sessionImageCount++;
-    _log(
-      AnalyticsEvents.imageGenerated,
-      {
-        AnalyticsParams.sessionImageCount: _sessionImageCount,
-        AnalyticsParams.totalImageCount: totalCount,
-      },
-    );
+    _log(AnalyticsEvents.imageGenerated, {
+      AnalyticsParams.sessionImageCount: _sessionImageCount,
+      AnalyticsParams.totalImageCount: totalCount,
+    });
   }
 
   /// Call when user selects a style. [isNewStyle] = first time trying this style.
   /// Logs [AnalyticsEvents.styleSelected] → use for "new style exploration" review trigger.
   static void logStyleSelected(String styleName, bool isNewStyle) {
-    _log(
-      AnalyticsEvents.styleSelected,
-      {
-        AnalyticsParams.styleName: styleName,
-        AnalyticsParams.isNewStyle: isNewStyle,
-      },
-    );
+    _log(AnalyticsEvents.styleSelected, {
+      AnalyticsParams.styleName: styleName,
+      AnalyticsParams.isNewStyle: isNewStyle,
+    });
   }
 
   /// Call when user shares an image. Use to trigger review for highly engaged users.
@@ -127,9 +98,6 @@ class AnalyticsService {
   static bool get isSessionActive => _sessionStart != null;
 
   static void _log(String name, Map<String, Object?>? params) {
-    if (kDebugMode && (params?.isNotEmpty ?? false)) {
-      print('Analytics: $name $params');
-    }
     _delegate?.logEvent(name, params);
   }
 }

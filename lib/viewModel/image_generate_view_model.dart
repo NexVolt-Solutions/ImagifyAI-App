@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
@@ -124,9 +123,6 @@ class ImageGenerateViewModel extends ChangeNotifier {
     final accessToken = signInViewModel.accessToken;
 
     if (accessToken == null || accessToken.isEmpty) {
-      if (kDebugMode) {
-        print('⚠️  No access token available for loading styles');
-      }
       return;
     }
 
@@ -135,34 +131,13 @@ class ImageGenerateViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== LOAD STYLES: START ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
-
       _stylesMap = await _wallpaperRepository.fetchStyles(
         accessToken: accessToken,
       );
-
-      if (kDebugMode) {
-        print('✅ Styles loaded successfully');
-        print('Total styles: ${_stylesMap.length}');
-        print('Style names: ${styles}');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== LOAD STYLES: SUCCESS ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
     } on ApiException catch (e) {
       stylesError = e.message;
-      if (kDebugMode) {
-        print('❌ Error loading styles: ${e.message}');
-      }
     } catch (e) {
       stylesError = 'Failed to load styles';
-      if (kDebugMode) {
-        print('❌ Unexpected error loading styles: $e');
-      }
     } finally {
       isLoadingStyles = false;
       notifyListeners();
@@ -190,13 +165,6 @@ class ImageGenerateViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== GET PROMPT SUGGESTION: START ===');
-        print('═══════════════════════════════════════════════════════════');
-        print('Current prompt: $currentPrompt');
-      }
-
       final response = await _wallpaperRepository.suggestPrompt(
         prompt: currentPrompt,
         accessToken: accessToken,
@@ -205,14 +173,6 @@ class ImageGenerateViewModel extends ChangeNotifier {
       if (response.suggestion != null && response.suggestion!.isNotEmpty) {
         promptController.text = response.suggestion!;
         notifyListeners();
-
-        if (kDebugMode) {
-          print('✅ Suggestion received: ${response.suggestion}');
-          print('═══════════════════════════════════════════════════════════');
-          print('=== GET PROMPT SUGGESTION: SUCCESS ===');
-          print('═══════════════════════════════════════════════════════════');
-        }
-
         _showMessage(
           context,
           'AI suggestion ready! Check it out above',
@@ -223,24 +183,10 @@ class ImageGenerateViewModel extends ChangeNotifier {
       }
     } on ApiException catch (e) {
       errorMessage = e.message;
-      if (kDebugMode) {
-        print('❌ ApiException in getSuggestion: ${e.message}');
-        print('Status code: ${e.statusCode}');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== GET PROMPT SUGGESTION: ERROR ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
       _showMessage(context, e.message);
     } catch (e) {
       errorMessage =
           'Oops! Couldn\'t generate a suggestion. Give it another try!';
-      if (kDebugMode) {
-        print('❌ Unexpected error in getSuggestion: $e');
-        print('Error type: ${e.runtimeType}');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== GET PROMPT SUGGESTION: ERROR ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
       _showMessage(context, errorMessage!);
     } finally {
       isGettingSuggestion = false;
@@ -278,32 +224,12 @@ class ImageGenerateViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== CREATE WALLPAPER: START ===');
-        print('═══════════════════════════════════════════════════════════');
-        print('Prompt: $prompt');
-        print('Size: $size');
-        print('Style: $style');
-        print('Access token present: ${accessToken.isNotEmpty}');
-      }
-
       createdWallpaper = await _wallpaperRepository.createWallpaper(
         prompt: prompt,
         size: size,
         style: style,
         accessToken: accessToken,
       );
-
-      if (kDebugMode) {
-        print('✅ Wallpaper created successfully!');
-        print('Wallpaper ID: ${createdWallpaper?.id}');
-        print('Image URL: ${createdWallpaper?.imageUrl}');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== CREATE WALLPAPER: SUCCESS ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
-
       if (createdWallpaper != null &&
           createdWallpaper!.imageUrl.isNotEmpty &&
           createdWallpaper!.imageUrl != 'null') {
@@ -331,17 +257,9 @@ class ImageGenerateViewModel extends ChangeNotifier {
       }
     } on ApiException catch (e) {
       if (e.statusCode == 401 && e.message.toLowerCase().contains('token')) {
-        if (kDebugMode) {
-          print('🔄 Token expired, attempting to refresh...');
-        }
-
         final refreshed = await signInViewModel.refreshTokenSilently();
 
         if (refreshed && signInViewModel.accessToken != null) {
-          if (kDebugMode) {
-            print('✅ Token refreshed, retrying wallpaper creation...');
-          }
-
           try {
             createdWallpaper = await _wallpaperRepository.createWallpaper(
               prompt: prompt,
@@ -349,13 +267,6 @@ class ImageGenerateViewModel extends ChangeNotifier {
               style: style,
               accessToken: signInViewModel.accessToken!,
             );
-
-            if (kDebugMode) {
-              print('✅ Wallpaper created successfully after token refresh!');
-              print('Wallpaper ID: ${createdWallpaper?.id}');
-              print('Image URL: ${createdWallpaper?.imageUrl}');
-            }
-
             if (createdWallpaper != null &&
                 createdWallpaper!.imageUrl.isNotEmpty &&
                 createdWallpaper!.imageUrl != 'null') {
@@ -393,14 +304,9 @@ class ImageGenerateViewModel extends ChangeNotifier {
             }
             return;
           } catch (retryError) {
-            if (kDebugMode) {
-              print('❌ Retry failed after token refresh: $retryError');
-            }
+            // ignore
           }
         } else {
-          if (kDebugMode) {
-            print('❌ Failed to refresh token, user needs to login again');
-          }
           _stopProgressAnimation();
           _stopPolling();
           isCreating = false;
@@ -419,26 +325,12 @@ class ImageGenerateViewModel extends ChangeNotifier {
       }
 
       errorMessage = e.message;
-      if (kDebugMode) {
-        print('❌ ApiException in createWallpaper: ${e.message}');
-        print('Status code: ${e.statusCode}');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== CREATE WALLPAPER: ERROR ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
       _stopProgressAnimation();
       _stopPolling();
       _showMessage(context, e.message);
     } catch (e) {
       errorMessage =
           'Hmm, something unexpected happened. Let\'s try that again!';
-      if (kDebugMode) {
-        print('❌ Unexpected error in createWallpaper: $e');
-        print('Error type: ${e.runtimeType}');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== CREATE WALLPAPER: ERROR ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
       _stopProgressAnimation();
       _stopPolling();
       _showMessage(context, errorMessage!);
@@ -513,18 +405,6 @@ class ImageGenerateViewModel extends ChangeNotifier {
       }
 
       try {
-        if (kDebugMode && _pollingAttempts % 6 == 0) {
-          // Log every 30 seconds (6 attempts * 5 seconds)
-          print(
-            '⏳ Polling attempt $_pollingAttempts - Elapsed: ${elapsedPollingTimeFormatted}',
-          );
-          print('   Wallpaper ID: ${createdWallpaper!.id}');
-          print(
-            '   Current progress: ${(creationProgress * 100).toStringAsFixed(1)}%',
-          );
-          print('   Current stage: $_currentStage');
-        }
-
         final updatedWallpaper = await _wallpaperRepository.getWallpaperById(
           wallpaperId: createdWallpaper!.id,
           accessToken: currentAccessToken,
@@ -541,13 +421,6 @@ class ImageGenerateViewModel extends ChangeNotifier {
             creationProgress = 1.0;
             _currentStage = 'Complete!';
             notifyListeners();
-
-            if (kDebugMode) {
-              print('✅ Image is ready! URL: ${updatedWallpaper.imageUrl}');
-              print('⏱️ Total polling attempts: $attempts');
-              print('⏱️ Total elapsed time: $elapsed');
-            }
-
             // Navigate to image created screen
             if (context.mounted) {
               _showMessage(
@@ -574,23 +447,11 @@ class ImageGenerateViewModel extends ChangeNotifier {
       } on ApiException catch (e) {
         // Handle token expiration during polling
         if (e.statusCode == 401 && e.message.toLowerCase().contains('token')) {
-          if (kDebugMode) {
-            print('🔄 Token expired during polling, attempting to refresh...');
-          }
-
-          // Try to refresh the token
           final refreshed = await signInViewModel.refreshTokenSilently();
 
           if (refreshed && signInViewModel.accessToken != null) {
-            if (kDebugMode) {
-              print('✅ Token refreshed during polling, continuing...');
-            }
-            // Update the access token for next polling attempt
             currentAccessToken = signInViewModel.accessToken!;
           } else {
-            if (kDebugMode) {
-              print('❌ Failed to refresh token during polling');
-            }
             // Stop polling if token refresh fails
             _stopPolling();
             isCreating = false;
@@ -608,21 +469,9 @@ class ImageGenerateViewModel extends ChangeNotifier {
               );
             }
           }
-        } else {
-          if (kDebugMode) {
-            print('❌ Error polling wallpaper status: ${e.message}');
-            print(
-              '   Attempt: $_pollingAttempts, Elapsed: ${elapsedPollingTimeFormatted}',
-            );
-          }
         }
       } catch (e) {
-        if (kDebugMode) {
-          print('❌ Error polling wallpaper status: $e');
-          print(
-            '   Attempt: $_pollingAttempts, Elapsed: ${elapsedPollingTimeFormatted}',
-          );
-        }
+        // ignore polling errors
       }
     });
   }

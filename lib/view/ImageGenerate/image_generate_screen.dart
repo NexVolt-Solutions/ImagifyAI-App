@@ -7,7 +7,9 @@ import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/home_align.dart';
 import 'package:imagifyai/Core/CustomWidget/prompt_continer.dart';
 import 'package:imagifyai/Core/CustomWidget/size_continer.dart';
+import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -399,6 +401,8 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                           : 'Create Magic',
                       icon: AppAssets.magicStarIcon,
                     ),
+                    SizedBox(height: context.h(12)),
+                    const _WatchAdButton(),
                     SizedBox(height: context.h(100)),
                   ],
                 ),
@@ -417,6 +421,46 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
         ),
       ),
     );
+  }
+}
+
+/// Button to watch a rewarded ad and earn 1 free generation.
+class _WatchAdButton extends StatelessWidget {
+  const _WatchAdButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: () => _onWatchAd(context),
+      icon: Icon(Icons.play_circle_outline, size: 20, color: context.primaryColor),
+      label: Text(
+        'Watch ad for 1 free generation',
+        style: context.appTextStyles?.imageGeneratePromptHint.copyWith(
+          color: context.primaryColor,
+        ),
+      ),
+    );
+  }
+
+  static Future<void> _onWatchAd(BuildContext context) async {
+    final shown = await RewardedAdService.showRewardedAd(
+      onReward: () {
+        if (!context.mounted) return;
+        SnackbarUtil.showTopSnackBar(
+          context,
+          'You earned 1 free generation!',
+          isError: false,
+        );
+      },
+    );
+    if (!context.mounted) return;
+    if (!shown) {
+      SnackbarUtil.showTopSnackBar(
+        context,
+        'Ad not ready. Please try again in a moment.',
+        isError: true,
+      );
+    }
   }
 }
 

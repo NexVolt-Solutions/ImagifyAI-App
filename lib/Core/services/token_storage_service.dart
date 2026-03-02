@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:imagifyai/models/user/user.dart';
 
@@ -17,9 +16,6 @@ class TokenStorageService {
       final prefs = await SharedPreferences.getInstance();
       return await prefs.setString(_accessTokenKey, token);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving access token: $e');
-      }
       return false;
     }
   }
@@ -30,9 +26,6 @@ class TokenStorageService {
       final prefs = await SharedPreferences.getInstance();
       return await prefs.setString(_refreshTokenKey, token);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving refresh token: $e');
-      }
       return false;
     }
   }
@@ -45,34 +38,17 @@ class TokenStorageService {
       final prefs = await SharedPreferences.getInstance();
       final accessSaved = await prefs.setString(_accessTokenKey, accessToken);
       final refreshSaved = await prefs.setString(_refreshTokenKey, refreshToken);
-      
-      if (kDebugMode) {
-        print('=== TOKENS SAVED ===');
-        print('Access token saved: $accessSaved');
-        print('Refresh token saved: $refreshSaved');
-      }
-      
       return accessSaved && refreshSaved;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving tokens: $e');
-        // Retry once after a delay
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          final accessSaved = await prefs.setString(_accessTokenKey, accessToken);
-          final refreshSaved = await prefs.setString(_refreshTokenKey, refreshToken);
-          if (kDebugMode) {
-            print('Retry successful - Access: $accessSaved, Refresh: $refreshSaved');
-          }
-          return accessSaved && refreshSaved;
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        final accessSaved = await prefs.setString(_accessTokenKey, accessToken);
+        final refreshSaved = await prefs.setString(_refreshTokenKey, refreshToken);
+        return accessSaved && refreshSaved;
+      } catch (retryError) {
+        return false;
       }
-      return false;
     }
   }
 
@@ -83,35 +59,15 @@ class TokenStorageService {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString(_accessTokenKey);
-      
-      if (kDebugMode) {
-        print('=== GETTING ACCESS TOKEN ===');
-        print('Token found: ${token != null && token.isNotEmpty}');
-        if (token != null) {
-          print('Token length: ${token.length}');
-        }
-      }
-      
       return token;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error getting access token: $e');
-        // Retry once after a delay
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString(_accessTokenKey);
-          if (kDebugMode) {
-            print('Retry successful: ${token != null && token.isNotEmpty}');
-          }
-          return token;
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getString(_accessTokenKey);
+      } catch (retryError) {
+        return null;
       }
-      return null;
     }
   }
 
@@ -122,32 +78,15 @@ class TokenStorageService {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString(_refreshTokenKey);
-      
-      if (kDebugMode) {
-        print('=== GETTING REFRESH TOKEN ===');
-        print('Token found: ${token != null && token.isNotEmpty}');
-      }
-      
       return token;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error getting refresh token: $e');
-        // Retry once after a delay
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          final token = prefs.getString(_refreshTokenKey);
-          if (kDebugMode) {
-            print('Retry successful: ${token != null && token.isNotEmpty}');
-          }
-          return token;
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getString(_refreshTokenKey);
+      } catch (retryError) {
+        return null;
       }
-      return null;
     }
   }
 
@@ -156,23 +95,11 @@ class TokenStorageService {
     try {
       final accessToken = await getAccessToken();
       final refreshToken = await getRefreshToken();
-      final loggedIn = accessToken != null && 
-                       accessToken.isNotEmpty && 
-                       refreshToken != null && 
-                       refreshToken.isNotEmpty;
-      
-      if (kDebugMode) {
-        print('=== CHECKING LOGIN STATUS ===');
-        print('Has access token: ${accessToken != null && accessToken.isNotEmpty}');
-        print('Has refresh token: ${refreshToken != null && refreshToken.isNotEmpty}');
-        print('Is logged in: $loggedIn');
-      }
-      
-      return loggedIn;
+      return accessToken != null &&
+          accessToken.isNotEmpty &&
+          refreshToken != null &&
+          refreshToken.isNotEmpty;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error checking login status: $e');
-      }
       return false;
     }
   }
@@ -183,29 +110,15 @@ class TokenStorageService {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
       final saved = await prefs.setString(_userIdKey, userId);
-      
-      if (kDebugMode) {
-        print('=== USER ID SAVED ===');
-        print('User ID: $userId');
-        print('Saved: $saved');
-      }
-      
       return saved;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving user_id: $e');
-        // Retry once
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          return await prefs.setString(_userIdKey, userId);
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return await prefs.setString(_userIdKey, userId);
+      } catch (retryError) {
+        return false;
       }
-      return false;
     }
   }
 
@@ -214,32 +127,15 @@ class TokenStorageService {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString(_userIdKey);
-      
-      if (kDebugMode) {
-        print('=== GETTING USER ID ===');
-        print('User ID found: ${userId != null && userId.isNotEmpty}');
-        if (userId != null) {
-          print('User ID: $userId');
-        }
-      }
-      
-      return userId;
+      return prefs.getString(_userIdKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error getting user_id: $e');
-        // Retry once
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          return prefs.getString(_userIdKey);
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getString(_userIdKey);
+      } catch (retryError) {
+        return null;
       }
-      return null;
     }
   }
 
@@ -249,21 +145,8 @@ class TokenStorageService {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
       final userJson = jsonEncode(user.toJson());
-      final saved = await prefs.setString(_userDataKey, userJson);
-      
-      if (kDebugMode) {
-        print('=== USER DATA SAVED ===');
-        print('User ID: ${user.id}');
-        print('Username: ${user.username}');
-        print('Email: ${user.email}');
-        print('Saved: $saved');
-      }
-      
-      return saved;
+      return await prefs.setString(_userDataKey, userJson);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving user data: $e');
-      }
       return false;
     }
   }
@@ -276,28 +159,11 @@ class TokenStorageService {
       final userJsonString = prefs.getString(_userDataKey);
       
       if (userJsonString == null || userJsonString.isEmpty) {
-        if (kDebugMode) {
-          print('=== GETTING USER DATA ===');
-          print('User data not found in cache');
-        }
         return null;
       }
-      
       final userJson = jsonDecode(userJsonString) as Map<String, dynamic>;
-      final user = User.fromJson(userJson);
-      
-      if (kDebugMode) {
-        print('=== USER DATA RETRIEVED FROM CACHE ===');
-        print('User ID: ${user.id}');
-        print('Username: ${user.username}');
-        print('Email: ${user.email}');
-      }
-      
-      return user;
+      return User.fromJson(userJson);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error getting user data: $e');
-      }
       return null;
     }
   }
@@ -306,18 +172,8 @@ class TokenStorageService {
   static Future<bool> clearUserData() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final removed = await prefs.remove(_userDataKey);
-      
-      if (kDebugMode) {
-        print('=== USER DATA CLEARED ===');
-        print('User data removed: $removed');
-      }
-      
-      return removed;
+      return await prefs.remove(_userDataKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error clearing user data: $e');
-      }
       return false;
     }
   }
@@ -331,20 +187,8 @@ class TokenStorageService {
       final refreshRemoved = await prefs.remove(_refreshTokenKey);
       final userIdRemoved = await prefs.remove(_userIdKey);
       final userDataRemoved = await prefs.remove(_userDataKey);
-      
-      if (kDebugMode) {
-        print('=== TOKENS CLEARED ===');
-        print('Access token removed: $accessRemoved');
-        print('Refresh token removed: $refreshRemoved');
-        print('User ID removed: $userIdRemoved');
-        print('User data removed: $userDataRemoved');
-      }
-      
       return accessRemoved && refreshRemoved && userIdRemoved && userDataRemoved;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error clearing tokens: $e');
-      }
       return false;
     }
   }
@@ -354,30 +198,15 @@ class TokenStorageService {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
-      final saved = await prefs.setBool(_onboardingCompletedKey, completed);
-      
-      if (kDebugMode) {
-        print('=== ONBOARDING STATUS SAVED ===');
-        print('Onboarding completed: $completed');
-        print('Saved: $saved');
-      }
-      
-      return saved;
+      return await prefs.setBool(_onboardingCompletedKey, completed);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving onboarding status: $e');
-        // Retry once
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          return await prefs.setBool(_onboardingCompletedKey, completed);
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return await prefs.setBool(_onboardingCompletedKey, completed);
+      } catch (retryError) {
+        return false;
       }
-      return false;
     }
   }
 
@@ -386,29 +215,15 @@ class TokenStorageService {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
-      final completed = prefs.getBool(_onboardingCompletedKey) ?? false;
-      
-      if (kDebugMode) {
-        print('=== CHECKING ONBOARDING STATUS ===');
-        print('Onboarding completed: $completed');
-      }
-      
-      return completed;
+      return prefs.getBool(_onboardingCompletedKey) ?? false;
     } catch (e) {
-      if (kDebugMode) {
-        print('Error checking onboarding status: $e');
-        // Retry once
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          return prefs.getBool(_onboardingCompletedKey) ?? false;
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getBool(_onboardingCompletedKey) ?? false;
+      } catch (retryError) {
+        return false;
       }
-      return false;
     }
   }
 
@@ -417,30 +232,15 @@ class TokenStorageService {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
-      final saved = await prefs.setString(_rememberedEmailKey, email);
-      
-      if (kDebugMode) {
-        print('=== REMEMBERED EMAIL SAVED ===');
-        print('Email saved: $email');
-        print('Saved: $saved');
-      }
-      
-      return saved;
+      return await prefs.setString(_rememberedEmailKey, email);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error saving remembered email: $e');
-        // Retry once
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          return await prefs.setString(_rememberedEmailKey, email);
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return await prefs.setString(_rememberedEmailKey, email);
+      } catch (retryError) {
+        return false;
       }
-      return false;
     }
   }
 
@@ -449,32 +249,15 @@ class TokenStorageService {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
       final prefs = await SharedPreferences.getInstance();
-      final email = prefs.getString(_rememberedEmailKey);
-      
-      if (kDebugMode) {
-        print('=== GETTING REMEMBERED EMAIL ===');
-        print('Email found: ${email != null && email.isNotEmpty}');
-        if (email != null) {
-          print('Email: $email');
-        }
-      }
-      
-      return email;
+      return prefs.getString(_rememberedEmailKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error getting remembered email: $e');
-        // Retry once
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final prefs = await SharedPreferences.getInstance();
-          return prefs.getString(_rememberedEmailKey);
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
-        }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final prefs = await SharedPreferences.getInstance();
+        return prefs.getString(_rememberedEmailKey);
+      } catch (retryError) {
+        return null;
       }
-      return null;
     }
   }
 
@@ -482,18 +265,8 @@ class TokenStorageService {
   static Future<bool> clearRememberedEmail() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final removed = await prefs.remove(_rememberedEmailKey);
-      
-      if (kDebugMode) {
-        print('=== REMEMBERED EMAIL CLEARED ===');
-        print('Email removed: $removed');
-      }
-      
-      return removed;
+      return await prefs.remove(_rememberedEmailKey);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error clearing remembered email: $e');
-      }
       return false;
     }
   }

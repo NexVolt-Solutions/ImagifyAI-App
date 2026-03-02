@@ -147,23 +147,11 @@ class VerificationViewModel extends ChangeNotifier {
   /// The resendCode API requires an active session from registration, which may not exist
   /// if the user registered earlier and came back. In that case, we handle the error gracefully.
   Future<void> autoResendCode(BuildContext context) async {
-    if (kDebugMode) {
-      print('=== AUTO-RESENDING VERIFICATION CODE ===');
-      print('Email: ${emailController.text}');
-      print('Note: This may fail if no active session exists');
-    }
-
     try {
       await resendCode(context, forceResend: true);
     } on ApiException catch (e) {
-      // Handle "No pending verification found" error gracefully
       if (e.message.toLowerCase().contains('no pending verification') ||
           e.message.toLowerCase().contains('pending verification')) {
-        if (kDebugMode) {
-          print(
-            '⚠️ No pending verification found - account may be verified or code expired',
-          );
-        }
         // Show helpful message but don't treat it as a critical error
         // Account might already be verified, or verification code expired
         _showMessage(
@@ -172,14 +160,10 @@ class VerificationViewModel extends ChangeNotifier {
           isError: false,
         );
       } else {
-        // For other errors, show the error message
         errorMessage = e.message;
         _showMessage(context, e.message);
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error in autoResendCode: $e');
-      }
       // Don't show error for auto-resend failures - user can manually resend
     }
   }

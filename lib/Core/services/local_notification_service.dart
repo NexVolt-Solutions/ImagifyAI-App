@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -39,9 +38,8 @@ class LocalNotificationService {
       );
       await _createChannel();
       _initialized = true;
-      if (kDebugMode) print('LocalNotificationService: initialized');
     } catch (e) {
-      if (kDebugMode) print('LocalNotificationService init: $e');
+      // init failed
     }
   }
 
@@ -66,7 +64,6 @@ class LocalNotificationService {
       }
       return true;
     } catch (e) {
-      if (kDebugMode) print('LocalNotificationService requestPermission: $e');
       return false;
     }
   }
@@ -114,13 +111,8 @@ class LocalNotificationService {
       );
 
       await prefs.setBool(_keyReviewReminderScheduled, true);
-      if (kDebugMode)
-        print(
-          'LocalNotificationService: review reminder scheduled in $daysFromNow days',
-        );
     } catch (e) {
-      if (kDebugMode)
-        print('LocalNotificationService scheduleReviewReminder: $e');
+      // schedule failed
     }
   }
 
@@ -131,8 +123,7 @@ class LocalNotificationService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_keyReviewReminderScheduled, false);
     } catch (e) {
-      if (kDebugMode)
-        print('LocalNotificationService cancelReviewReminder: $e');
+      // cancel failed
     }
   }
 
@@ -154,8 +145,6 @@ class LocalNotificationService {
   }
 
   static void _onNotificationTapped(NotificationResponse response) {
-    if (kDebugMode)
-      print('LocalNotificationService: notification tapped ${response.id}');
     // Optionally: navigate to rate screen or open in-app review when user taps.
   }
 }

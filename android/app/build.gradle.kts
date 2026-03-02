@@ -18,6 +18,16 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Load secrets (AdMob, etc.) - use key.properties or create android/secrets.properties
+val secretsFile = rootProject.file("secrets.properties")
+val secretsProperties = Properties()
+if (secretsFile.exists()) {
+    secretsProperties.load(FileInputStream(secretsFile))
+}
+val admobAppId = (keystoreProperties["ADMOB_APP_ID"] ?: secretsProperties["ADMOB_APP_ID"])
+    ?.toString()
+    ?: "ca-app-pub-8279839772210876~1156823788"
+
 android {
     namespace = "com.imagifyai.app"
     compileSdk = flutter.compileSdkVersion
@@ -41,6 +51,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         multiDexEnabled = true
+        manifestPlaceholders["ADMOB_APP_ID"] = admobAppId
     }
 
     signingConfigs {

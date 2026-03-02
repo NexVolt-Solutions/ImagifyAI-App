@@ -44,6 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Environment secrets - DO NOT COMMIT
+.env
+android/secrets.properties
+
 # Keystore files - DO NOT COMMIT
 **/key.properties
 **/upload-keystore.jks

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
@@ -35,69 +34,21 @@ class AuthRepository {
       'confirm_password': confirmPassword,
     };
 
-    if (kDebugMode) {
-      print('=== AUTH REPOSITORY: REGISTER ===');
-      print('Endpoint: ${ApiConstants.baseUrl}${ApiConstants.register}');
-      print('Fields: $fields');
-      print('Has file: ${profileImage != null}');
-      if (profileImage != null) {
-        print('File path: ${profileImage.path}');
-        print('File exists: ${profileImage.existsSync()}');
-        if (profileImage.existsSync()) {
-          print('File size: ${profileImage.lengthSync()} bytes');
-        }
-      }
-    }
-
     try {
-      if (kDebugMode) {
-        print('Calling _apiService.postMultipart...');
-      }
-
       final json = await _apiService.postMultipart(
         path: ApiConstants.register,
         fields: fields,
         file: profileImage,
       );
 
-      if (kDebugMode) {
-        print('=== REGISTER API RESPONSE RECEIVED ===');
-        print('Response JSON: $json');
-        print('Response keys: ${json.keys.toList()}');
-        print('Response message: ${json['message']}');
-        print('Response status: ${json['status']}');
-        print('Response data: ${json['data']}');
-      }
-
-      // Validate JSON structure before parsing
       if (json.isEmpty) {
-        if (kDebugMode) {
-          print('ERROR: Empty response from server');
-        }
         throw ApiException('Empty response from server');
       }
 
       try {
-        if (kDebugMode) {
-          print('Parsing RegisterResponse from JSON...');
-        }
         final response = RegisterResponse.fromJson(json);
-        if (kDebugMode) {
-          print('=== REGISTER RESPONSE PARSED SUCCESSFULLY ===');
-          print('Response status: ${response.status}');
-          print('Response message: ${response.message}');
-          print('Response data: ${response.data}');
-          print('Status: ${response.status}');
-          print('Message: ${response.message}');
-        }
         return response;
       } catch (e, stackTrace) {
-        if (kDebugMode) {
-          print('=== ERROR PARSING RegisterResponse ===');
-          print('Exception: $e');
-          print('Stack trace: $stackTrace');
-          print('JSON that failed to parse: $json');
-        }
         // If parsing fails, check if there's an error message in the response
         final errorMsg =
             json['message']?.toString() ??
@@ -106,24 +57,8 @@ class AuthRepository {
         throw ApiException(errorMsg);
       }
     } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('=== ERROR IN AUTH REPOSITORY REGISTER ===');
-        print('Exception type: ${e.runtimeType}');
-        print('Exception: $e');
-        print('Stack trace: $stackTrace');
-      }
-
-      // Re-throw ApiException as-is
       if (e is ApiException) {
-        if (kDebugMode) {
-          print('Re-throwing ApiException: ${e.message}');
-        }
         rethrow;
-      }
-
-      // Wrap other exceptions with more context
-      if (kDebugMode) {
-        print('Wrapping exception as ApiException');
       }
       throw ApiException('Registration failed: ${e.toString()}');
     }
@@ -190,16 +125,6 @@ class AuthRepository {
     required String userId,
     bool forceRefresh = false,
   }) async {
-    if (kDebugMode) {
-      print('═══════════════════════════════════════════════════════════');
-      print('=== GET USER PROFILE API: START ===');
-      print('═══════════════════════════════════════════════════════════');
-      print('Endpoint: GET /api/v1/users/{user_id}');
-      print('Has access token: ${accessToken.isNotEmpty}');
-      print('User ID: $userId');
-      print('Force refresh: $forceRefresh');
-    }
-
     if (userId.isEmpty) {
       throw ApiException(
         'User ID is required for GET /api/v1/users/{user_id}',
@@ -212,30 +137,10 @@ class AuthRepository {
       try {
         final cachedUser = await TokenStorageService.getUserData();
         if (cachedUser != null && cachedUser.id == userId) {
-          if (kDebugMode) {
-            print('✅ User data found in cache, returning cached data');
-            print('Cached User ID: ${cachedUser.id}');
-            print('Cached Username: ${cachedUser.username}');
-            print('Cached Email: ${cachedUser.email}');
-          }
           return cachedUser;
-        } else if (cachedUser != null && cachedUser.id != userId) {
-          if (kDebugMode) {
-            print('⚠️ Cached user ID (${cachedUser.id}) does not match requested ID ($userId), fetching from API');
-          }
-        } else {
-          if (kDebugMode) {
-            print('ℹ️ No cached user data found, fetching from API');
-          }
         }
       } catch (e) {
-        if (kDebugMode) {
-          print('⚠️ Error checking cache, proceeding with API call: $e');
-        }
-      }
-    } else {
-      if (kDebugMode) {
-        print('🔄 Force refresh requested, skipping cache');
+        // Proceed with API call
       }
     }
 
@@ -244,139 +149,26 @@ class AuthRepository {
     // Construct path: /users/{user_id}
     final path = '${ApiConstants.getCurrentUser}/$userId';
 
-    if (kDebugMode) {
-      print('--- Request Configuration ---');
-      print('Base URL: ${ApiConstants.baseUrl}');
-      print('Path: $path');
-      print('Full URL: ${ApiConstants.baseUrl}$path');
-      print('Method: GET');
-      print('Headers: Present');
-      print(
-        '  - Authorization: Bearer *** (${headers['Authorization']?.length ?? 0} chars)',
-      );
-      print(
-        '  - Token preview (first 30): ${accessToken.substring(0, accessToken.length > 30 ? 30 : accessToken.length)}...',
-      );
-      print(
-        '  - Token preview (last 30): ...${accessToken.substring(accessToken.length > 30 ? accessToken.length - 30 : 0)}',
-      );
-      print('User ID to use: $userId');
-      print('--- Sending Request ---');
-    }
-
     try {
       final json = await _apiService.get(path, headers: headers);
-
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== GET USER PROFILE API: SUCCESS ===');
-        print('═══════════════════════════════════════════════════════════');
-        print('Response Status: 200 OK');
-        print('Response Type: application/json');
-        print('--- Response Data ---');
-        print('Full JSON: $json');
-        print('Response Keys: ${json.keys.toList()}');
-        print('--- User Profile Fields ---');
-        print('  id: ${json['id']}');
-        print('  username: ${json['username']}');
-        print('  email: ${json['email']}');
-        print('  first_name: ${json['first_name']}');
-        print('  last_name: ${json['last_name']}');
-        print('  profile_image_url: ${json['profile_image_url']}');
-        print('  is_verified: ${json['is_verified']}');
-        print('  is_active: ${json['is_active']}');
-        print('  created_at: ${json['created_at']}');
-        print('  updated_at: ${json['updated_at']}');
-        print('--- Parsing User Model ---');
-      }
-
       final user = User.fromJson(json);
 
-      if (kDebugMode) {
-        print('✅ User Model Parsed Successfully');
-        print('--- Parsed User Object ---');
-        print('  User.id: ${user.id}');
-        print('  User.username: ${user.username}');
-        print('  User.email: ${user.email}');
-        print('  User.fullName: ${user.fullName}');
-        print('  User.firstName: ${user.firstName}');
-        print('  User.lastName: ${user.lastName}');
-        print('  User.profileImageUrl: ${user.profileImageUrl}');
-        print('  User.isVerified: ${user.isVerified}');
-        print('  User.isActive: ${user.isActive}');
-        print('  User.phoneNumber: ${user.phoneNumber}');
-        print('  User.createdAt: ${user.createdAt}');
-        print('  User.updatedAt: ${user.updatedAt}');
-      }
-
-      // Save user_id to SharedPreferences for future use
       if (user.id != null && user.id!.isNotEmpty) {
         try {
           await TokenStorageService.saveUserId(user.id!);
-          if (kDebugMode) {
-            print('✅ User ID saved to storage: ${user.id}');
-          }
         } catch (e) {
-          if (kDebugMode) {
-            print('⚠️  Failed to save user_id: $e');
-          }
+          // ignore
         }
       }
 
-      // Save full user data to cache
       try {
         await TokenStorageService.saveUserData(user);
-        if (kDebugMode) {
-          print('✅ User data saved to cache');
-        }
       } catch (e) {
-        if (kDebugMode) {
-          print('⚠️  Failed to save user data to cache: $e');
-        }
-      }
-
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== GET USER PROFILE API: END (SUCCESS) ===');
-        print('═══════════════════════════════════════════════════════════');
+        // ignore
       }
 
       return user;
     } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== GET USER PROFILE API: ERROR ===');
-        print('═══════════════════════════════════════════════════════════');
-        print('Exception Type: ${e.runtimeType}');
-        print('Exception Message: $e');
-        if (e is ApiException) {
-          print('Status Code: ${e.statusCode}');
-          print('Error Details:');
-          print('  - The API endpoint requires: GET /api/v1/users/{user_id}');
-          print('  - Current request path: $path');
-          if (e.statusCode == 403) {
-            print('  - 403 Forbidden: Unauthorized access');
-            print('  - Possible reasons:');
-
-            print('    2. user_id is required but not provided');
-            print('    3. Token is invalid or expired');
-            print(
-              '    4. User does not have permission to access this resource',
-            );
-          } else if (e.statusCode == 404) {
-            print('  - 404 Not Found: Endpoint does not exist');
-            print('  - The path "$path" is not available on the server');
-          } else if (e.statusCode == 401) {
-            print('  - 401 Unauthorized: Token is invalid or expired');
-            print('  - Need to refresh token or re-login');
-          }
-        }
-        print('--- Stack Trace ---');
-        print(stackTrace);
-        print('═══════════════════════════════════════════════════════════');
-        print('=== GET USER PROFILE API: END (ERROR) ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
       rethrow;
     }
   }
@@ -405,12 +197,6 @@ class AuthRepository {
     // Construct path: /users/{user_id}
     final path = '${ApiConstants.updateUser}/$userId';
 
-    if (kDebugMode) {
-      print('=== UPDATE USER API ===');
-      print('Endpoint: PATCH $path');
-      print('User ID: $userId');
-    }
-
     final body = <String, String>{};
     if (firstName != null && firstName.isNotEmpty) {
       body['first_name'] = firstName;
@@ -425,16 +211,7 @@ class AuthRepository {
       body['username'] = username;
     }
 
-    if (kDebugMode) {
-      print('Body: $body');
-    }
-
-    final json = await _apiService.put(
-      path,
-      headers: headers,
-      body: body.isNotEmpty ? body : null,
-    );
-
+    final json = await _apiService.patch(path, headers: headers, body: body);
     return UpdateUserResponse.fromJson(json);
   }
 
@@ -462,22 +239,10 @@ class AuthRepository {
     // Construct path: /users/{user_id}/profile
     final path = '${ApiConstants.updateUserProfile}/$userId/profile';
 
-    if (kDebugMode) {
-      print('=== UPDATE USER PROFILE API ===');
-      print('Endpoint: PUT $path');
-      print('User ID: $userId');
-      print('Has username: ${username != null && username.isNotEmpty}');
-      print('Has profile image: ${profileImage != null}');
-    }
-
     // Username should be sent as a query parameter, not in multipart form
     final query = <String, String>{};
     if (username != null && username.isNotEmpty) {
       query['username'] = username;
-    }
-
-    if (kDebugMode) {
-      print('Query parameters: $query');
     }
 
     final json = await _apiService.putMultipart(
@@ -511,12 +276,6 @@ class AuthRepository {
 
     // Construct path: /users/{user_id}/profile (as per updated API docs)
     final path = '${ApiConstants.updateUserProfile}/$userId/profile';
-
-    if (kDebugMode) {
-      print('=== UPDATE PROFILE PICTURE API ===');
-      print('Endpoint: PUT $path');
-      print('User ID: $userId');
-    }
 
     final json = await _apiService.putMultipart(
       path: path,
@@ -615,16 +374,6 @@ class AuthRepository {
     final body = <String, dynamic>{'id_token': idToken, 'name': name};
     if (picture != null && picture.isNotEmpty) {
       body['picture'] = picture;
-    }
-
-    if (kDebugMode) {
-      print('=== GOOGLE SIGN-IN REQUEST ===');
-      print('Endpoint: ${ApiConstants.googleSignIn}');
-      print('ID Token length: ${idToken.length}');
-      print('ID Token preview: ${idToken.substring(0, 20)}...');
-      print('Name: $name');
-      print('Picture: ${picture ?? "null"}');
-      print('Request body keys: ${body.keys.toList()}');
     }
 
     final json = await _apiService.post(ApiConstants.googleSignIn, body: body);
