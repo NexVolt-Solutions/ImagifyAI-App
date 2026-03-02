@@ -18,7 +18,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>imagifyai</string>
+	<string>Imagify AI</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -77,5 +77,11 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Imagify AI needs access to your photos to choose a profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Imagify AI needs camera access to take a profile picture.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Imagify AI needs permission to save generated wallpapers to your photo library.</string>
 </dict>
 </plist>
