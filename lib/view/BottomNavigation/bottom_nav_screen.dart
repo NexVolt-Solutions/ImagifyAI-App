@@ -4,7 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
-import 'package:imagifyai/Core/theme/app_theme.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:provider/provider.dart';
@@ -32,10 +31,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     });
   }
 
-  Future<bool> _onWillPop() async {
+  Future<void> _handlePopInvoked(bool didPop) async {
+    if (didPop) return;
     final shouldExit = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text(
           'Exit App',
           style: TextStyle(
@@ -54,14 +54,14 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(
               'Cancel',
               style: TextStyle(color: context.subtitleColor),
             ),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
+            onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               'Exit',
               style: TextStyle(
@@ -73,12 +73,9 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         ],
       ),
     );
-
     if (shouldExit == true) {
       SystemNavigator.pop();
-      return false; // Prevent default back behavior since we're exiting
     }
-    return false; // Prevent back navigation
   }
 
   @override
@@ -87,8 +84,9 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       context,
     );
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) => _handlePopInvoked(didPop),
       child: Scaffold(
         backgroundColor: context.backgroundColor,
         appBar: PreferredSize(

@@ -117,7 +117,7 @@ class Routes {
       default:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => Scaffold(
+          builder: (ctx) => Scaffold(
             body: Stack(
               children: [
                 const Center(
@@ -136,6 +136,7 @@ class Routes {
                   top: 50,
                   left: 20,
                   child: InkWell(
+                    onTap: () => Navigator.of(ctx).pop(),
                     child: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.black,

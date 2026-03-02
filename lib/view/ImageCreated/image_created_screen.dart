@@ -222,6 +222,17 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                       AppAssets.imagifyaiLogo,
                       fit: BoxFit.cover,
                     ),
+                    Positioned(
+                      left: 0,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Icon(
+                          Icons.arrow_back_ios,
+                          color: Theme.of(context).iconTheme.color,
+                          size: 20,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -113,6 +113,8 @@ class _LibraryState extends State<Library> {
                   SizedBox(height: context.h(10)),
                   if (isLoading)
                     const Center(child: AppLoadingIndicator.large())
+                  else if (items.isEmpty)
+                    _LibraryEmptyState(onCreateTap: () => Navigator.pop(context))
                   else
                     GridView.builder(
                       shrinkWrap: true,
@@ -234,6 +236,51 @@ class _LibraryState extends State<Library> {
           ),
         );
       },
+    );
+  }
+}
+
+class _LibraryEmptyState extends StatelessWidget {
+  final VoidCallback onCreateTap;
+
+  const _LibraryEmptyState({required this.onCreateTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: context.h(40)),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.photo_library_outlined,
+            size: 64,
+            color: context.subtitleColor,
+          ),
+          SizedBox(height: context.h(16)),
+          Text(
+            'No wallpapers yet',
+            style: context.appTextStyles?.profileScreenTitle,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: context.h(8)),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.w(24)),
+            child: Text(
+              'Create your first one from the Create tab.',
+              style: context.appTextStyles?.profileListItemSubtitle,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: context.h(24)),
+          CustomButton(
+            onPressed: onCreateTap,
+            width: context.w(200),
+            gradient: AppColors.gradient,
+            text: 'Go to Create',
+          ),
+        ],
+      ),
     );
   }
 }
