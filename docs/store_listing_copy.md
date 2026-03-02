@@ -52,10 +52,9 @@ Update this for every release.
 
 ## Privacy policy URL (required)
 
-Host your full Privacy Policy at a stable URL, e.g.:
+Your live Privacy Policy URL:
 
-- `https://imagifyai.com/privacy`  
-(or your actual domain)
+- **https://imagifyai.io/privacy-policy**
 
 Add this URL in:
 

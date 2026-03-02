@@ -58,7 +58,7 @@
 - **Required:** Complete the **Data safety** form in Play Console and provide a **public Privacy Policy URL** (even if you collect no data).
 - **Current:** Privacy Policy and Terms exist **in-app only** (no live web URL). Play and Apple often require a **stable URL** to the same policy.
 - **Action:**
-  1. Host your Privacy Policy and Terms on a webpage (e.g. `https://imagifyai.com/privacy`, `https://imagifyai.com/terms`).
+  1. Host your Privacy Policy and Terms on a webpage. Your privacy policy is live at: **https://imagifyai.io/privacy-policy** (add a Terms URL similarly if needed, e.g. `https://imagifyai.io/terms`).
   2. Enter that URL in Play Console (Data safety / Store settings) and in App Store Connect (App Privacy / App Information).
   3. Optionally, in-app screens can “Open in browser” to the same URL for consistency.
 

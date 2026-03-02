@@ -59,6 +59,7 @@ dependencies:
   firebase_analytics: ^11.3.5
   # Gentle reminders for review / Pro features
   flutter_local_notifications: ^18.0.1
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:

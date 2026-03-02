@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PrivacyPolicy extends StatelessWidget {
   const PrivacyPolicy({super.key});
@@ -67,6 +68,23 @@ class PrivacyPolicy extends StatelessWidget {
                 textAlign: TextAlign.start,
               ),
             ),
+            SizedBox(height: context.h(16)),
+            InkWell(
+              onTap: () async {
+                final uri = Uri.parse('https://imagifyai.io/privacy-policy');
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                }
+              },
+              child: Text(
+                'View full policy online',
+                style: context.appTextStyles?.profileBodyText.copyWith(
+                  color: context.primaryColor,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+            SizedBox(height: context.h(24)),
           ],
         ),
       ),
