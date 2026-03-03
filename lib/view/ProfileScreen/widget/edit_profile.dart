@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
-import 'package:imagifyai/Core/CustomWidget/align_text.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
-import 'package:imagifyai/Core/CustomWidget/password_text.dart';
 import 'package:imagifyai/Core/CustomWidget/profile_image.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/edit_profile_view_model.dart';
@@ -244,93 +242,6 @@ class _EditProfileState extends State<EditProfile> {
                           label: "Email",
                           enabled: false,
                           enabledBorderColor: context.colorScheme.onSurface,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: context.h(20)),
-                  Container(
-                    height: context.h(470),
-                    width: context.w(double.infinity),
-                    decoration: BoxDecoration(
-                      color: context.surfaceColor,
-                      borderRadius: BorderRadius.circular(context.radius(12)),
-                    ),
-                    child: ListView(
-                      scrollDirection: Axis.vertical,
-                      physics: NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: context.h(20),
-                        vertical: context.w(20),
-                      ),
-                      children: [
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            "Change Password",
-                            style: context.appTextStyles?.profileSectionTitle,
-                            textAlign: TextAlign.start,
-                          ),
-                        ),
-                        SizedBox(height: context.h(20)),
-                        CustomTextField(
-                          controller:
-                              editProfileViewModel.oldPasswordController,
-                          validatorType: "password",
-                          hintText: 'Enter old Password',
-                          hintStyle: context.appTextStyles?.authHintText,
-                          label: "Old Password",
-                          enabledBorderColor: context.colorScheme.onSurface,
-                        ),
-                        SizedBox(height: context.h(16)),
-                        CustomTextField(
-                          controller:
-                              editProfileViewModel.newPasswordController,
-                          validatorType: "password",
-                          hintText: 'Enter new Password',
-                          hintStyle: context.appTextStyles?.authHintText,
-                          label: "New Password",
-                          enabledBorderColor: context.colorScheme.onSurface,
-                        ),
-                        SizedBox(height: context.h(16)),
-                        CustomTextField(
-                          controller:
-                              editProfileViewModel.confirmPasswordController,
-                          validatorType: "password",
-                          hintText: 'Enter confirm Password',
-                          hintStyle: context.appTextStyles?.authHintText,
-                          label: "Confirm Password",
-                          enabledBorderColor: context.colorScheme.onSurface,
-                        ),
-                        SizedBox(height: context.h(20)),
-                        AlignText(
-                          text: 'Password must contain',
-                          fontWeight: FontWeight.w500,
-                          fontSize: context.text(16),
-                        ),
-                        SizedBox(height: context.h(4)),
-                        Column(
-                          children: List.generate(
-                            editProfileViewModel.items.length,
-                            (index) {
-                              bool isSelected =
-                                  editProfileViewModel.selectedIndex == index;
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    editProfileViewModel.selectedIndex = index;
-                                  });
-                                },
-                                child: PasswordText(
-                                  text: editProfileViewModel.items[index],
-                                  icon: isSelected ? Icons.check : Icons.cancel,
-                                  iconColor: isSelected
-                                      ? AppColors.greenColor
-                                      : AppColors.grayColor,
-                                ),
-                              );
-                            },
-                          ),
                         ),
                       ],
                     ),

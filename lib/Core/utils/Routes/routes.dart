@@ -13,6 +13,7 @@ import 'package:imagifyai/view/ImageCreated/image_created_screen.dart';
 import 'package:imagifyai/view/ImageGenerate/image_generate_screen.dart';
 import 'package:imagifyai/view/OnBoardingScreen/on_boarding_screen.dart';
 import 'package:imagifyai/view/ProfileScreen/profile_screen.dart';
+import 'package:imagifyai/view/ProfileScreen/widget/change_password_screen.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/contact_us.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/edit_profile.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/library.dart';
@@ -114,6 +115,11 @@ class Routes {
         );
       case RoutesName.LibraryScreen:
         return MaterialPageRoute(settings: settings, builder: (_) => Library());
+      case RoutesName.ChangePasswordScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const ChangePasswordScreen(),
+        );
       default:
         return MaterialPageRoute(
           settings: settings,

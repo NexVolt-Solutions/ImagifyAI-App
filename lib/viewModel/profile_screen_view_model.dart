@@ -32,6 +32,13 @@ class ProfileScreenViewModel extends ChangeNotifier {
       'switchValue': false,
     },
     {
+      'leading': AppAssets.shieldIcon,
+      'title': 'Account',
+      'subtitle': 'Change password and account security',
+      'trailingType': 'arrow',
+      'switchValue': false,
+    },
+    {
       'leading': AppAssets.themeIcon,
       'title': 'Theme',
       'subtitle': 'Dark Mode', // Will be updated dynamically based on theme
@@ -140,11 +147,13 @@ class ProfileScreenViewModel extends ChangeNotifier {
       Navigator.pushNamed(context, RoutesName.EditScreen);
     } else if (index == 1) {
       Navigator.pushNamed(context, RoutesName.LibraryScreen);
-    } else if (index == 4) {
-      Navigator.pushNamed(context, RoutesName.PrivicyScreen);
+    } else if (index == 2) {
+      Navigator.pushNamed(context, RoutesName.ChangePasswordScreen);
     } else if (index == 5) {
-      Navigator.pushNamed(context, RoutesName.TermScreen);
+      Navigator.pushNamed(context, RoutesName.PrivicyScreen);
     } else if (index == 6) {
+      Navigator.pushNamed(context, RoutesName.TermScreen);
+    } else if (index == 7) {
       Navigator.pushNamed(context, RoutesName.ContactScreen);
     }
   }

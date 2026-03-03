@@ -1,22 +1,30 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:imagifyai/Core/Constants/env_constants.dart';
 
 /// AdMob Interstitial ad shown after natural breaks (e.g. after download).
-/// Ad unit ID from .env (ADMOB_INTERSTITIAL_AD_UNIT_ID).
+/// Ad unit ID from .env (ADMOB_INTERSTITIAL_AD_UNIT_ID). In debug, uses Google test ID so ads always load.
 class InterstitialAdService {
   static String get interstitialAdUnitId =>
-      EnvConstants.admobInterstitialAdUnitId;
+      kDebugMode
+          ? 'ca-app-pub-3940256099942544/1033173712' // Google test interstitial
+          : EnvConstants.admobInterstitialAdUnitId;
 
   static InterstitialAd? _interstitialAd;
   static bool _isLoading = false;
+  static bool _retryDone = false;
 
-  /// Load an interstitial so it's ready to show.
+  /// Load an interstitial so it's ready to show. Retries once on failure (code 0 or 3).
   static Future<void> loadInterstitialAd() async {
     if (_interstitialAd != null || _isLoading) return;
     if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) {
       return;
     }
     _isLoading = true;
+    if (kDebugMode) {
+      // ignore: avoid_print
+      print('InterstitialAdService: loading with adUnitId=${interstitialAdUnitId.substring(0, 30)}...');
+    }
     try {
       await InterstitialAd.load(
         adUnitId: interstitialAdUnitId,
@@ -25,6 +33,7 @@ class InterstitialAdService {
           onAdLoaded: (ad) {
             _interstitialAd = ad;
             _isLoading = false;
+            _retryDone = false;
             ad.fullScreenContentCallback = FullScreenContentCallback(
               onAdDismissedFullScreenContent: (ad) {
                 ad.dispose();
@@ -40,6 +49,14 @@ class InterstitialAdService {
           },
           onAdFailedToLoad: (error) {
             _isLoading = false;
+            if (!_retryDone &&
+                (error.code == 0 || error.code == 3) &&
+                kDebugMode) {
+              _retryDone = true;
+              Future<void>.delayed(const Duration(seconds: 3), () {
+                loadInterstitialAd();
+              });
+            }
           },
         ),
       );

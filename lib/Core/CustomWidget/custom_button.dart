@@ -89,7 +89,7 @@ class CustomButton extends StatelessWidget {
                             (context.appTextStyles?.customButtonText ??
                                     TextStyle())
                                 .copyWith(
-                                  fontSize: fontSize ?? context.text(16),
+                                  fontSize: fontSize ?? context.text(14),
                                 ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,

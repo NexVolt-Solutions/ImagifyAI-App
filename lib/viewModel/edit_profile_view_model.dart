@@ -134,17 +134,6 @@ class EditProfileViewModel extends ChangeNotifier {
     }
   }
 
-  bool _shouldUpdatePassword() {
-    final oldPassword = oldPasswordController.text.trim();
-    final newPassword = newPasswordController.text.trim();
-    final confirmPassword = confirmPasswordController.text.trim();
-
-    // Update password only if all password fields are filled
-    return oldPassword.isNotEmpty &&
-        newPassword.isNotEmpty &&
-        confirmPassword.isNotEmpty;
-  }
-
   /// Check if profile data (name, username, profile image) has changed
   bool _hasProfileDataChanged() {
     if (currentUser == null) return false;
@@ -166,28 +155,23 @@ class EditProfileViewModel extends ChangeNotifier {
         profileImageChanged;
   }
 
-  /// Check if password has changed
-  bool _hasPasswordChanged() {
-    return _shouldUpdatePassword();
-  }
-
-  Future<void> updatePassword({
+  /// Returns true if password was updated successfully.
+  Future<bool> updatePassword({
     required BuildContext context,
     String? accessToken,
   }) async {
-    if (isLoading) return;
+    if (isLoading) return false;
 
     final oldPassword = oldPasswordController.text.trim();
     final newPassword = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    // Validate password fields
     if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
       SnackbarUtil.showTopSnackBar(
         context,
         'Please complete all password fields',
       );
-      return;
+      return false;
     }
 
     if (newPassword != confirmPassword) {
@@ -195,7 +179,7 @@ class EditProfileViewModel extends ChangeNotifier {
         context,
         'New password and confirm password must match',
       );
-      return;
+      return false;
     }
 
     isLoading = true;
@@ -220,16 +204,18 @@ class EditProfileViewModel extends ChangeNotifier {
           'Password updated successfully! Your account is secure';
       SnackbarUtil.showTopSnackBar(context, message, isError: false);
 
-      // Clear password fields after successful update
       oldPasswordController.clear();
       newPasswordController.clear();
       confirmPasswordController.clear();
+      return true;
     } on ApiException catch (e) {
       errorMessage = e.message;
       SnackbarUtil.showTopSnackBar(context, e.message);
+      return false;
     } catch (_) {
       errorMessage = 'Couldn\'t update password. Please try again!';
       SnackbarUtil.showTopSnackBar(context, errorMessage!);
+      return false;
     } finally {
       isLoading = false;
       notifyListeners();
@@ -244,32 +230,15 @@ class EditProfileViewModel extends ChangeNotifier {
     if (isLoading) return;
     if (!(formKey.currentState?.validate() ?? false)) return;
 
-    // Check what has changed
     final hasProfileChanged = _hasProfileDataChanged();
-    final hasPasswordChanged = _hasPasswordChanged();
 
-    // If nothing changed, show message and return
-    if (!hasProfileChanged && !hasPasswordChanged) {
+    if (!hasProfileChanged) {
       SnackbarUtil.showTopSnackBar(
         context,
         'No changes to save',
         isError: false,
       );
       return;
-    }
-
-    // Validate password fields if they are filled
-    if (hasPasswordChanged) {
-      final newPassword = newPasswordController.text.trim();
-      final confirmPassword = confirmPasswordController.text.trim();
-
-      if (newPassword != confirmPassword) {
-        SnackbarUtil.showTopSnackBar(
-          context,
-          'New password and confirm password must match',
-        );
-        return;
-      }
     }
 
     isLoading = true;
@@ -332,12 +301,6 @@ class EditProfileViewModel extends ChangeNotifier {
         if (successMessage != null) {
           SnackbarUtil.showTopSnackBar(context, successMessage, isError: false);
         }
-      }
-
-      // Update password if changed
-      if (hasPasswordChanged) {
-        await updatePassword(context: context, accessToken: accessToken);
-        // Password update already shows its own success message
       }
 
       // Reload user data only once after all updates complete

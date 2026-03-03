@@ -7,6 +7,7 @@ import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
+import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/interstitial_ad_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
@@ -307,6 +308,8 @@ class ImageCreatedViewModel extends ChangeNotifier {
         createdAt: recreatedWallpaper.createdAt,
       );
 
+      await GenerationLimitService.recordGeneration();
+
       // Reset polling state and start checking for the new image
       isPolling = true;
       _pollingStartTime =
@@ -356,10 +359,20 @@ class ImageCreatedViewModel extends ChangeNotifier {
     }
   }
 
+  /// Save wallpaper to device (no dialog). Call from Save button.
+  Future<void> saveToDevice(BuildContext context) async {
+    await _downloadImage(context);
+  }
+
+  /// Open share sheet (no dialog). Call from Share button.
+  Future<void> share(BuildContext context) async {
+    await _shareWallpaper(context);
+  }
+
+  /// Legacy: full-screen dialog with Save / Share. Prefer direct Save and Share buttons.
   Future<void> showDownloadDialog(BuildContext context) async {
     if (wallpaper == null || wallpaper!.id.isEmpty) return;
 
-    // Get access token from SignInViewModel
     final signInViewModel = context.read<SignInViewModel>();
     final accessToken = signInViewModel.accessToken;
 
@@ -368,7 +381,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
       return;
     }
 
-    // Show dialog with Download and Share options
     final imageUrl = wallpaper!.imageUrl;
     showDialog(
       context: context,

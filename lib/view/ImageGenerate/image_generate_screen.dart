@@ -7,6 +7,7 @@ import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/home_align.dart';
 import 'package:imagifyai/Core/CustomWidget/prompt_continer.dart';
 import 'package:imagifyai/Core/CustomWidget/size_continer.dart';
+import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
@@ -75,6 +76,53 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     if (styleIndex != null) {
       _scrollToSelectedStyle(styleIndex, context);
     }
+  }
+
+  Future<void> _onCreateMagicTapped(BuildContext context) async {
+    final can = await GenerationLimitService.canGenerate();
+    if (!mounted) return;
+    if (can) {
+      context.read<ImageGenerateViewModel>().createWallpaper(context);
+      return;
+    }
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          'Daily limit reached',
+          style: context.appTextStyles?.imageGenerateSectionTitle,
+        ),
+        content: Text(
+          'You\'ve used your free generations for today. Watch a short ad for 1 more?',
+          style: context.appTextStyles?.imageGeneratePromptText,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Cancel', style: TextStyle(color: context.primaryColor)),
+          ),
+          TextButton(
+            onPressed: () async {
+              final shown = await RewardedAdService.showRewardedAd(
+                onReward: () {
+                  if (dialogContext.mounted) Navigator.pop(dialogContext);
+                  context.read<ImageGenerateViewModel>().createWallpaper(context);
+                },
+              );
+              if (!dialogContext.mounted) return;
+              if (!shown) {
+                SnackbarUtil.showTopSnackBar(
+                  dialogContext,
+                  'Ad not ready. Try again in a moment.',
+                  isError: true,
+                );
+              }
+            },
+            child: Text('Watch ad', style: TextStyle(color: context.primaryColor)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -390,8 +438,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                     ),
                     SizedBox(height: context.h(20)),
                     CustomButton(
-                      onPressed: () =>
-                          imageGenerateViewModel.createWallpaper(context),
+                      onPressed: () => _onCreateMagicTapped(context),
                       width: context.w(350),
                       iconHeight: 24,
                       iconWidth: 24,
@@ -401,7 +448,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                       isLoading: imageGenerateViewModel.isCreating,
                     ),
                     SizedBox(height: context.h(12)),
-                    const _WatchAdButton(),
+                    _LimitAndWatchAdRow(),
                     SizedBox(height: context.h(100)),
                   ],
                 ),
@@ -423,21 +470,42 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
   }
 }
 
-/// Button to watch a rewarded ad and earn 1 free generation.
-class _WatchAdButton extends StatelessWidget {
-  const _WatchAdButton();
-
+/// Row showing daily usage (X/5) and "Watch ad for +1" button.
+class _LimitAndWatchAdRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return TextButton.icon(
-      onPressed: () => _onWatchAd(context),
-      icon: Icon(Icons.play_circle_outline, size: 20, color: context.primaryColor),
-      label: Text(
-        'Watch ad for 1 free generation',
-        style: context.appTextStyles?.imageGeneratePromptHint.copyWith(
-          color: context.primaryColor,
-        ),
-      ),
+    return FutureBuilder<Map<String, int>>(
+      future: Future.wait([
+        GenerationLimitService.getGenerationsUsedToday(),
+        RewardedAdService.getFreeGenerationsFromAds(),
+      ]).then((v) => {'used': v[0], 'adCredits': v[1]}),
+      builder: (context, snapshot) {
+        final used = snapshot.data?['used'] ?? 0;
+        final adCredits = snapshot.data?['adCredits'] ?? 0;
+        final limit = GenerationLimitService.dailyLimit;
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Free today: $used/$limit${adCredits > 0 ? ' • $adCredits from ads' : ''}',
+              style: context.appTextStyles?.imageGeneratePromptHint.copyWith(
+                color: context.textColor,
+              ),
+            ),
+            SizedBox(height: context.h(4)),
+            TextButton.icon(
+              onPressed: () => _onWatchAd(context),
+              icon: Icon(Icons.play_circle_outline, size: 20, color: context.primaryColor),
+              label: Text(
+                'Watch ad for +1',
+                style: context.appTextStyles?.imageGeneratePromptHint.copyWith(
+                  color: context.primaryColor,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

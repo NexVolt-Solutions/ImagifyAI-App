@@ -1,21 +1,30 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:imagifyai/Core/Constants/env_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// AdMob Rewarded ad for "Watch ad for 1 free generation".
-/// Ad unit ID from .env (ADMOB_REWARDED_AD_UNIT_ID).
+/// Ad unit ID from .env (ADMOB_REWARDED_AD_UNIT_ID). In debug, uses Google test ID so ads always load.
 class RewardedAdService {
   static const String _keyFreeGenerationsFromAds = 'free_generations_from_ads';
 
-  static String get rewardedAdUnitId => EnvConstants.admobRewardedAdUnitId;
+  static String get rewardedAdUnitId =>
+      kDebugMode
+          ? 'ca-app-pub-3940256099942544/5224354917' // Google test rewarded
+          : EnvConstants.admobRewardedAdUnitId;
 
   static RewardedAd? _rewardedAd;
   static bool _isLoading = false;
+  static bool _retryDone = false;
 
-  /// Load a rewarded ad so it's ready to show.
+  /// Load a rewarded ad so it's ready to show. Retries once on failure (code 0 or 3).
   static Future<void> loadRewardedAd() async {
     if (_rewardedAd != null || _isLoading) return;
     _isLoading = true;
+    if (kDebugMode) {
+      // ignore: avoid_print
+      print('RewardedAdService: loading with adUnitId=${rewardedAdUnitId.substring(0, 30)}...');
+    }
     try {
       await RewardedAd.load(
         adUnitId: rewardedAdUnitId,
@@ -24,6 +33,7 @@ class RewardedAdService {
           onAdLoaded: (ad) {
             _rewardedAd = ad;
             _isLoading = false;
+            _retryDone = false;
             ad.fullScreenContentCallback = FullScreenContentCallback(
               onAdDismissedFullScreenContent: (ad) {
                 ad.dispose();
@@ -39,6 +49,14 @@ class RewardedAdService {
           },
           onAdFailedToLoad: (error) {
             _isLoading = false;
+            if (!_retryDone &&
+                (error.code == 0 || error.code == 3) &&
+                kDebugMode) {
+              _retryDone = true;
+              Future<void>.delayed(const Duration(seconds: 3), () {
+                loadRewardedAd();
+              });
+            }
           },
         ),
       );

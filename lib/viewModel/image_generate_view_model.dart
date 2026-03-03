@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
@@ -238,6 +239,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
         notifyListeners();
 
         _showMessage(context, 'Wallpaper created successfully', isError: false);
+        await GenerationLimitService.recordGeneration();
         InAppReviewService.recordCompletedGenerationAndMaybeReview(context);
         Navigator.pushNamed(
           context,
@@ -279,6 +281,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 'Wallpaper created successfully',
                 isError: false,
               );
+              await GenerationLimitService.recordGeneration();
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,
               );
@@ -428,6 +431,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 'Your masterpiece is ready!',
                 isError: false,
               );
+              await GenerationLimitService.recordGeneration();
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,
               );
