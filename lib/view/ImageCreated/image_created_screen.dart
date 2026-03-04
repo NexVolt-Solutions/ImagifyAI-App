@@ -27,7 +27,8 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
   Timer? _pollingTimer;
   StreamController<int>? _elapsedTimeController;
   String? _lastWallpaperId;
-  String? _lastImageUrl; // Track last image URL to reset retry count on URL change
+  String?
+  _lastImageUrl; // Track last image URL to reset retry count on URL change
   late TextEditingController _promptController;
 
   @override
@@ -232,12 +233,14 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
         final wp = imageCreatedViewModel.wallpaper;
         final imageUrl = wp?.imageUrl ?? '';
 
-        // Reset retry count if image URL changed
+        // Reset retry count if image URL changed (defer to avoid notifyListeners during build)
         if (imageUrl.isNotEmpty &&
             imageUrl != 'null' &&
             imageUrl != _lastImageUrl) {
           _lastImageUrl = imageUrl;
-          imageCreatedViewModel.clearImageLoadError();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) imageCreatedViewModel.clearImageLoadError();
+          });
         }
 
         // Ensure isPolling is false if image is available
@@ -270,61 +273,68 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
             child: Stack(
               children: [
                 SafeArea(
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: context.padSym(h: 20),
-                  children: [
-                    Text(
-                      'Your Creation',
-                      style: context.appTextStyles?.imageCreatedTitle,
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: context.h(20)),
-                    Container(
-                      height: context.h(410),
-                      width: context.w(350),
-                      decoration: BoxDecoration(
-                        color: context.backgroundColor,
-                        borderRadius: BorderRadius.circular(context.radius(12)),
+                  child: ListView(
+                    shrinkWrap: true,
+                    padding: context.padSym(h: 20),
+                    children: [
+                      Text(
+                        'Your Creation',
+                        style: context.appTextStyles?.imageCreatedTitle,
+                        textAlign: TextAlign.center,
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(context.radius(12)),
-                        child: CreationImagePreview(
-                          imageUrl: imageUrl,
-                          viewModel: imageCreatedViewModel,
-                          elapsedTimeStream: _elapsedTimeController?.stream,
-                          initialElapsed: imageCreatedViewModel.elapsedPollingTime,
-                          isMounted: () => mounted,
+                      SizedBox(height: context.h(20)),
+                      Container(
+                        height: context.h(410),
+                        width: context.w(350),
+                        decoration: BoxDecoration(
+                          color: context.backgroundColor,
+                          borderRadius: BorderRadius.circular(
+                            context.radius(12),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                            context.radius(12),
+                          ),
+                          child: CreationImagePreview(
+                            imageUrl: imageUrl,
+                            viewModel: imageCreatedViewModel,
+                            elapsedTimeStream: _elapsedTimeController?.stream,
+                            initialElapsed:
+                                imageCreatedViewModel.elapsedPollingTime,
+                            isMounted: () => mounted,
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: context.h(20)),
-                    PromptEditorCard(
-                      controller: _promptController,
-                      onCopyTap: () {
-                        Clipboard.setData(
-                          ClipboardData(text: _promptController.text),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Prompt copied to clipboard',
-                              style: context.appTextStyles?.imageCreatedPromptText,
+                      SizedBox(height: context.h(20)),
+                      PromptEditorCard(
+                        controller: _promptController,
+                        onCopyTap: () {
+                          Clipboard.setData(
+                            ClipboardData(text: _promptController.text),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Prompt copied to clipboard',
+                                style: context
+                                    .appTextStyles
+                                    ?.imageCreatedPromptText,
+                              ),
+                              duration: const Duration(seconds: 2),
+                              backgroundColor: context.primaryColor,
                             ),
-                            duration: const Duration(seconds: 2),
-                            backgroundColor: context.primaryColor,
-                          ),
-                        );
-                      },
-                    ),
-                    SizedBox(height: context.h(16)),
-                    ActionButtonsRow(
-                      viewModel: imageCreatedViewModel,
-                      onTryAgainTap: () => _onTryAgainTapped(context),
-                    ),
-                    SizedBox(height: context.h(20)),
-                  ],
-                ),
+                          );
+                        },
+                      ),
+                      SizedBox(height: context.h(16)),
+                      ActionButtonsRow(
+                        viewModel: imageCreatedViewModel,
+                        onTryAgainTap: () => _onTryAgainTapped(context),
+                      ),
+                      SizedBox(height: context.h(20)),
+                    ],
+                  ),
                 ),
                 if (imageCreatedViewModel.isPolling)
                   Consumer<ImageCreatedViewModel>(
