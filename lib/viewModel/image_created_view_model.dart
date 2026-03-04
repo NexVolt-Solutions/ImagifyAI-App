@@ -475,10 +475,13 @@ class ImageCreatedViewModel extends ChangeNotifier {
         isError: false,
       );
 
-      // Show interstitial ad after every 10th generation (same threshold as daily limit)
+      // Show interstitial only after a natural break (after save completed), at most every 10th generation. Short delay so user sees the success message first (Better Ads policy).
       final used = await GenerationLimitService.getGenerationsUsedToday();
       if (used >= 10 && used % 10 == 0) {
-        await InterstitialAdService.showInterstitialAd();
+        await Future<void>.delayed(const Duration(milliseconds: 800));
+        if (context.mounted) {
+          await InterstitialAdService.showInterstitialAd();
+        }
       }
     } on ApiException catch (e) {
       errorMessage = e.message;
