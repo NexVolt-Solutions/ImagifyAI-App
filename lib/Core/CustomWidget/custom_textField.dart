@@ -7,6 +7,9 @@ class CustomTextField extends StatelessWidget {
 
   final String? hintText;
   final String? label;
+  /// When set, shown when the field is empty (instead of generic "This field is required").
+  /// Use e.g. "Email is required" or "Password is required" for sign-in.
+  final String? emptyErrorMessage;
 
   final TextEditingController? controller;
   final TextInputType? keyboard;
@@ -44,6 +47,7 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.iconColor,
     this.onChanged,
+    this.emptyErrorMessage,
   });
 
   @override
@@ -63,21 +67,16 @@ class CustomTextField extends StatelessWidget {
           onChanged: onChanged,
           enabled: enabled ?? true,
           validator: (value) {
-            // Password fields are optional - only validate if they have content
-            if (validatorType == "password") {
-              // If password field is empty, it's valid (optional field)
-              if (value == null || value.trim().isEmpty) {
-                return null;
-              }
-              // If password field has content, validate it (you can add password strength validation here if needed)
-              // For now, just return null if it has content (validation happens in view model)
-              return null;
-            }
-
-            // For all other fields, check if they're required
-            if (value == null || value.trim().isEmpty) {
+            final isEmpty = value == null || value.trim().isEmpty;
+            if (isEmpty) {
+              if (emptyErrorMessage != null) return emptyErrorMessage;
+              // Password fields are optional by default when no emptyErrorMessage is set
+              if (validatorType == "password") return null;
               return "This field is required";
             }
+
+            // Password with content: no format check here (handled in view model)
+            if (validatorType == "password") return null;
 
             if (validatorType == "name" && value.length < 3) {
               return "Enter a valid name";

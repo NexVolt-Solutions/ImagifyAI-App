@@ -4,7 +4,7 @@ import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/theme/app_theme.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:imagifyai/viewModel/edit_profile_view_model.dart';
 import 'package:imagifyai/viewModel/library_view_model.dart';
@@ -23,6 +23,7 @@ import 'package:imagifyai/viewModel/theme_provider.dart';
 import 'package:imagifyai/viewModel/verification_view_model.dart';
 import 'package:imagifyai/viewModel/forgot_verification_view_model.dart';
 import 'package:imagifyai/viewModel/set_new_password_view_model.dart';
+import 'package:imagifyai/viewModel/contact_us_view_model.dart';
 import 'package:provider/provider.dart';
 
 class MyApp extends StatefulWidget {
@@ -114,6 +115,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(create: (context) => ImageCreatedViewModel()),
         ChangeNotifierProvider(create: (context) => ProfileScreenViewModel()),
         ChangeNotifierProvider(create: (context) => EditProfileViewModel()),
+        ChangeNotifierProvider(create: (context) => ContactUsViewModel()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

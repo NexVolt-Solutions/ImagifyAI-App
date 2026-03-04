@@ -83,6 +83,7 @@ class _SignInState extends State<SignIn> {
                                   hintStyle:
                                       context.appTextStyles?.authHintText,
                                   label: "Email",
+                                  emptyErrorMessage: "Email is required",
                                   enabledBorderColor:
                                       context.colorScheme.onSurface,
                                 ),
@@ -96,6 +97,7 @@ class _SignInState extends State<SignIn> {
                                   hintStyle:
                                       context.appTextStyles?.authHintText,
                                   label: "Password",
+                                  emptyErrorMessage: "Password is required",
                                   enabledBorderColor:
                                       context.colorScheme.onSurface,
                                 ),

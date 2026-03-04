@@ -149,9 +149,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 editProfileViewModel.selectedIndex == index;
                             return GestureDetector(
                               onTap: () {
-                                setState(() {
-                                  editProfileViewModel.selectedIndex = index;
-                                });
+                                editProfileViewModel.setSelectedPasswordRequirementIndex(index);
                               },
                               child: PasswordText(
                                 text: editProfileViewModel.items[index],

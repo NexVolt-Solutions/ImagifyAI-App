@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:imagifyai/Core/Constants/app_assets.dart';
-import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
-import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
-import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/view/ImageCreated/widgets/action_buttons_row.dart';
+import 'package:imagifyai/view/ImageCreated/widgets/creation_image_preview.dart';
+import 'package:imagifyai/view/ImageCreated/widgets/image_created_app_bar.dart';
+import 'package:imagifyai/view/ImageCreated/widgets/prompt_editor_card.dart';
 import 'package:imagifyai/viewModel/image_created_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -26,13 +26,8 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
   bool _initialized = false;
   Timer? _pollingTimer;
   StreamController<int>? _elapsedTimeController;
-  bool _imageLoadError = false;
-  String? _errorMessage;
-  int _retryCount = 0;
   String? _lastWallpaperId;
-  String?
-  _lastImageUrl; // Track last image URL to reset retry count on URL change
-  int _retryTimestamp = 0; // Timestamp for cache-busting on retry
+  String? _lastImageUrl; // Track last image URL to reset retry count on URL change
   late TextEditingController _promptController;
 
   @override
@@ -130,12 +125,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
     // Check if wallpaper ID changed (e.g., after recreate)
     if (_lastWallpaperId != currentWallpaper.id) {
       _lastWallpaperId = currentWallpaper.id;
-
-      // Reset error state for new wallpaper
-      _imageLoadError = false;
-      _errorMessage = null;
-      _retryCount = 0; // Reset retry count for new wallpaper
-      _retryTimestamp = 0; // Reset retry timestamp
+      viewModel.clearImageLoadError();
 
       // If image is not ready, start polling
       if (currentWallpaper.imageUrl.isEmpty ||
@@ -247,10 +237,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
             imageUrl != 'null' &&
             imageUrl != _lastImageUrl) {
           _lastImageUrl = imageUrl;
-          _retryCount = 0;
-          _retryTimestamp = 0;
-          _imageLoadError = false;
-          _errorMessage = null;
+          imageCreatedViewModel.clearImageLoadError();
         }
 
         // Ensure isPolling is false if image is available
@@ -278,36 +265,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
 
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(65),
-            child: Container(
-              color: context.backgroundColor,
-              child: Align(
-                alignment: Alignment.bottomCenter,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                    SvgPicture.asset(
-                      AppAssets.imagifyaiLogo,
-                      fit: BoxFit.cover,
-                    ),
-                    Positioned(
-                      left: 0,
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Icon(
-                          Icons.arrow_back_ios,
-                          color: Theme.of(context).iconTheme.color,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          appBar: const ImageCreatedAppBar(),
           body: Stack(
             children: [
               SafeArea(
@@ -316,7 +274,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                   padding: context.padSym(h: 20),
                   children: [
                     Text(
-                      "Your Creation",
+                      'Your Creation',
                       style: context.appTextStyles?.imageCreatedTitle,
                       textAlign: TextAlign.center,
                     ),
@@ -330,387 +288,46 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(context.radius(12)),
-                        child: (imageUrl.isNotEmpty && imageUrl != 'null')
-                            ? (_imageLoadError && _retryCount >= 3
-                                  ? Container(
-                                      color: context.backgroundColor,
-                                      child: Center(
-                                        child: Container(
-                                          padding: context.padAll(15),
-                                          decoration: BoxDecoration(
-                                            color: context.backgroundColor
-                                                .withOpacity(0.7),
-                                            borderRadius: BorderRadius.circular(
-                                              context.radius(8),
-                                            ),
-                                          ),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                _errorMessage?.contains(
-                                                          '403',
-                                                        ) ==
-                                                        true
-                                                    ? Icons.lock_outline
-                                                    : Icons.error_outline,
-                                                color:
-                                                    _errorMessage?.contains(
-                                                          '403',
-                                                        ) ==
-                                                        true
-                                                    ? Colors.orange
-                                                    : Colors.red,
-                                                size: 32,
-                                              ),
-                                              SizedBox(height: context.h(10)),
-                                              Text(
-                                                _errorMessage ??
-                                                    'Failed to load image',
-                                                style: context
-                                                    .appTextStyles
-                                                    ?.imageCreatedError,
-                                                textAlign: TextAlign.center,
-                                              ),
-                                              SizedBox(height: context.h(10)),
-                                              CustomButton(
-                                                onPressed: () {
-                                                  setState(() {
-                                                    _imageLoadError = false;
-                                                    _errorMessage = null;
-                                                    _retryCount =
-                                                        0; // Reset retry count for manual retry
-                                                    _retryTimestamp =
-                                                        0; // Reset retry timestamp
-                                                  });
-                                                },
-                                                height: context.h(36),
-                                                width: context.w(120),
-                                                gradient: AppColors.gradient,
-                                                text: 'Try Again',
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  : Image.network(
-                                      // Add cache-busting query parameter to force reload on retry
-                                      _retryCount > 0 && _retryTimestamp > 0
-                                          ? '$imageUrl?retry=$_retryCount&t=$_retryTimestamp'
-                                          : imageUrl,
-                                      fit: BoxFit.fill,
-                                      // Force reload on retry by changing the key
-                                      key: ValueKey(
-                                        '${imageUrl}_retry_$_retryCount',
-                                      ),
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                            if (loadingProgress == null)
-                                              return child;
-                                            return Center(
-                                              child: AppLoadingIndicator.medium(
-                                                color: context.primaryColor,
-                                              ),
-                                            );
-                                          },
-                                      errorBuilder: (context, error, stackTrace) {
-                                        // Extract error information
-                                        String errorMsg =
-                                            'Failed to load image';
-                                        bool isNetworkError = false;
-
-                                        if (error.toString().contains('403') ||
-                                            error.toString().contains(
-                                              'Forbidden',
-                                            )) {
-                                          errorMsg =
-                                              'Image access denied (403)\nS3 bucket permissions issue';
-                                        } else if (error.toString().contains(
-                                          '404',
-                                        )) {
-                                          errorMsg = 'Image not found (404)';
-                                        } else if (error.toString().contains(
-                                              'timeout',
-                                            ) ||
-                                            error.toString().contains(
-                                              'TimeoutException',
-                                            )) {
-                                          errorMsg =
-                                              'Connection timeout\nPlease check your internet';
-                                          isNetworkError = true;
-                                        } else if (error.toString().contains(
-                                              'SocketException',
-                                            ) ||
-                                            error.toString().contains(
-                                              'Connection reset',
-                                            ) ||
-                                            error.toString().contains(
-                                              'Connection closed',
-                                            ) ||
-                                            error.toString().contains(
-                                              'HttpException',
-                                            )) {
-                                          errorMsg =
-                                              'Connection error\nPlease check your internet';
-                                          isNetworkError = true;
-                                        }
-
-                                        // Auto-retry for network errors (up to 3 times)
-                                        if (isNetworkError && _retryCount < 3) {
-                                          // Schedule retry after a delay
-                                          WidgetsBinding.instance.addPostFrameCallback((
-                                            _,
-                                          ) {
-                                            if (mounted) {
-                                              Future.delayed(
-                                                const Duration(seconds: 2),
-                                                () {
-                                                  if (mounted &&
-                                                      _retryCount < 3) {
-                                                    setState(() {
-                                                      _imageLoadError = false;
-                                                      _errorMessage = null;
-                                                      _retryCount++; // Increment to force image reload with new key
-                                                      _retryTimestamp =
-                                                          DateTime.now()
-                                                              .millisecondsSinceEpoch; // Generate new timestamp for cache-busting
-                                                    });
-                                                  }
-                                                },
-                                              );
-                                            }
-                                          });
-
-                                          // Show loading indicator while retrying
-                                          return Container(
-                                            color: context.backgroundColor,
-                                            child: Center(
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  AppLoadingIndicator.medium(
-                                                    color: context.primaryColor,
-                                                  ),
-                                                  SizedBox(
-                                                    height: context.h(10),
-                                                  ),
-                                                  Text(
-                                                    'Retrying... (${_retryCount + 1}/3)',
-                                                    style: context
-                                                        .appTextStyles
-                                                        ?.imageCreatedPollingSubtitle,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }
-
-                                        // Show error after retries exhausted or non-network error
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                              if (mounted) {
-                                                setState(() {
-                                                  _imageLoadError = true;
-                                                  _errorMessage = errorMsg;
-                                                });
-                                              }
-                                            });
-
-                                        // Return loading indicator initially, will be replaced by error state
-                                        return Container(
-                                          color: context.backgroundColor,
-                                          child: Center(
-                                            child: AppLoadingIndicator.medium(
-                                              color: context.primaryColor,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ))
-                            : (imageCreatedViewModel.isPolling
-                                  ? Container(
-                                      color: context.backgroundColor,
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            AppLoadingIndicator.medium(
-                                              color: context.primaryColor,
-                                            ),
-                                            SizedBox(height: context.h(10)),
-                                            Text(
-                                              'Crafting Your Masterpiece...',
-                                              style: context
-                                                  .appTextStyles
-                                                  ?.imageCreatedPollingTitle,
-                                            ),
-                                            SizedBox(height: context.h(5)),
-                                            StreamBuilder<int>(
-                                              stream: _elapsedTimeController
-                                                  ?.stream,
-                                              initialData: imageCreatedViewModel
-                                                  .elapsedPollingTime,
-                                              builder: (context, snapshot) {
-                                                final elapsed =
-                                                    snapshot.data ?? 0;
-                                                String formatted;
-                                                if (elapsed < 60) {
-                                                  formatted = '${elapsed}s';
-                                                } else {
-                                                  final minutes = elapsed ~/ 60;
-                                                  final seconds = elapsed % 60;
-                                                  formatted =
-                                                      '${minutes}m ${seconds}s';
-                                                }
-                                                return Text(
-                                                  'Time elapsed: $formatted',
-                                                  style: context
-                                                      .appTextStyles
-                                                      ?.imageCreatedPollingTime,
-                                                );
-                                              },
-                                            ),
-                                            SizedBox(height: context.h(5)),
-                                            Text(
-                                              'Great art takes time',
-                                              style: context
-                                                  .appTextStyles
-                                                  ?.imageCreatedPollingSubtitle,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  : Container(
-                                      color: context.backgroundColor,
-                                      child: Center(
-                                        child: Text(
-                                          'No image available',
-                                          style: context
-                                              .appTextStyles
-                                              ?.imageCreatedError,
-                                        ),
-                                      ),
-                                    )),
+                        child: CreationImagePreview(
+                          imageUrl: imageUrl,
+                          viewModel: imageCreatedViewModel,
+                          elapsedTimeStream: _elapsedTimeController?.stream,
+                          initialElapsed: imageCreatedViewModel.elapsedPollingTime,
+                          isMounted: () => mounted,
+                        ),
                       ),
                     ),
                     SizedBox(height: context.h(20)),
-                    Container(
-                      padding: context.padAll(20),
-                      decoration: BoxDecoration(
-                        color: context.surfaceColor,
-                        borderRadius: BorderRadius.circular(context.radius(12)),
-                      ),
-                      child: Stack(
-                        children: [
-                          TextFormField(
-                            controller: _promptController,
-                            maxLines: 4,
-                            minLines: 1,
-                            enabled: true,
-                            readOnly: false,
-                            style:
-                                context.appTextStyles?.imageCreatedPromptText,
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Enter your prompt...',
-                              hintStyle:
-                                  context.appTextStyles?.imageCreatedPromptHint,
-                              contentPadding: EdgeInsets.only(
-                                bottom: context.h(30),
-                                right: context.w(40),
-                                left: context.w(10),
-                                top: context.h(10),
-                              ),
+                    PromptEditorCard(
+                      controller: _promptController,
+                      onCopyTap: () {
+                        Clipboard.setData(
+                          ClipboardData(text: _promptController.text),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Prompt copied to clipboard',
+                              style: context.appTextStyles?.imageCreatedPromptText,
                             ),
-                            textInputAction: TextInputAction.newline,
-                            keyboardType: TextInputType.multiline,
+                            duration: const Duration(seconds: 2),
+                            backgroundColor: context.primaryColor,
                           ),
-                          Positioned(
-                            bottom: context.h(10),
-                            right: context.w(10),
-                            child: GestureDetector(
-                              onTap: () {
-                                // Copy prompt to clipboard
-                                Clipboard.setData(
-                                  ClipboardData(text: _promptController.text),
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Prompt copied to clipboard',
-                                      style: context
-                                          .appTextStyles
-                                          ?.imageCreatedPromptText,
-                                    ),
-                                    duration: Duration(seconds: 2),
-                                    backgroundColor: context.primaryColor,
-                                  ),
-                                );
-                              },
-                              child: Icon(
-                                Icons.copy,
-                                color: context.textColor,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                     SizedBox(height: context.h(16)),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomButton(
-                            onPressed: () => _onTryAgainTapped(context),
-                            iconHeight: 24,
-                            iconWidth: 24,
-                            gradient: AppColors.gradient,
-                            text: 'Try Again',
-                            isLoading: imageCreatedViewModel.isLoading,
-                            icon: AppAssets.reCreateIcon,
-                          ),
-                        ),
-                        SizedBox(width: context.w(12)),
-                        Expanded(
-                          child: CustomButton(
-                            onPressed: () =>
-                                imageCreatedViewModel.saveToDevice(context),
-                            iconHeight: 24,
-                            iconWidth: 24,
-                            gradient: AppColors.gradient,
-                            text: 'Save',
-                            isLoading: imageCreatedViewModel.isDownloading,
-                            icon: AppAssets.downloadIcon,
-                          ),
-                        ),
-                        SizedBox(width: context.w(12)),
-                        Expanded(
-                          child: CustomButton(
-                            onPressed: () =>
-                                imageCreatedViewModel.share(context),
-                            iconHeight: 24,
-                            iconWidth: 24,
-                            gradient: AppColors.gradient,
-                            text: 'Share',
-                          ),
-                        ),
-                      ],
+                    ActionButtonsRow(
+                      viewModel: imageCreatedViewModel,
+                      onTryAgainTap: () => _onTryAgainTapped(context),
                     ),
                     SizedBox(height: context.h(20)),
                   ],
                 ),
               ),
-              // Loading Overlay (same as ImageGenerateScreen)
               if (imageCreatedViewModel.isPolling)
                 Consumer<ImageCreatedViewModel>(
-                  builder: (context, vm, _) => _LoadingOverlay(
+                  builder: (context, vm, _) => LoadingOverlay(
                     progress: vm.creationProgress,
                     currentStage: vm.currentStage,
                     elapsedTime: vm.elapsedPollingTimeFormatted,
@@ -720,219 +337,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-// Loading Overlay Widget (same as ImageGenerateScreen)
-class _LoadingOverlay extends StatefulWidget {
-  final double progress;
-  final String currentStage;
-  final String elapsedTime;
-
-  const _LoadingOverlay({
-    required this.progress,
-    required this.currentStage,
-    required this.elapsedTime,
-  });
-
-  @override
-  State<_LoadingOverlay> createState() => _LoadingOverlayState();
-}
-
-class _LoadingOverlayState extends State<_LoadingOverlay>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _fadeController;
-  String _displayedStage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _displayedStage = widget.currentStage;
-    _fadeController.forward();
-  }
-
-  @override
-  void didUpdateWidget(_LoadingOverlay oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currentStage != widget.currentStage) {
-      // Fade out old stage
-      _fadeController.reverse().then((_) {
-        if (mounted) {
-          setState(() {
-            _displayedStage = widget.currentStage;
-          });
-          // Fade in new stage
-          _fadeController.forward();
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _fadeController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final progressPercent = (widget.progress * 100).toInt().clamp(0, 100);
-
-    return Container(
-      color: context.backgroundColor.withOpacity(0.9),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: context.w(40)),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Circular Progress Indicator
-              SizedBox(
-                width: context.w(200),
-                height: context.h(200),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Background circle (white/grey)
-                    SizedBox(
-                      width: context.w(200),
-                      height: context.h(200),
-                      child: CircularProgressIndicator(
-                        value: 1.0,
-                        strokeWidth: context.w(20),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          context.textColor.withOpacity(0.3),
-                        ),
-                        backgroundColor: Colors.transparent,
-                      ),
-                    ),
-                    // Progress circle (gradient color)
-                    SizedBox(
-                      width: context.w(200),
-                      height: context.h(200),
-                      child: ShaderMask(
-                        shaderCallback: (bounds) {
-                          return AppColors.gradient.createShader(bounds);
-                        },
-                        blendMode: BlendMode.srcIn,
-                        child: CircularProgressIndicator(
-                          value: widget.progress,
-                          strokeWidth: context.w(20),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white, // This will be masked by the gradient
-                          ),
-                          backgroundColor: Colors.transparent,
-                          strokeCap: StrokeCap.round,
-                        ),
-                      ),
-                    ),
-                    // Percentage text
-                    Text(
-                      '$progressPercent%',
-                      style: context.appTextStyles?.imageGenerateLoadingPercent,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: context.h(32)),
-
-              // Current stage with fade animation
-              FadeTransition(
-                opacity: _fadeController,
-                child: Text(
-                  _displayedStage,
-                  style: context.appTextStyles?.imageGenerateLoadingStage,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-
-              SizedBox(height: context.h(40)),
-              // Progress stages indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildStageIndicator(
-                    context,
-                    'Preparing',
-                    widget.progress >= 0.0,
-                  ),
-                  SizedBox(width: context.w(8)),
-                  _buildStageConnector(context, widget.progress >= 0.2),
-                  SizedBox(width: context.w(8)),
-                  _buildStageIndicator(
-                    context,
-                    'Rendering',
-                    widget.progress >= 0.4,
-                  ),
-                  SizedBox(width: context.w(8)),
-                  _buildStageConnector(context, widget.progress >= 0.6),
-                  SizedBox(width: context.w(8)),
-                  _buildStageIndicator(
-                    context,
-                    'Finalizing',
-                    widget.progress >= 0.8,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStageIndicator(
-    BuildContext context,
-    String label,
-    bool isActive,
-  ) {
-    return Column(
-      children: [
-        Container(
-          width: context.w(12),
-          height: context.h(12),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive
-                ? context.primaryColor
-                : context.textColor.withOpacity(0.3),
-            border: Border.all(
-              color: isActive
-                  ? context.primaryColor
-                  : context.textColor.withOpacity(0.5),
-              width: 2,
-            ),
-          ),
-        ),
-        SizedBox(height: context.h(4)),
-        Text(
-          label,
-          style: (context.appTextStyles?.imageGenerateStageLabel)?.copyWith(
-            color: isActive
-                ? context.primaryColor
-                : context.textColor.withOpacity(0.5),
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStageConnector(BuildContext context, bool isActive) {
-    return Container(
-      width: context.w(20),
-      height: context.h(2),
-      decoration: BoxDecoration(
-        color: isActive
-            ? context.primaryColor
-            : context.textColor.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(1),
-      ),
     );
   }
 }

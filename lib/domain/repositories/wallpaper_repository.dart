@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
 import 'package:imagifyai/models/wallpaper/suggest_response.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 
-class WallpaperRepository {
+class WallpaperRepository implements IWallpaperRepository {
   WallpaperRepository({ApiService? apiService})
     : _apiService = apiService ?? ApiService();
 

@@ -4,17 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/user/user.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:imagifyai/viewModel/home_view_model.dart';
 import 'package:imagifyai/viewModel/profile_screen_view_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class EditProfileViewModel extends ChangeNotifier {
-  EditProfileViewModel({AuthRepository? authRepository})
+  EditProfileViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository();
 
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
 
   // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final firstNameController = TextEditingController();
@@ -38,6 +39,12 @@ class EditProfileViewModel extends ChangeNotifier {
     "1 or more English letters (A-Z, a,z)",
     "7 or more charactrers",
   ];
+
+  void setSelectedPasswordRequirementIndex(int index) {
+    if (selectedIndex == index) return;
+    selectedIndex = index;
+    notifyListeners();
+  }
 
   void loadUserData(User? user) {
     if (user == null) return;

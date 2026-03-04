@@ -11,7 +11,7 @@ import 'package:imagifyai/Core/services/interstitial_ad_service.dart';
 import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/firebase_options.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:imagifyai/view/my_app.dart';
 
 void main() async {

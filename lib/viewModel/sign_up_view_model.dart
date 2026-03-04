@@ -9,13 +9,14 @@ import 'package:imagifyai/Core/utils/jwt_decoder.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/auth/login_response.dart';
 import 'package:imagifyai/models/auth/register_response.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
 
 class SignUpViewModel extends ChangeNotifier {
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
 
   // FormKey is no longer stored here to avoid GlobalKey conflicts
   // It will be passed from the widget when needed
@@ -40,7 +41,7 @@ class SignUpViewModel extends ChangeNotifier {
     "7 or more charactrers",
   ];
 
-  SignUpViewModel({AuthRepository? authRepository})
+  SignUpViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository() {
     // Add listener to password controller for real-time validation
     passwordController.addListener(_validatePassword);

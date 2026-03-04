@@ -13,7 +13,8 @@ import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
-import 'package:imagifyai/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -22,16 +23,42 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ImageCreatedViewModel extends ChangeNotifier {
-  ImageCreatedViewModel({WallpaperRepository? wallpaperRepository})
+  ImageCreatedViewModel({IWallpaperRepository? wallpaperRepository})
     : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
 
-  final WallpaperRepository _wallpaperRepository;
+  final IWallpaperRepository _wallpaperRepository;
 
   Wallpaper? wallpaper;
   bool isLoading = false;
   bool isDownloading = false;
   bool isPolling = false;
   String? errorMessage;
+
+  bool imageLoadError = false;
+  String? imageLoadErrorMessage;
+  int imageRetryCount = 0;
+  int imageRetryTimestamp = 0;
+
+  void clearImageLoadError() {
+    imageLoadError = false;
+    imageLoadErrorMessage = null;
+    imageRetryCount = 0;
+    imageRetryTimestamp = 0;
+    notifyListeners();
+  }
+
+  void setImageLoadError(String message) {
+    imageLoadError = true;
+    imageLoadErrorMessage = message;
+    notifyListeners();
+  }
+
+  void incrementImageRetry() {
+    imageRetryCount++;
+    imageRetryTimestamp = DateTime.now().millisecondsSinceEpoch;
+    notifyListeners();
+  }
+
   DateTime? _pollingStartTime;
   int _pollingAttempts = 0;
   static const int _maxPollingAttempts =
@@ -45,6 +72,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
   void setWallpaper(Wallpaper? data) {
     wallpaper = data;
+    clearImageLoadError();
 
     // If wallpaper already has an image URL, stop polling
     if (data != null && data.imageUrl.isNotEmpty && data.imageUrl != 'null') {

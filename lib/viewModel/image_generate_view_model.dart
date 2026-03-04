@@ -6,15 +6,16 @@ import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
-import 'package:imagifyai/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ImageGenerateViewModel extends ChangeNotifier {
-  ImageGenerateViewModel({WallpaperRepository? wallpaperRepository})
+  ImageGenerateViewModel({IWallpaperRepository? wallpaperRepository})
     : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
 
-  final WallpaperRepository _wallpaperRepository;
+  final IWallpaperRepository _wallpaperRepository;
 
   int selectedIndex = -1;
   int selectedStyleIndex = -1;
