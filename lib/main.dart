@@ -16,7 +16,11 @@ import 'package:imagifyai/view/my_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env not bundled (e.g. release without .env); EnvConstants use fallbacks
+  }
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   AnalyticsService.delegate = FirebaseAnalyticsDelegate();
   await LocalNotificationService.initialize();
