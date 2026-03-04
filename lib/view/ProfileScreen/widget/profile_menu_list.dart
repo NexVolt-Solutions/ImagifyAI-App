@@ -53,6 +53,7 @@ class ProfileMenuList extends StatelessWidget {
                   inactiveThumbColor: context.subtitleColor,
                   activeTrackColor: context.textColor,
                   activeThumbColor: context.primaryColor,
+
                   value: isThemeItem
                       ? isDarkMode
                       : viewModel.notificationsEnabled,

@@ -6,7 +6,8 @@ import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
-import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
+import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:imagifyai/viewModel/library_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -114,7 +115,9 @@ class _LibraryState extends State<Library> {
                   if (isLoading)
                     const Center(child: AppLoadingIndicator.large())
                   else if (items.isEmpty)
-                    _LibraryEmptyState(onCreateTap: () => Navigator.pop(context))
+                    _LibraryEmptyState(
+                      onCreateTap: () => Navigator.pop(context),
+                    )
                   else
                     GridView.builder(
                       shrinkWrap: true,
@@ -211,13 +214,18 @@ class _LibraryState extends State<Library> {
                               gradient: AppColors.gradient,
                               text: "Use This Prompt",
                               onPressed: () {
-                                SnackbarUtil.showTopSnackBar(
-                                  context,
-                                  item.prompt.isNotEmpty
-                                      ? item.prompt
-                                      : 'No prompt',
-                                  isError: false,
-                                );
+                                context
+                                    .read<ImageGenerateViewModel>()
+                                    .setPromptFromLibrary(
+                                      item.prompt,
+                                      styleName: item.style.isNotEmpty
+                                          ? item.style
+                                          : null,
+                                    );
+                                context
+                                    .read<BottomNavScreenViewModel>()
+                                    .updateIndex(1);
+                                Navigator.pop(context);
                               },
                             ),
                           ],

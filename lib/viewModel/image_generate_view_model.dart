@@ -95,6 +95,21 @@ class ImageGenerateViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sets prompt (and optional style) when navigating from Library "Use This Prompt".
+  void setPromptFromLibrary(String prompt, {String? styleName}) {
+    promptController.text = prompt;
+    selectedIndex = 0;
+    selectedPromptIndex = -1;
+    if (styleName != null && styleName.isNotEmpty && _stylesMap.isNotEmpty) {
+      final styleIndex = _stylesMap.keys.toList().indexOf(styleName);
+      selectedStyleIndex = styleIndex >= 0 ? styleIndex : -1;
+    } else {
+      selectedStyleIndex = -1;
+    }
+    errorMessage = null;
+    notifyListeners();
+  }
+
   /// Clears prompt and style/size selections. Call when user leaves and comes
   /// back to the generation screen so the form is fresh.
   void clearPromptAndSelections() {
