@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
 
 class SnackbarUtil {
   static void showTopSnackBar(
@@ -112,7 +114,9 @@ class _TopSnackBarState extends State<_TopSnackBar>
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: widget.isError ? Colors.red : Colors.green,
+                  color: widget.isError
+                      ? AppColors.errorColor
+                      : AppColors.greenColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -127,22 +131,14 @@ class _TopSnackBarState extends State<_TopSnackBar>
                     Expanded(
                       child: Text(
                         widget.message,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? context.colorScheme.onSurface
+                              : context.colorScheme.onSurface,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      onPressed: _dismiss,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
                     ),
                   ],
                 ),

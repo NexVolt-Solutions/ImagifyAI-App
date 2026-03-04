@@ -30,8 +30,9 @@ class ProfileMenuList extends StatelessWidget {
           leading: item['leading'] != null
               ? Image.asset(
                   item['leading'],
-                  height: context.h(26),
-                  width: context.w(26),
+                  height: context.h(24),
+                  width: context.w(24),
+                  color: context.primaryColor,
                   fit: BoxFit.contain,
                 )
               : const SizedBox.shrink(),
@@ -43,8 +44,8 @@ class ProfileMenuList extends StatelessWidget {
             isThemeItem
                 ? (isDarkMode ? 'Dark Mode' : 'Light Mode')
                 : (item['title'] == 'Notifications'
-                    ? (viewModel.notificationsEnabled ? 'On' : 'Off')
-                    : (item['subtitle'] ?? '')),
+                      ? (viewModel.notificationsEnabled ? 'On' : 'Off')
+                      : (item['subtitle'] ?? '')),
             style: context.appTextStyles?.profileListItemSubtitle,
           ),
           trailing: item['trailingType'] == 'switch'

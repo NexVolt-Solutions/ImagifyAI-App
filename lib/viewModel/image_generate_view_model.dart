@@ -95,6 +95,17 @@ class ImageGenerateViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears prompt and style/size selections. Call when user leaves and comes
+  /// back to the generation screen so the form is fresh.
+  void clearPromptAndSelections() {
+    promptController.clear();
+    selectedIndex = -1;
+    selectedStyleIndex = -1;
+    selectedPromptIndex = -1;
+    errorMessage = null;
+    notifyListeners();
+  }
+
   int? getStyleIndexByName(String styleName) {
     final index = styles.indexOf(styleName);
     return index >= 0 ? index : null;
@@ -246,7 +257,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
           context,
           RoutesName.ImageCreatedScreen,
           arguments: createdWallpaper,
-        );
+        ).then((_) => clearPromptAndSelections());
 
         isCreating = false;
         _stopProgressAnimation();
@@ -290,7 +301,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 context,
                 RoutesName.ImageCreatedScreen,
                 arguments: createdWallpaper,
-              );
+              ).then((_) => clearPromptAndSelections());
 
               isCreating = false;
               _stopProgressAnimation();
@@ -440,7 +451,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 context,
                 RoutesName.ImageCreatedScreen,
                 arguments: createdWallpaper,
-              );
+              ).then((_) => clearPromptAndSelections());
             }
 
             // Reset state

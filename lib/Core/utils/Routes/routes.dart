@@ -126,12 +126,12 @@ class Routes {
           builder: (ctx) => Scaffold(
             body: Stack(
               children: [
-                const Center(
+                Center(
                   child: Text(
                     'No Route Found',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(ctx).colorScheme.onSurface,
                       fontSize: 18,
                       fontFamily: 'Times',
                       fontWeight: FontWeight.bold,
@@ -143,9 +143,9 @@ class Routes {
                   left: 20,
                   child: InkWell(
                     onTap: () => Navigator.of(ctx).pop(),
-                    child: const Icon(
+                    child: Icon(
                       Icons.arrow_back_ios,
-                      color: Colors.black,
+                      color: Theme.of(ctx).iconTheme.color,
                     ),
                   ),
                 ),

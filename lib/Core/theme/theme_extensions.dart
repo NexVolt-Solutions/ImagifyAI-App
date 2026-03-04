@@ -19,6 +19,10 @@ extension ThemeExtension on BuildContext {
   /// Get primary color from theme
   Color get primaryColor => Theme.of(this).colorScheme.primary;
 
+  /// Get icon color from theme (dark in light theme, white in dark theme)
+  Color get iconColor =>
+      Theme.of(this).iconTheme.color ?? Theme.of(this).colorScheme.onSurface;
+
   /// Get background color from theme
   Color get backgroundColor => Theme.of(this).scaffoldBackgroundColor;
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/home_align.dart';
@@ -6,6 +7,49 @@ import 'package:imagifyai/Core/CustomWidget/prompt_continer.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:provider/provider.dart';
+
+String? _styleImagePath(String styleName) {
+  switch (styleName) {
+    case 'Colorful':
+      return AppAssets.imageColorful;
+    case '3D Render':
+      return AppAssets.image3DRender;
+    case 'Photorealistic':
+      return AppAssets.imagePhotorealistic;
+    case 'Oil Painting':
+      return AppAssets.imageOil;
+    case 'Watercolor':
+      return AppAssets.imageWaterColor;
+    case 'Cyberpunk':
+      return AppAssets.imageNeon;
+    case 'Fantasy':
+      return AppAssets.imageFantasy;
+    case 'Anime':
+      return AppAssets.imageAnime;
+    case 'Cartoon':
+      return AppAssets.imageCartoon;
+    case 'Steampunk':
+      return AppAssets.imageSteampunk;
+    case 'Pixel Art':
+      return AppAssets.imagePixel;
+    case 'Low Poly':
+      return AppAssets.imageLowPoly;
+    case 'Isometric':
+      return AppAssets.imageIsometric;
+    case 'Minimalist':
+      return AppAssets.imageMinimalistic;
+    case 'Synthwave':
+      return AppAssets.imageSynthwave;
+    case 'Retro Futurism':
+      return AppAssets.imageRetroFuturism;
+    case 'Solarpunk':
+      return AppAssets.imageSolarPunk;
+    case 'Game Art':
+      return AppAssets.imageGameArt;
+    default:
+      return null;
+  }
+}
 
 class StyleSelectorList extends StatelessWidget {
   final ScrollController scrollController;
@@ -44,7 +88,7 @@ class StyleSelectorList extends StatelessWidget {
               );
             }
             return SizedBox(
-              height: context.h(100),
+              height: context.h(130),
               child: ListView.builder(
                 controller: scrollController,
                 scrollDirection: Axis.horizontal,
@@ -53,7 +97,7 @@ class StyleSelectorList extends StatelessWidget {
                   final style = vm.styles[index];
                   final isSelected = vm.selectedStyleIndex == index;
                   return Padding(
-                    padding: EdgeInsets.only(right: context.w(10)),
+                    padding: EdgeInsets.only(right: context.w(12)),
                     child: PromptContiner(
                       text: style,
                       isSelected: isSelected,
@@ -61,6 +105,7 @@ class StyleSelectorList extends StatelessWidget {
                         vm.setSelectedStyle(index, context);
                         if (!isSelected) onScrollToStyle(index);
                       },
+                      imagePath: _styleImagePath(style),
                     ),
                   );
                 },

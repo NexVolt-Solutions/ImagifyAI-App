@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
@@ -35,6 +36,16 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double? buttonWidth = width ?? double.infinity;
+    final isFilled = gradient != null;
+    // Filled (gradient): white text/icon. Outline (no gradient): theme onSurface so light theme = dark text, dark theme = white.
+    final contentColor = isFilled
+        ? (context.appTextStyles?.customButtonText.color ??
+              context.colorScheme.onPrimary)
+        : context.colorScheme.onSurface;
+    // Outline button border: in light theme use primary or onSurface for visibility; dark theme unchanged.
+    final effectiveBorderColor =
+        borderColor ??
+        (isFilled ? context.backgroundColor : context.colorScheme.onSurface);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -51,50 +62,42 @@ class CustomButton extends StatelessWidget {
         Widget buttonContent = Container(
           height: height ?? context.h(48),
           width: actualWidth,
-          padding: EdgeInsets.symmetric(horizontal: context.w(16)),
+          padding: EdgeInsets.symmetric(horizontal: context.w(24)),
           decoration: BoxDecoration(
             gradient: gradient,
 
-            border: Border.all(color: borderColor ?? context.backgroundColor),
+            border: Border.all(color: effectiveBorderColor),
             borderRadius: BorderRadius.circular(context.radius(8)),
           ),
           child: isLoading
-              ? Center(
-                  child: AppLoadingIndicator.medium(
-                    color:
-                        context.appTextStyles?.customButtonText.color ??
-                        context.colorScheme.onPrimary,
-                  ),
-                )
+              ? Center(child: AppLoadingIndicator.medium(color: contentColor))
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (icon != null) ...[
-                      Image.asset(
+                      _buildIcon(
+                        context,
                         icon!,
-                        height: iconHeight ?? context.h(20),
-                        width: iconWidth ?? context.w(20),
-                        color:
-                            context.appTextStyles?.customButtonText.color ??
-                            context.colorScheme.onPrimary,
-                        fit: BoxFit.cover,
+                        iconHeight ?? context.h(24),
+                        iconWidth ?? context.w(24),
+                        contentColor,
                       ),
-                      SizedBox(width: context.w(5)),
                     ],
-                    Flexible(
-                      child: Text(
-                        text ?? "",
-                        style:
-                            (context.appTextStyles?.customButtonText ??
-                                    TextStyle())
-                                .copyWith(
-                                  fontSize: fontSize ?? context.text(14),
-                                ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                      ),
+                    if (text != null) SizedBox(width: context.w(5)),
+                    Text(
+                      text ?? "",
+                      style:
+                          (context.appTextStyles?.customButtonText ??
+                                  TextStyle(color: contentColor))
+                              .copyWith(
+                                fontSize: fontSize ?? context.text(14),
+                                color: contentColor,
+                              ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
@@ -117,6 +120,31 @@ class CustomButton extends StatelessWidget {
           child: Opacity(opacity: isLoading ? 0.7 : 1.0, child: buttonContent),
         );
       },
+    );
+  }
+
+  static Widget _buildIcon(
+    BuildContext context,
+    String path,
+    double height,
+    double width,
+    Color color,
+  ) {
+    if (path.toLowerCase().endsWith('.svg')) {
+      return SvgPicture.asset(
+        path,
+        height: height,
+        width: width,
+        colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+        fit: BoxFit.contain,
+      );
+    }
+    return Image.asset(
+      path,
+      height: height,
+      width: width,
+      color: color,
+      fit: BoxFit.contain,
     );
   }
 }

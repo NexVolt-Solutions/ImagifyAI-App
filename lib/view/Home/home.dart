@@ -3,6 +3,7 @@ import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_list_view.dart';
 import 'package:imagifyai/Core/CustomWidget/home_align.dart';
+import 'package:imagifyai/Core/services/home_permission_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/services/local_notification_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
@@ -33,6 +34,9 @@ class _HomeState extends State<Home> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
+        // Ask for storage/photos permission once (so save-to-gallery works)
+        await HomePermissionService.requestIfFirstTime();
+        if (!mounted) return;
         // Record first open (for 5-day review trigger)
         await InAppReviewService.recordFirstOpenIfNeeded();
         // Gentle review reminder in 3 days if not yet asked
@@ -65,6 +69,7 @@ class _HomeState extends State<Home> {
                   UserProfileHeader(
                     currentUser: homeViewModel.currentUser,
                     displayName: UserProfileHeader.getDisplayName(homeViewModel.currentUser),
+                    isProfileLoading: homeViewModel.isLoadingUser,
                   ),
                   SliverToBoxAdapter(child: SizedBox(height: context.h(24))),
                   SliverToBoxAdapter(

@@ -12,7 +12,7 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: AppColors.primeryColor,
       scaffoldBackgroundColor: AppColors.lightBackground,
-      colorScheme: const ColorScheme.light(
+      colorScheme: ColorScheme.light(
         primary: AppColors.primeryColor, // Golden
         secondary: AppColors.lightGoldenAccent, // Brighter gold
         surface: AppColors.lightSurface, // Warm cream
@@ -62,10 +62,12 @@ class AppTheme {
         hintStyle: const TextStyle(color: AppColors.lightTextTertiary),
       ),
 
-      // Card Theme
+      // Card Theme (warm card on cream background for perfect light-theme combo)
       cardTheme: CardThemeData(
         color: AppColors.lightCardBackground,
+        surfaceTintColor: Colors.transparent,
         elevation: 2,
+        shadowColor: AppColors.lightTextFieldBorder.withOpacity(0.2),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
 
@@ -167,17 +169,17 @@ class AppTheme {
       // Custom Text Styles Extension (accessible via Theme.of(context).extension<AppTextStyles>())
       extensions: <ThemeExtension<dynamic>>[AppTextStyles.light],
 
-      // Divider Theme
+      // Divider Theme (same grey for both themes)
       dividerTheme: const DividerThemeData(
-        color: AppColors.textFieldBoderColor,
+        color: AppColors.textFieldIconColor,
         thickness: 1,
       ),
 
       // Bottom Navigation Bar Theme
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.lightBackground,
+        backgroundColor: AppColors.lightBottomBar,
         selectedItemColor: AppColors.primeryColor,
-        unselectedItemColor: AppColors.bottomBarIconColor,
+        unselectedItemColor: AppColors.lightBottomBarIcon,
         type: BottomNavigationBarType.fixed,
 
         selectedLabelStyle: TextStyle(
@@ -634,7 +636,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       homeGreetingTitle: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w500,
-        color: Colors.black,
+        color: AppColors.lightTextPrimary,
       ),
       homeGreetingSubtitle: GoogleFonts.poppins(
         fontSize: 14,
@@ -644,27 +646,27 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       homeCardTitle: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: Colors.black,
+        color: AppColors.lightTextPrimary,
       ),
       homeCardDescription: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       imageCreatedTitle: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.black,
+        color: AppColors.lightTextPrimary,
       ),
       imageCreatedError: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       imageCreatedPollingTitle: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       imageCreatedPollingTime: GoogleFonts.poppins(
         fontSize: 12,
@@ -679,7 +681,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       imageCreatedPromptText: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       imageCreatedPromptHint: GoogleFonts.poppins(
         fontSize: 14,
@@ -689,12 +691,12 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       imageGenerateSectionTitle: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       imageGeneratePromptText: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       imageGeneratePromptHint: GoogleFonts.poppins(
         fontSize: 12,
@@ -704,17 +706,17 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       imageGenerateAISuggestion: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       imageGenerateLoadingPercent: GoogleFonts.poppins(
         fontSize: 48,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       imageGenerateLoadingTitle: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       imageGenerateLoadingStage: GoogleFonts.poppins(
         fontSize: 16,
@@ -724,27 +726,27 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       imageGenerateLoadingTime: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w400,
-        color: Colors.white.withOpacity(0.7),
+        color: AppColors.lightTextTertiary,
       ),
       imageGenerateStageLabel: GoogleFonts.poppins(
         fontSize: 10,
         fontWeight: FontWeight.w400,
-        color: Colors.white.withOpacity(0.5),
+        color: AppColors.lightTextTertiary,
       ),
       onboardingTitle: GoogleFonts.poppins(
         fontSize: 22,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       onboardingSubtitle: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: Colors.white70,
+        color: AppColors.lightTextSecondary,
       ),
       onboardingButton: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.whiteColor,
       ),
       profileName: GoogleFonts.poppins(
         fontSize: 16,
@@ -754,12 +756,12 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       profileEmail: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextSecondary,
       ),
       profileListItemTitle: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       profileListItemSubtitle: GoogleFonts.poppins(
         fontSize: 13,
@@ -769,7 +771,7 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       profileScreenTitle: GoogleFonts.poppins(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       profileScreenSubtitle: GoogleFonts.poppins(
         fontSize: 14,
@@ -779,27 +781,27 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       profileSectionTitle: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       profileHelperText: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       profileContactInfo: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       profileCardTitle: GoogleFonts.poppins(
         fontSize: 11,
         fontWeight: FontWeight.w700,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       profileBodyText: GoogleFonts.poppins(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.lightTextPrimary,
       ),
       profileDateText: GoogleFonts.poppins(
         fontSize: 10,
@@ -810,37 +812,37 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       customTextFieldLabel: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       customTextFieldInput: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       customButtonText: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.white,
+        color: AppColors.whiteColor,
       ),
       normalTextTitle: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       normalTextSubtitle: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       promptContainerText: GoogleFonts.poppins(
         fontSize: 10,
         fontWeight: FontWeight.w400,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       sizeContainerText: GoogleFonts.poppins(
         fontSize: 11,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       customTextRichText1: GoogleFonts.poppins(
         fontSize: 14,
@@ -855,17 +857,17 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       passwordTextStyle: GoogleFonts.poppins(
         fontSize: 10,
         fontWeight: FontWeight.w400,
-        color: Colors.black87,
+        color: AppColors.lightTextSecondary,
       ),
       homeAlignText: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
       alignTextStyle: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: Colors.black87,
+        color: AppColors.lightTextPrimary,
       ),
     );
   }

@@ -26,10 +26,20 @@ class ImageGenerateScreen extends StatefulWidget {
 class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
   final ScrollController _styleScrollController = ScrollController();
   bool _hasLoadedStyles = false;
+  bool _hasClearedOnEnter = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    if (!_hasClearedOnEnter) {
+      _hasClearedOnEnter = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.read<ImageGenerateViewModel>().clearPromptAndSelections();
+        }
+      });
+    }
     if (!_hasLoadedStyles) {
       _hasLoadedStyles = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -101,14 +111,19 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text('Cancel', style: TextStyle(color: context.primaryColor)),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.primaryColor),
+            ),
           ),
           TextButton(
             onPressed: () async {
               final shown = await RewardedAdService.showRewardedAd(
                 onReward: () {
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
-                  context.read<ImageGenerateViewModel>().createWallpaper(context);
+                  context.read<ImageGenerateViewModel>().createWallpaper(
+                    context,
+                  );
                 },
               );
               if (!dialogContext.mounted) return;
@@ -120,7 +135,10 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                 );
               }
             },
-            child: Text('Watch ad', style: TextStyle(color: context.primaryColor)),
+            child: Text(
+              'Watch ad',
+              style: TextStyle(color: context.primaryColor),
+            ),
           ),
         ],
       ),
@@ -192,4 +210,3 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     );
   }
 }
-

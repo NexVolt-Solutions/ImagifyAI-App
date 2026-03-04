@@ -8,19 +8,25 @@ import 'package:imagifyai/models/user/user.dart';
 class UserProfileHeader extends StatelessWidget {
   final User? currentUser;
   final String displayName;
+  final bool isProfileLoading;
 
   const UserProfileHeader({
     super.key,
     required this.currentUser,
     required this.displayName,
+    this.isProfileLoading = false,
   });
 
   static String getDisplayName(User? user) {
     if (user == null) return 'User';
-    if (user.username != null && user.username!.isNotEmpty) return user.username!;
+    if (user.username != null && user.username!.isNotEmpty) {
+      return user.username!;
+    }
     final fullName = user.fullName;
     if (fullName.isNotEmpty && fullName != 'User') return fullName;
-    if (user.firstName != null && user.firstName!.isNotEmpty) return user.firstName!;
+    if (user.firstName != null && user.firstName!.isNotEmpty) {
+      return user.firstName!;
+    }
     if (user.email != null && user.email!.isNotEmpty) {
       final parts = user.email!.split('@');
       if (parts.isNotEmpty) return parts[0];
@@ -51,6 +57,17 @@ class UserProfileHeader extends StatelessWidget {
   }
 
   Widget _buildLeading(BuildContext context) {
+    if (isProfileLoading) {
+      return Container(
+        height: context.h(50),
+        width: context.h(50),
+        decoration: BoxDecoration(
+          color: context.subtitleColor.withOpacity(0.3),
+          shape: BoxShape.circle,
+        ),
+        child: const Center(child: AppLoadingIndicator.small()),
+      );
+    }
     final url = currentUser?.profileImageUrl;
     final hasUrl = url != null && url.isNotEmpty;
     if (hasUrl) {
@@ -64,6 +81,7 @@ class UserProfileHeader extends StatelessWidget {
           cacheWidth: context.h(50).toInt(),
           cacheHeight: context.h(50).toInt(),
           errorBuilder: (_, __, ___) => _buildPlaceholder(context),
+
           loadingBuilder: (_, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Container(
@@ -112,7 +130,11 @@ class _UserProfileHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return SizedBox(
       height: height,
       child: Container(
