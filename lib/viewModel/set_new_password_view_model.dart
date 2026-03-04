@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 
 class SetNewPasswordViewModel extends ChangeNotifier {
-  SetNewPasswordViewModel({AuthRepository? authRepository})
+  SetNewPasswordViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository();
 
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
 
   GlobalKey<FormState>? formKey;
   final passwordController = TextEditingController();

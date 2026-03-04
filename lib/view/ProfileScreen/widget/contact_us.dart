@@ -1,23 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/viewModel/contact_us_view_model.dart';
+import 'package:provider/provider.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
-class ContactUs extends StatefulWidget {
+class ContactUs extends StatelessWidget {
   const ContactUs({super.key});
 
-  @override
-  State<ContactUs> createState() => _ContactUsState();
-}
-
-class _ContactUsState extends State<ContactUs> {
-  int selectedIndex = 0;
-
-  final List<String> subjects = [
+  static const List<String> subjects = [
     "Feature Request",
     "General Feedback",
     "Bug Report",
@@ -54,10 +49,12 @@ class _ContactUsState extends State<ContactUs> {
         ),
       ),
 
-      body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-          children: [
+      body: Consumer<ContactUsViewModel>(
+        builder: (context, contactUsViewModel, _) {
+          return SafeArea(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+              children: [
             SizedBox(height: context.h(20)),
             Align(
               alignment: Alignment.center,
@@ -150,14 +147,12 @@ class _ContactUsState extends State<ContactUs> {
               spacing: context.w(10),
               runSpacing: context.h(13),
               children: List.generate(subjects.length, (index) {
-                bool isSelected = selectedIndex == index;
+                final isSelected = contactUsViewModel.selectedSubjectIndex == index;
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () {
-                      setState(() {
-                        selectedIndex = index;
-                      });
+                      contactUsViewModel.setSelectedSubjectIndex(index);
                     },
                     borderRadius: BorderRadius.circular(8),
                     child: Padding(
@@ -241,7 +236,9 @@ class _ContactUsState extends State<ContactUs> {
             ),
             SizedBox(height: context.h(20)),
           ],
-        ),
+            ),
+          );
+        },
       ),
     );
   }

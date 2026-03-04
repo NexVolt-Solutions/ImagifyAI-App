@@ -11,21 +11,23 @@ import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/user/user.dart';
 import 'package:imagifyai/models/wallpaper/suggest_response.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
-import 'package:imagifyai/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
 import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
-    WallpaperRepository? wallpaperRepository,
-    AuthRepository? authRepository,
+    IWallpaperRepository? wallpaperRepository,
+    IAuthRepository? authRepository,
   }) : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository(),
        _authRepository = authRepository ?? AuthRepository();
 
-  final WallpaperRepository _wallpaperRepository;
-  final AuthRepository _authRepository;
+  final IWallpaperRepository _wallpaperRepository;
+  final IAuthRepository _authRepository;
 
   final promptController = TextEditingController();
   final sizeController = TextEditingController(text: '1:1');

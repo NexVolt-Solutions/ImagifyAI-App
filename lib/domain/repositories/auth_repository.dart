@@ -13,8 +13,9 @@ import 'package:imagifyai/models/user/user.dart';
 import 'package:imagifyai/models/user/update_user_response.dart';
 import 'package:imagifyai/models/user/update_profile_picture_response.dart';
 import 'package:imagifyai/models/user/update_password_response.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
 
-class AuthRepository {
+class AuthRepository implements IAuthRepository {
   AuthRepository({ApiService? apiService})
     : _apiService = apiService ?? ApiService();
 

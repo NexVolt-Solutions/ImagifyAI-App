@@ -3,13 +3,14 @@ import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/auth/forgot_password_response.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 
 class ForgotPasswordViewModel extends ChangeNotifier {
-  ForgotPasswordViewModel({AuthRepository? authRepository})
+  ForgotPasswordViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository();
 
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
 
   // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final emailController = TextEditingController();

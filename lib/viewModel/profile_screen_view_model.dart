@@ -4,17 +4,25 @@ import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/models/user/user.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 
 class ProfileScreenViewModel extends ChangeNotifier {
-  ProfileScreenViewModel({AuthRepository? authRepository})
+  ProfileScreenViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository();
 
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
 
   User? currentUser;
   bool isLoading = false;
   String? errorMessage;
+  bool notificationsEnabled = true;
+
+  void setNotificationsEnabled(bool value) {
+    if (notificationsEnabled == value) return;
+    notificationsEnabled = value;
+    notifyListeners();
+  }
 
   List<Map<String, dynamic>> profileData = [
     {

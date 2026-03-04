@@ -9,17 +9,25 @@ import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/auth/logout_response.dart';
 import 'package:imagifyai/models/auth/login_response.dart';
 import 'package:imagifyai/models/auth/refresh_response.dart';
-import 'package:imagifyai/repositories/auth_repository.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class SignInViewModel extends ChangeNotifier {
-  SignInViewModel({AuthRepository? authRepository})
+  SignInViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository() {
-    _loadTokensFromStorage();
+    _tokensLoadFuture = _loadTokensFromStorage();
     _loadRememberedEmail();
   }
 
-  final AuthRepository _authRepository;
+  final IAuthRepository _authRepository;
+
+  /// Completes when tokens have been loaded from storage (on init).
+  /// Await this before using [accessToken] when the app starts (e.g. before navigating to Home).
+  Future<void> ensureTokensLoaded() =>
+      _tokensLoadFuture ?? Future.value();
+
+  Future<void>? _tokensLoadFuture;
 
   // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final emailController = TextEditingController();

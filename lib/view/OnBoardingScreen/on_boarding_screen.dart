@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/logo_app_bar.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/viewModel/on_boarding_screen_view_model.dart';
@@ -23,39 +22,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       backgroundColor: context.backgroundColor,
 
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(65),
-        child: Container(
-          color: context.backgroundColor,
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
-                SvgPicture.asset(AppAssets.imagifyaiLogo, fit: BoxFit.cover),
-                Positioned(
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: () async {
-                      await viewModel.completeOnboarding();
-                      if (context.mounted) {
-                        Navigator.pushReplacementNamed(
-                          context,
-                          RoutesName.SignInScreen,
-                        );
-                      }
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.all(context.w(16)),
-                      child: Text(
-                        'Skip',
-                        style: context.appTextStyles?.onboardingButton,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+      appBar: LogoAppBar(
+        trailing: GestureDetector(
+          onTap: () async {
+            await viewModel.completeOnboarding();
+            if (context.mounted) {
+              Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.all(context.w(16)),
+            child: Text(
+              'Skip',
+              style: context.appTextStyles?.onboardingButton,
             ),
           ),
         ),
