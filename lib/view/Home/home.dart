@@ -64,13 +64,15 @@ class _HomeState extends State<Home> {
                 slivers: [
                   UserProfileHeader(
                     currentUser: homeViewModel.currentUser,
-                    displayName: UserProfileHeader.getDisplayName(homeViewModel.currentUser),
+                    displayName: UserProfileHeader.getDisplayName(
+                      homeViewModel.currentUser,
+                    ),
                   ),
                   SliverToBoxAdapter(child: SizedBox(height: context.h(24))),
                   SliverToBoxAdapter(
                     child: GenerateWallpaperCard(
-                      onGenerateTap: () =>
-                          homeViewModel.navigateToGenerateWallpaperScreen(context),
+                      onGenerateTap: () => homeViewModel
+                          .navigateToGenerateWallpaperScreen(context),
                       isLoading: homeViewModel.isLoading,
                     ),
                   ),
@@ -125,8 +127,7 @@ class _HomeState extends State<Home> {
                             ),
                           ];
                         })
-                        .expand((widgets) => widgets)
-                        .toList(),
+                        .expand((widgets) => widgets),
                   ],
 
                   // Bottom Padding

@@ -11,6 +11,7 @@ class WallpaperRepository implements IWallpaperRepository {
 
   final ApiService _apiService;
 
+  @override
   Future<SuggestResponse> suggestPrompt({
     required String prompt,
     required String accessToken,
@@ -29,6 +30,7 @@ class WallpaperRepository implements IWallpaperRepository {
     return SuggestResponse.fromJson(json);
   }
 
+  @override
   Future<List<Wallpaper>> fetchWallpapers({
     required String accessToken,
     int page = 1,
@@ -66,6 +68,7 @@ class WallpaperRepository implements IWallpaperRepository {
     return wallpapers;
   }
 
+  @override
   Future<Wallpaper> createWallpaper({
     required String prompt,
     required String size,
@@ -101,11 +104,12 @@ class WallpaperRepository implements IWallpaperRepository {
         headers: headers,
       );
       return Wallpaper.fromJson(json);
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }
 
+  @override
   Future<Wallpaper?> getWallpaperById({
     required String wallpaperId,
     required String accessToken,
@@ -148,11 +152,12 @@ class WallpaperRepository implements IWallpaperRepository {
         return null;
       }
       return Wallpaper.fromJson(wallpaperMap);
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }
 
+  @override
   Future<Wallpaper> recreateWallpaper({
     required String wallpaperId,
     required String accessToken,
@@ -187,6 +192,7 @@ class WallpaperRepository implements IWallpaperRepository {
     return Wallpaper.fromJson(json);
   }
 
+  @override
   Future<Wallpaper> downloadWallpaper({
     required String wallpaperId,
     required String accessToken,
@@ -204,6 +210,7 @@ class WallpaperRepository implements IWallpaperRepository {
     return Wallpaper.fromJson(json);
   }
 
+  @override
   Future<void> deleteWallpaper({
     required String wallpaperId,
     required String accessToken,
@@ -221,6 +228,7 @@ class WallpaperRepository implements IWallpaperRepository {
     );
   }
 
+  @override
   Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
     required String accessToken,
     int page = 1,
@@ -256,13 +264,14 @@ class WallpaperRepository implements IWallpaperRepository {
         }
       });
       return groupedWallpapers;
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }
 
   /// Fetch available styles from the API
   /// Returns a map where keys are style names and values are style suffixes
+  @override
   Future<Map<String, String>> fetchStyles({required String accessToken}) async {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
@@ -283,7 +292,7 @@ class WallpaperRepository implements IWallpaperRepository {
         }
       });
       return styles;
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }

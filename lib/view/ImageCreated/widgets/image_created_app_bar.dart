@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
-import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
-class ImageCreatedAppBar extends StatelessWidget implements PreferredSizeWidget {
+class ImageCreatedAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const ImageCreatedAppBar({super.key});
 
   @override

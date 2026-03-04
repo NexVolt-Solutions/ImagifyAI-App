@@ -93,8 +93,9 @@ class EditProfileViewModel extends ChangeNotifier {
     String? accessToken,
     bool reloadUserData = true,
   }) async {
-    if (isUpdatingPicture || profileImage == null || accessToken == null)
+    if (isUpdatingPicture || profileImage == null || accessToken == null) {
       return;
+    }
 
     isUpdatingPicture = true;
     errorMessage = null;
@@ -298,10 +299,8 @@ class EditProfileViewModel extends ChangeNotifier {
             accessToken: accessToken,
             userId: currentUser!.id!,
           );
-          if (successMessage == null) {
-            successMessage =
-                response.message ?? 'Your profile has been updated!';
-          }
+          successMessage ??=
+              response.message ?? 'Your profile has been updated!';
         }
 
         // Show success message for profile update

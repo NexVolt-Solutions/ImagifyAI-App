@@ -114,7 +114,9 @@ class _LibraryState extends State<Library> {
                   if (isLoading)
                     const Center(child: AppLoadingIndicator.large())
                   else if (items.isEmpty)
-                    _LibraryEmptyState(onCreateTap: () => Navigator.pop(context))
+                    _LibraryEmptyState(
+                      onCreateTap: () => Navigator.pop(context),
+                    )
                   else
                     GridView.builder(
                       shrinkWrap: true,
@@ -169,8 +171,9 @@ class _LibraryState extends State<Library> {
                                                 child,
                                                 loadingProgress,
                                               ) {
-                                                if (loadingProgress == null)
+                                                if (loadingProgress == null) {
                                                   return child;
+                                                }
                                                 return Container(
                                                   color: context.surfaceColor,
                                                   child: Center(

@@ -43,8 +43,8 @@ class ProfileMenuList extends StatelessWidget {
             isThemeItem
                 ? (isDarkMode ? 'Dark Mode' : 'Light Mode')
                 : (item['title'] == 'Notifications'
-                    ? (viewModel.notificationsEnabled ? 'On' : 'Off')
-                    : (item['subtitle'] ?? '')),
+                      ? (viewModel.notificationsEnabled ? 'On' : 'Off')
+                      : (item['subtitle'] ?? '')),
             style: context.appTextStyles?.profileListItemSubtitle,
           ),
           trailing: item['trailingType'] == 'switch'
@@ -62,7 +62,6 @@ class ProfileMenuList extends StatelessWidget {
                       viewModel.setNotificationsEnabled(val);
                     }
                   },
-                  activeColor: context.textColor,
                 )
               : Icon(
                   Icons.arrow_forward_ios,

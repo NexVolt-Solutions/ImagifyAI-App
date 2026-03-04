@@ -34,7 +34,7 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double? buttonWidth = width ?? double.infinity;
+    final double buttonWidth = width ?? double.infinity;
 
     return LayoutBuilder(
       builder: (context, constraints) {
