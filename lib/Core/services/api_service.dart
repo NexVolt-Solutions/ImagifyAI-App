@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:imagifyai/Core/Constants/api_constants.dart';
 
@@ -18,6 +19,28 @@ class ApiService {
   ApiService({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
+
+  static const _sensitiveKeys = {'token', 'access_token', 'refresh_token', 'password', 'access', 'secret'};
+
+  static void _log(String message, {bool isError = false}) {
+    if (kDebugMode) {
+      final prefix = isError ? '[API ERROR]' : '[API]';
+      debugPrint('$prefix $message');
+    }
+  }
+
+  static Map<String, dynamic> _sanitizeForLog(Map<String, dynamic> map) {
+    final out = <String, dynamic>{};
+    for (final e in map.entries) {
+      final keyLower = e.key.toString().toLowerCase();
+      if (_sensitiveKeys.any((s) => keyLower.contains(s))) {
+        out[e.key] = '<redacted>';
+      } else {
+        out[e.key] = e.value;
+      }
+    }
+    return out;
+  }
 
   // Token refresh callback - should return new access token or null if refresh failed
   static Future<String?> Function()? _onTokenExpired;
@@ -72,6 +95,7 @@ class ApiService {
     );
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      _log('getRaw Response ${response.statusCode} | bytes: ${response.bodyBytes.length}');
       return response.bodyBytes;
     }
 
@@ -83,12 +107,14 @@ class ApiService {
         decoded['error']?.toString();
 
     if (errorMessage == null || errorMessage.isEmpty) {
+      _log('getRaw failed | status: ${response.statusCode} | body: ${response.body.length > 150 ? response.body.substring(0, 150) + "..." : response.body}', isError: true);
       throw ApiException(
         'Failed to download wallpaper',
         statusCode: response.statusCode,
       );
     }
 
+    _log('getRaw error | status: ${response.statusCode} | message: $errorMessage', isError: true);
     throw ApiException(errorMessage, statusCode: response.statusCode);
   }
 
@@ -494,6 +520,10 @@ class ApiService {
   Map<String, dynamic> _handleResponse(http.Response response) {
     final decoded = _decodeResponseBody(response);
     if (response.statusCode >= 200 && response.statusCode < 300) {
+      _log('Response ${response.statusCode} | body keys: ${decoded.keys.toList()}');
+      final sanitized = _sanitizeForLog(decoded);
+      final str = sanitized.toString();
+      _log('Response body: ${str.length > 300 ? str.substring(0, 300) + "..." : str}');
       return decoded;
     }
 
@@ -539,11 +569,13 @@ class ApiService {
     }
 
     if (errorMessage == null || errorMessage.isEmpty) {
+      _log('API request failed | status: ${response.statusCode} | body: ${response.body.length > 150 ? response.body.substring(0, 150) + "..." : response.body}', isError: true);
       throw ApiException(
         'API request failed with status ${response.statusCode}',
         statusCode: response.statusCode,
       );
     }
+    _log('API error | status: ${response.statusCode} | message: $errorMessage', isError: true);
     throw ApiException(errorMessage, statusCode: response.statusCode);
   }
 
@@ -562,6 +594,7 @@ class ApiService {
         trimmed.contains('<!doctype') ||
         (trimmed.length > 10 && trimmed.substring(0, 10).contains('<'));
     if (looksLikeHtml) {
+      _log('Parse error: server returned HTML instead of JSON | status: ${response.statusCode}', isError: true);
       throw ApiException(
         'The server returned a web page instead of API data. The API URL may be wrong or the server may be misconfigured. Please try again later.',
         statusCode: response.statusCode,
@@ -577,9 +610,10 @@ class ApiService {
         return {'data': decoded};
       }
       return {'data': decoded};
-    } catch (e) {
+    } catch (e, stackTrace) {
       final body = response.body.toLowerCase();
       if (body.contains('<!doctype') || body.contains('<html')) {
+        _log('Parse error: HTML response | status: ${response.statusCode}', isError: true);
         throw ApiException(
           'The server returned a web page instead of API data. The API URL may be wrong or the server may be misconfigured. Please try again later.',
           statusCode: response.statusCode,
@@ -590,6 +624,8 @@ class ApiService {
               response.body.contains('error'))) {
         return {'message': response.body, 'status': false};
       }
+      _log('Parse error: $e | status: ${response.statusCode} | body length: ${response.body.length}', isError: true);
+      if (kDebugMode) debugPrint(stackTrace.toString());
       throw ApiException(
         'Unable to parse server response: ${e.toString()}',
         statusCode: response.statusCode,

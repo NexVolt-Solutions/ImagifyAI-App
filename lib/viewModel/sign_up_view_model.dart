@@ -102,6 +102,14 @@ class SignUpViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void navigateBack(BuildContext context) {
+    Navigator.pop(context);
+  }
+
+  void navigateToSignIn(BuildContext context) {
+    Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
+  }
+
   Future<void> register(
     BuildContext context, {
     required GlobalKey<FormState> formKey,

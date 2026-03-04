@@ -5,6 +5,18 @@ import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:provider/provider.dart';
 
+/// Prompt + style pairs using API style names (from fetchStyles).
+/// Style names must match backend: Colorful, 3D Render, Photorealistic, etc.
+class _InspirationPrompts {
+  static const List<({String prompt, String style})> items = [
+    (prompt: 'A sunset by the sea', style: 'Photorealistic'),
+    (prompt: 'Neon city at night', style: 'Cyberpunk'),
+    (prompt: 'Starry sky above', style: '3D Render'),
+    (prompt: 'A cozy forest', style: 'Fantasy'),
+    (prompt: 'Cute cartoon character', style: 'Cartoon'),
+  ];
+}
+
 class InspirationGallery extends StatelessWidget {
   final void Function(String styleName) onScrollToStyle;
 
@@ -25,10 +37,14 @@ class InspirationGallery extends StatelessWidget {
           spacing: context.w(8),
           runSpacing: context.h(4),
           children: [
-            _buildChip(context, vm, 'Abstract neon cityscape at night', 'Cyberpunk', 0),
-            _buildChip(context, vm, 'Serene mountain landscape with sunset', 'Photorealistic', 1),
-            _buildChip(context, vm, 'Cosmic galaxy with stars and nebula', '3D Render', 2),
-            _buildChip(context, vm, 'Minimalist geometric patterns', 'Illustration', 3),
+            for (var i = 0; i < _InspirationPrompts.items.length; i++)
+              _buildChip(
+                context,
+                vm,
+                _InspirationPrompts.items[i].prompt,
+                _InspirationPrompts.items[i].style,
+                i,
+              ),
           ],
         ),
       ],

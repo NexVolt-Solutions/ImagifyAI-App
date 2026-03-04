@@ -8,7 +8,6 @@ import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_text_rich.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
-import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +21,20 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   // Create formKey in widget state to ensure uniqueness per widget instance
   final _formKey = GlobalKey<FormState>();
+  bool _didClearFormOnEnter = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didClearFormOnEnter) {
+      _didClearFormOnEnter = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<SignInViewModel>().clearForm();
+        _formKey.currentState?.reset();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +87,7 @@ class _SignInState extends State<SignIn> {
                                       context.appTextStyles?.authTitlePrimary,
                                   textAlign: TextAlign.center,
                                 ),
-                                SizedBox(height: context.h(24)),
+                                SizedBox(height: context.h(16)),
                                 CustomTextField(
                                   controller: signInViewModel.emailController,
                                   prefixIcon: Icon(Icons.email),
@@ -87,7 +100,7 @@ class _SignInState extends State<SignIn> {
                                   enabledBorderColor:
                                       context.colorScheme.onSurface,
                                 ),
-                                SizedBox(height: context.h(24)),
+                                SizedBox(height: context.h(16)),
                                 CustomTextField(
                                   controller:
                                       signInViewModel.passwordController,
@@ -134,12 +147,9 @@ class _SignInState extends State<SignIn> {
                                     CustomTextRich(
                                       text2: 'Forgot Password?',
                                       textSize2: context.text(14),
-                                      onTap2: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          RoutesName.ForgotScreen,
-                                        );
-                                      },
+                                      onTap2: () =>
+                                          signInViewModel.navigateToForgotPassword(
+                                              context),
                                     ),
                                   ],
                                 ),
@@ -148,10 +158,12 @@ class _SignInState extends State<SignIn> {
                             Column(
                               children: [
                                 CustomButton(
-                                  onPressed: () => signInViewModel.login(
-                                    context,
-                                    formKey: _formKey,
-                                  ),
+                                  onPressed: signInViewModel.isGoogleLoading
+                                      ? null
+                                      : () => signInViewModel.login(
+                                          context,
+                                          formKey: _formKey,
+                                        ),
                                   width: context.w(350),
                                   gradient: AppColors.gradient,
                                   text: 'Sign In',
@@ -162,13 +174,15 @@ class _SignInState extends State<SignIn> {
                                 ),
                                 SizedBox(height: context.h(20)),
                                 GestureDetector(
-                                  onTap: signInViewModel.isLoading
+                                  onTap:
+                                      (signInViewModel.isLoading ||
+                                          signInViewModel.isGoogleLoading)
                                       ? null
                                       : () => signInViewModel.signInWithGoogle(
                                           context,
                                         ),
                                   child: Opacity(
-                                    opacity: signInViewModel.isLoading
+                                    opacity: signInViewModel.isGoogleLoading
                                         ? 0.7
                                         : 1.0,
                                     child: Container(
@@ -182,29 +196,29 @@ class _SignInState extends State<SignIn> {
                                           context.radius(8),
                                         ),
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          if (signInViewModel.isLoading)
-                                            const AppLoadingIndicator.medium()
-                                          else
-                                            Image.asset(
-                                              AppAssets.googleIcon,
-                                              height: context.h(23.94),
-                                              width: context.w(23.94),
+                                      child: signInViewModel.isGoogleLoading
+                                          ? const Center(
+                                              child:
+                                                  AppLoadingIndicator.medium(),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Image.asset(
+                                                  AppAssets.googleIcon,
+                                                  height: context.h(23.94),
+                                                  width: context.w(23.94),
+                                                ),
+                                                SizedBox(width: context.w(8)),
+                                                Text(
+                                                  'Continue with Google',
+                                                  style: context
+                                                      .appTextStyles
+                                                      ?.authGoogleButton,
+                                                ),
+                                              ],
                                             ),
-                                          SizedBox(width: context.w(8)),
-                                          Text(
-                                            signInViewModel.isLoading
-                                                ? 'Signing in...'
-                                                : 'Continue with Google',
-                                            style: context
-                                                .appTextStyles
-                                                ?.authGoogleButton,
-                                          ),
-                                        ],
-                                      ),
                                     ),
                                   ),
                                 ),
@@ -214,12 +228,8 @@ class _SignInState extends State<SignIn> {
                                   text2: 'SignUp',
                                   textSize1: context.text(14),
                                   textSize2: context.text(14),
-                                  onTap2: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      RoutesName.SignUpScreen,
-                                    );
-                                  },
+                                  onTap2: () =>
+                                      signInViewModel.navigateToSignUp(context),
                                 ),
                                 SizedBox(height: context.h(20)),
                               ],

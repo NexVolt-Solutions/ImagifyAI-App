@@ -29,8 +29,9 @@ class CategoryDetailsScreen extends StatelessWidget {
         title: Text(categoryName, style: context.appTextStyles?.homeAlignText),
         centerTitle: true,
       ),
-      body: wallpapers.isEmpty
-          ? Center(
+      body: SafeArea(
+        child: wallpapers.isEmpty
+            ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -126,6 +127,7 @@ class CategoryDetailsScreen extends StatelessWidget {
                 );
               },
             ),
+        ),
     );
   }
 }

@@ -21,6 +21,19 @@ class ForgotPasswordViewModel extends ChangeNotifier {
 
   String? get email => _email;
 
+  /// Clear email field and error. Call when entering the screen so stale data is not shown.
+  void clearForm() {
+    emailController.clear();
+    errorMessage = null;
+    _email = null;
+    notifyListeners();
+  }
+
+  /// Called when the forgot password screen is entered. Clears form.
+  void onScreenEnter() {
+    clearForm();
+  }
+
   Future<void> sendReset(
     BuildContext context, {
     required GlobalKey<FormState> formKey,

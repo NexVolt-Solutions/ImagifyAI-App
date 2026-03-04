@@ -11,7 +11,6 @@ import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_text_rich.dart';
 import 'package:imagifyai/Core/CustomWidget/password_text.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
-import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/viewModel/sign_up_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -24,6 +23,20 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   late final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _didClearFormOnEnter = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didClearFormOnEnter) {
+      _didClearFormOnEnter = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<SignUpViewModel>().clearForm();
+        _formKey.currentState?.reset();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +58,8 @@ class _SignUpState extends State<SignUp> {
                   Positioned(
                     left: 0,
                     child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () =>
+                          signUpViewModel.navigateBack(context),
                       child: Icon(
                         Icons.arrow_back_ios,
                         color: Theme.of(context).iconTheme.color,
@@ -63,7 +77,7 @@ class _SignUpState extends State<SignUp> {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: context.h(20)),
                 children: [
-                  SizedBox(height: context.h(20)),
+                  SizedBox(height: context.h(16)),
                   Text(
                     "Sign Up",
                     style: context.appTextStyles?.authTitlePrimary,
@@ -114,7 +128,7 @@ class _SignUpState extends State<SignUp> {
                       ),
                     ),
                   ),
-                  SizedBox(height: context.h(16)),
+                  SizedBox(height: context.h(8)),
                   CustomTextField(
                     controller: signUpViewModel.usernameController,
                     prefixIcon: Icon(Icons.person),
@@ -124,7 +138,7 @@ class _SignUpState extends State<SignUp> {
                     label: "User Name",
                     enabledBorderColor: context.colorScheme.onSurface,
                   ),
-                  SizedBox(height: context.h(24)),
+                  SizedBox(height: context.h(16)),
                   CustomTextField(
                     controller: signUpViewModel.emailController,
                     prefixIcon: Icon(Icons.email),
@@ -134,7 +148,7 @@ class _SignUpState extends State<SignUp> {
                     label: "Email",
                     enabledBorderColor: context.colorScheme.onSurface,
                   ),
-                  SizedBox(height: context.h(24)),
+                  SizedBox(height: context.h(16)),
                   CustomTextField(
                     controller: signUpViewModel.passwordController,
                     prefixIcon: Icon(Icons.lock),
@@ -147,7 +161,7 @@ class _SignUpState extends State<SignUp> {
                       signUpViewModel.validatePassword();
                     },
                   ),
-                  SizedBox(height: context.h(24)),
+                  SizedBox(height: context.h(16)),
                   CustomTextField(
                     controller: signUpViewModel.confirmPasswordController,
                     prefixIcon: Icon(Icons.lock),
@@ -184,7 +198,23 @@ class _SignUpState extends State<SignUp> {
                       );
                     }),
                   ),
-                  SizedBox(height: context.h(24)),
+                  SizedBox(height: context.h(32)),
+                  CustomButton(
+                    onPressed:
+                        (signUpViewModel.isLoading ||
+                            signUpViewModel.isGoogleLoading)
+                        ? null
+                        : () => signUpViewModel.register(
+                            context,
+                            formKey: _formKey,
+                          ),
+                    width: context.w(350),
+                    gradient: AppColors.gradient,
+                    text: 'Create Account',
+                    isLoading: signUpViewModel.isLoading,
+                  ),
+                  SizedBox(height: context.h(16)),
+
                   Row(
                     children: [
                       Expanded(
@@ -210,14 +240,19 @@ class _SignUpState extends State<SignUp> {
                       ),
                     ],
                   ),
-                  SizedBox(height: context.h(24)),
+                  SizedBox(height: context.h(16)),
                   GestureDetector(
-                    onTap: (signUpViewModel.isLoading ||
+                    onTap:
+                        (signUpViewModel.isLoading ||
                             signUpViewModel.isGoogleLoading)
                         ? null
                         : () => signUpViewModel.signInWithGoogle(context),
                     child: Opacity(
-                      opacity: signUpViewModel.isGoogleLoading ? 0.7 : 1.0,
+                      opacity:
+                          (signUpViewModel.isLoading ||
+                              signUpViewModel.isGoogleLoading)
+                          ? 0.7
+                          : 1.0,
                       child: Container(
                         height: context.h(47.9),
                         width: context.w(350),
@@ -229,42 +264,28 @@ class _SignUpState extends State<SignUp> {
                             context.radius(8),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (signUpViewModel.isGoogleLoading)
-                              const AppLoadingIndicator.medium()
-                            else
-                              Image.asset(
-                                AppAssets.googleIcon,
-                                height: context.h(23.94),
-                                width: context.w(23.94),
+                        child: signUpViewModel.isGoogleLoading
+                            ? const Center(
+                                child: AppLoadingIndicator.medium(),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    AppAssets.googleIcon,
+                                    height: context.h(23.94),
+                                    width: context.w(23.94),
+                                  ),
+                                  SizedBox(width: context.w(8)),
+                                  Text(
+                                    'Continue with Google',
+                                    style:
+                                        context.appTextStyles?.authGoogleButton,
+                                  ),
+                                ],
                               ),
-                            SizedBox(width: context.w(8)),
-                            Text(
-                              signUpViewModel.isGoogleLoading
-                                  ? 'Signing in...'
-                                  : 'Continue with Google',
-                              style: context.appTextStyles?.authGoogleButton,
-                            ),
-                          ],
-                        ),
                       ),
                     ),
-                  ),
-
-                  SizedBox(height: context.h(20)),
-                  CustomButton(
-                    onPressed: signUpViewModel.isGoogleLoading
-                        ? null
-                        : () => signUpViewModel.register(
-                              context,
-                              formKey: _formKey,
-                            ),
-                    width: context.w(350),
-                    gradient: AppColors.gradient,
-                    text: 'Create Account',
-                    isLoading: signUpViewModel.isLoading,
                   ),
 
                   SizedBox(height: context.h(16)),
@@ -273,12 +294,8 @@ class _SignUpState extends State<SignUp> {
                     text2: 'SignIn',
                     textSize1: context.text(14),
                     textSize2: context.text(14),
-                    onTap2: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        RoutesName.SignInScreen,
-                      );
-                    },
+                    onTap2: () =>
+                        signUpViewModel.navigateToSignIn(context),
                   ),
                   SizedBox(height: context.h(20)),
                 ],

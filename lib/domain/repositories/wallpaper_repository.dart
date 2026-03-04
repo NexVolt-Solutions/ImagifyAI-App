@@ -1,9 +1,16 @@
-import 'dart:convert';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
 import 'package:imagifyai/models/wallpaper/suggest_response.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+
+const Map<String, String> _sizeToApi = {
+  '1:1': '1:1',
+  '2:3 Portrait': '9:16_Portrait',
+  '2:3 Landscape': '16:9_Landscape',
+};
+
+String _toApiSize(String size) => _sizeToApi[size] ?? size;
 
 class WallpaperRepository implements IWallpaperRepository {
   WallpaperRepository({ApiService? apiService})
@@ -85,7 +92,7 @@ class WallpaperRepository implements IWallpaperRepository {
 
     final body = <String, dynamic>{
       'prompt': prompt,
-      'size': size,
+      'size': _toApiSize(size),
       'style': style,
     };
 
@@ -177,7 +184,7 @@ class WallpaperRepository implements IWallpaperRepository {
       body['prompt'] = prompt.trim(); // Ensure trimmed prompt
     }
     if (size != null && size.isNotEmpty) {
-      body['size'] = size;
+      body['size'] = _toApiSize(size);
     }
     if (style != null && style.isNotEmpty) {
       body['style'] = style;

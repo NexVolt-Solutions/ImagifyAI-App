@@ -19,68 +19,66 @@ class BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            margin: EdgeInsets.symmetric(
-              horizontal: context.w(20),
-              vertical: context.h(20),
-            ),
-            padding: EdgeInsets.symmetric(
-              horizontal: context.w(16),
-              vertical: context.h(11),
-            ),
-            decoration: BoxDecoration(
-              color: context.theme.bottomNavigationBarTheme.backgroundColor,
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(context.radius(68)),
-                topLeft: Radius.circular(context.radius(68)),
-                bottomLeft: Radius.circular(context.radius(56)),
-                bottomRight: Radius.circular(context.radius(56)),
-              ),
-              border: Border.all(
-                color: context.theme.brightness == Brightness.dark
-                    ? context.backgroundColor
-                    : context.primaryColor,
-                width: context.w(1),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(bottomData.length, (index) {
-                final isSelected = currentIndex == index;
-                return InkWell(
-                  onTap: () => onTap(index),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      isSelected
-                          ? ShaderMask(
-                              shaderCallback: (bounds) =>
-                                  AppColors.gradient.createShader(bounds),
-                              blendMode: BlendMode.srcIn,
-                              child: Image.asset(bottomData[index]['image']),
-                            )
-                          : Image.asset(
-                              bottomData[index]['image'],
-                              color: context.theme.bottomNavigationBarTheme
-                                  .unselectedItemColor,
-                            ),
-                      SizedBox(height: context.h(4)),
-                      Text(
-                        bottomData[index]['name'],
-                        style: isSelected
-                            ? context.appTextStyles?.bottomNavLabelSelected
-                            : context.appTextStyles?.bottomNavLabelUnselected,
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ),
+      child: Container(
+        margin: EdgeInsets.symmetric(
+          horizontal: context.w(20),
+          vertical: context.h(20),
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: context.w(16),
+          vertical: context.h(11),
+        ),
+        decoration: BoxDecoration(
+          color: context.theme.bottomNavigationBarTheme.backgroundColor,
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(context.radius(68)),
+            topLeft: Radius.circular(context.radius(68)),
+            bottomLeft: Radius.circular(context.radius(56)),
+            bottomRight: Radius.circular(context.radius(56)),
           ),
-        ],
+          border: Border.all(
+            color: context.theme.brightness == Brightness.dark
+                ? context.backgroundColor
+                : context.primaryColor,
+            width: context.w(1),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(bottomData.length, (index) {
+            final isSelected = currentIndex == index;
+            return GestureDetector(
+              onTap: () => onTap(index),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  isSelected
+                      ? ShaderMask(
+                          shaderCallback: (bounds) =>
+                              AppColors.gradient.createShader(bounds),
+                          blendMode: BlendMode.srcIn,
+                          child: Image.asset(bottomData[index]['image']),
+                        )
+                      : Image.asset(
+                          bottomData[index]['image'],
+                          color: context
+                              .theme
+                              .bottomNavigationBarTheme
+                              .unselectedItemColor,
+                        ),
+                  SizedBox(height: context.h(4)),
+                  Text(
+                    bottomData[index]['name'],
+                    style: isSelected
+                        ? context.appTextStyles?.bottomNavLabelSelected
+                        : context.appTextStyles?.bottomNavLabelUnselected,
+                  ),
+                ],
+              ),
+            );
+          }),
+        ),
       ),
     );
   }

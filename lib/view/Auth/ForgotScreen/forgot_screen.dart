@@ -17,8 +17,20 @@ class ForgotScreen extends StatefulWidget {
 }
 
 class _ForgotScreenState extends State<ForgotScreen> {
-  // Create formKey in widget state to ensure uniqueness per widget instance
   final _formKey = GlobalKey<FormState>();
+  bool _didClearFormOnEnter = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didClearFormOnEnter) return;
+    _didClearFormOnEnter = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<ForgotPasswordViewModel>().onScreenEnter();
+      _formKey.currentState?.reset();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

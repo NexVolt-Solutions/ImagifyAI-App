@@ -11,6 +11,7 @@ class VerificationViewModel extends ChangeNotifier {
   VerificationViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository() {
     _startTimer();
+    codeController.addListener(_clearErrorOnCodeChange);
   }
 
   final IAuthRepository _authRepository;
@@ -19,7 +20,17 @@ class VerificationViewModel extends ChangeNotifier {
   final emailController = TextEditingController();
   final codeController = TextEditingController();
 
+  void _clearErrorOnCodeChange() {
+    if (errorMessage != null) {
+      errorMessage = null;
+      notifyListeners();
+    }
+  }
+
+  /// Loading state for the Verify Account action only.
   bool isLoading = false;
+  /// Loading state for the Resend Code action only. Separate from verify flow.
+  bool isResendLoading = false;
   String? errorMessage;
 
   Timer? _timer;
@@ -56,6 +67,32 @@ class VerificationViewModel extends ChangeNotifier {
     emailController.text = email;
   }
 
+  /// Clear all fields and error. Call when entering the screen so stale data is not shown.
+  void clearForm() {
+    emailController.clear();
+    codeController.clear();
+    errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Called when the verification screen is entered. Clears form, applies route args (email, autoResend).
+  void onScreenEnter(BuildContext context) {
+    clearForm();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    String? email;
+    bool autoResend = false;
+    if (args is String && args.isNotEmpty) {
+      email = args;
+    } else if (args is Map) {
+      email = args['email']?.toString();
+      autoResend = args['autoResend'] == true;
+    }
+    if (email != null && email.isNotEmpty) {
+      setEmail(email);
+      if (autoResend) autoResendCode(context);
+    }
+  }
+
   Future<void> verify(
     BuildContext context, {
     required GlobalKey<FormState> formKey,
@@ -66,16 +103,17 @@ class VerificationViewModel extends ChangeNotifier {
 
     // Validate that code is exactly 6 digits
     if (code.isEmpty || code.length != 6) {
-      _showMessage(
-        context,
-        'Please enter the complete 6-digit verification code',
-      );
+      errorMessage = 'Please enter the complete 6-digit verification code';
+      notifyListeners();
+      _showMessage(context, errorMessage!);
       return;
     }
 
     // Validate that code contains only digits
     if (!RegExp(r'^\d{6}$').hasMatch(code)) {
-      _showMessage(context, 'Verification code must contain only numbers');
+      errorMessage = 'Verification code must contain only numbers';
+      notifyListeners();
+      _showMessage(context, errorMessage!);
       return;
     }
 
@@ -109,14 +147,15 @@ class VerificationViewModel extends ChangeNotifier {
     }
   }
 
+  /// Resend OTP only. Does not call verify. Use when timer expired or user wants a new code.
   Future<void> resendCode(
     BuildContext context, {
     bool forceResend = false,
   }) async {
     // If forceResend is true, bypass the timer check (for auto-resend scenarios)
-    if (!forceResend && (isLoading || !_canResend)) return;
+    if (!forceResend && (isResendLoading || !_canResend)) return;
 
-    isLoading = true;
+    isResendLoading = true;
     errorMessage = null;
     notifyListeners();
 
@@ -127,7 +166,7 @@ class VerificationViewModel extends ChangeNotifier {
           'A new verification code has been sent to your email';
       _showMessage(context, message, isError: false);
 
-      // Restart the timer
+      // Restart the timer so Resend hides again until next expiry
       _startTimer();
     } on ApiException catch (e) {
       errorMessage = e.message;
@@ -137,7 +176,7 @@ class VerificationViewModel extends ChangeNotifier {
           'Hmm, something unexpected happened. Let\'s try that again!';
       _showMessage(context, errorMessage!);
     } finally {
-      isLoading = false;
+      isResendLoading = false;
       notifyListeners();
     }
   }

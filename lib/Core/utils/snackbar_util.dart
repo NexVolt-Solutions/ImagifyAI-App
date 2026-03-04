@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class SnackbarUtil {
@@ -7,9 +8,14 @@ class SnackbarUtil {
     bool isError = true,
     Duration duration = const Duration(seconds: 3),
   }) {
+    if (kDebugMode) {
+      debugPrint(
+        '[TOP SNACKBAR] isError: $isError | duration: ${duration.inSeconds}s | message: $message',
+      );
+    }
     final overlay = Overlay.of(context);
     late OverlayEntry overlayEntry;
-    
+
     overlayEntry = OverlayEntry(
       builder: (context) => _TopSnackBar(
         message: message,
@@ -64,18 +70,12 @@ class _TopSnackBarState extends State<_TopSnackBar>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0.0, -1.0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -154,4 +154,3 @@ class _TopSnackBarState extends State<_TopSnackBar>
     );
   }
 }
-

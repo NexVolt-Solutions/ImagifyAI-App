@@ -8,19 +8,31 @@ import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
 import 'package:imagifyai/domain/repositories/auth_repository.dart';
 
 class ForgotVerificationViewModel extends ChangeNotifier {
-  ForgotVerificationViewModel({IAuthRepository? authRepository})
-    : _authRepository = authRepository ?? AuthRepository() {
-    _startTimer();
-  }
-
   final IAuthRepository _authRepository;
 
   // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final codeController = TextEditingController();
 
+  ForgotVerificationViewModel({IAuthRepository? authRepository})
+    : _authRepository = authRepository ?? AuthRepository() {
+    _startTimer();
+    codeController.addListener(_clearErrorOnCodeChange);
+  }
+
+  void _clearErrorOnCodeChange() {
+    if (errorMessage != null) {
+      errorMessage = null;
+      notifyListeners();
+    }
+  }
+
   bool isLoading = false;
+  bool isResendLoading = false;
   String? errorMessage;
   String? _email;
+
+  String get emailDisplay =>
+      (_email != null && _email!.isNotEmpty) ? _email! : 'your email';
 
   Timer? _timer;
   int _remainingSeconds = 120; // 2 minutes = 120 seconds
@@ -56,6 +68,20 @@ class ForgotVerificationViewModel extends ChangeNotifier {
     _email = email;
   }
 
+  /// Clear OTP field and error. Call when entering the screen so stale data is not shown.
+  void clearForm() {
+    codeController.clear();
+    errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Called when the forgot verification screen is entered. Clears form, applies email from route args.
+  void onScreenEnter(BuildContext context) {
+    clearForm();
+    final email = ModalRoute.of(context)?.settings.arguments as String? ?? '';
+    if (email.isNotEmpty) setEmail(email);
+  }
+
   Future<void> verify(BuildContext context) async {
     if (isLoading) return;
 
@@ -63,16 +89,17 @@ class ForgotVerificationViewModel extends ChangeNotifier {
 
     // Validate that code is exactly 6 digits
     if (code.isEmpty || code.length != 6) {
-      _showMessage(
-        context,
-        'Please enter the complete 6-digit verification code',
-      );
+      errorMessage = 'Please enter the complete 6-digit verification code';
+      notifyListeners();
+      _showMessage(context, errorMessage!);
       return;
     }
 
     // Validate that code contains only digits
     if (!RegExp(r'^\d{6}$').hasMatch(code)) {
-      _showMessage(context, 'Verification code must contain only numbers');
+      errorMessage = 'Verification code must contain only numbers';
+      notifyListeners();
+      _showMessage(context, errorMessage!);
       return;
     }
 
@@ -102,14 +129,14 @@ class ForgotVerificationViewModel extends ChangeNotifier {
   }
 
   Future<void> resendCode(BuildContext context) async {
-    if (isLoading || !_canResend) return;
+    if (isResendLoading || isLoading || !_canResend) return;
 
     if (_email == null || _email!.isEmpty) {
       _showMessage(context, 'Email not found. Please go back and try again.');
       return;
     }
 
-    isLoading = true;
+    isResendLoading = true;
     errorMessage = null;
     notifyListeners();
 
@@ -129,7 +156,7 @@ class ForgotVerificationViewModel extends ChangeNotifier {
       errorMessage = 'Something went wrong. Please try again.';
       _showMessage(context, errorMessage!);
     } finally {
-      isLoading = false;
+      isResendLoading = false;
       notifyListeners();
     }
   }
