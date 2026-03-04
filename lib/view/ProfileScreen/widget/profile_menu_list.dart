@@ -30,8 +30,9 @@ class ProfileMenuList extends StatelessWidget {
           leading: item['leading'] != null
               ? Image.asset(
                   item['leading'],
-                  height: context.h(26),
-                  width: context.w(26),
+                  height: context.h(24),
+                  width: context.w(24),
+                  color: context.primaryColor,
                   fit: BoxFit.contain,
                 )
               : const SizedBox.shrink(),
@@ -52,6 +53,7 @@ class ProfileMenuList extends StatelessWidget {
                   inactiveThumbColor: context.subtitleColor,
                   activeTrackColor: context.textColor,
                   activeThumbColor: context.primaryColor,
+
                   value: isThemeItem
                       ? isDarkMode
                       : viewModel.notificationsEnabled,

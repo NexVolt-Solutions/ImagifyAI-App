@@ -40,7 +40,10 @@ class GenerateWallpaperCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: AppColors.gradient,
               ),
-              child: SvgPicture.asset(AppAssets.startIcon, fit: BoxFit.scaleDown),
+              child: SvgPicture.asset(
+                AppAssets.startIcon,
+                fit: BoxFit.scaleDown,
+              ),
             ),
             SizedBox(height: context.h(12)),
             Text(

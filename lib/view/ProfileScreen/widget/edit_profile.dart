@@ -214,7 +214,7 @@ class _EditProfileState extends State<EditProfile> {
                         Align(
                           alignment: Alignment.topLeft,
                           child: Text(
-                            "Persnol Information",
+                            "Personal Information",
                             style: context.appTextStyles?.profileSectionTitle,
                             textAlign: TextAlign.start,
                           ),

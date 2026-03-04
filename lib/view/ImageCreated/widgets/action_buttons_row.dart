@@ -22,8 +22,7 @@ class ActionButtonsRow extends StatelessWidget {
         Expanded(
           child: CustomButton(
             onPressed: onTryAgainTap,
-            iconHeight: 24,
-            iconWidth: 24,
+            iconHeight: context.h(32),
             gradient: AppColors.gradient,
             text: 'Try Again',
             isLoading: viewModel.isLoading,
@@ -31,24 +30,14 @@ class ActionButtonsRow extends StatelessWidget {
           ),
         ),
         SizedBox(width: context.w(12)),
-        Expanded(
-          child: CustomButton(
-            onPressed: () => viewModel.saveToDevice(context),
-            iconHeight: 24,
-            iconWidth: 24,
-            gradient: AppColors.gradient,
-            text: 'Save',
-            isLoading: viewModel.isDownloading,
-            icon: AppAssets.downloadIcon,
-          ),
-        ),
-        SizedBox(width: context.w(12)),
+
         Expanded(
           child: CustomButton(
             onPressed: () => viewModel.share(context),
-            iconHeight: 24,
-            iconWidth: 24,
+            iconHeight: context.h(28),
             gradient: AppColors.gradient,
+            icon: AppAssets.shareIcon,
+
             text: 'Share',
           ),
         ),

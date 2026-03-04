@@ -55,187 +55,197 @@ class ContactUs extends StatelessWidget {
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: context.h(20)),
               children: [
-            SizedBox(height: context.h(20)),
-            Align(
-              alignment: Alignment.center,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Contact Us",
-                    style: context.appTextStyles?.profileScreenTitle,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: context.h(4)),
-                  Text(
-                    "Manage your imagifyai account settings",
-                    style: context.appTextStyles?.profileScreenSubtitle,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: context.h(24)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Column(
-                  children: [
-                    Image.asset(
-                      AppAssets.phoneIcon,
-                      height: context.h(24),
-                      width: context.w(24),
-                    ),
-                    SizedBox(height: context.h(11)),
-                    Text(
-                      '+923174869556',
-                      style: context.appTextStyles?.profileContactInfo,
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Image.asset(
-                      AppAssets.emailIcon,
-                      height: context.h(24),
-                      width: context.w(24),
-                    ),
-                    SizedBox(height: context.h(11)),
-                    Text(
-                      'info@nexvoltsolutions.com',
-                      style: context.appTextStyles?.profileContactInfo,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: context.h(20)),
-            CustomTextField(
-              validatorType: "name",
-              hintText: 'Enter your first name',
-              hintStyle: context.appTextStyles?.authHintText,
-              label: "First Name",
-              enabledBorderColor: context.colorScheme.onSurface,
-            ),
-            SizedBox(height: context.h(16)),
-            CustomTextField(
-              validatorType: "name",
-              hintText: 'Enter your last name',
-              hintStyle: context.appTextStyles?.authHintText,
-              label: "Last Name",
-              enabledBorderColor: context.colorScheme.onSurface,
-            ),
-            SizedBox(height: context.h(16)),
-            CustomTextField(
-              validatorType: "email",
-              hintText: 'Enter your email name',
-              hintStyle: context.appTextStyles?.authHintText,
-              label: "Email",
-              enabledBorderColor: context.colorScheme.onSurface,
-            ),
-            SizedBox(height: context.h(20)),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Text(
-                "Select Subject",
-                style: context.appTextStyles?.profileScreenTitle,
-                textAlign: TextAlign.start,
-              ),
-            ),
-            SizedBox(height: context.h(20)),
-            Wrap(
-              spacing: context.w(10),
-              runSpacing: context.h(13),
-              children: List.generate(subjects.length, (index) {
-                final isSelected = contactUsViewModel.selectedSubjectIndex == index;
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () {
-                      contactUsViewModel.setSelectedSubjectIndex(index);
-                    },
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: context.w(8),
-                        vertical: context.h(4),
+                SizedBox(height: context.h(20)),
+                Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Contact Us",
+                        style: context.appTextStyles?.profileScreenTitle,
+                        textAlign: TextAlign.center,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeInOut,
-                            padding: EdgeInsets.all(context.w(4)),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? context.primaryColor
-                                  : Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isSelected
-                                    ? context.primaryColor
-                                    : context.colorScheme.onSurface.withOpacity(
-                                        0.5,
-                                      ),
-                                width: 2,
+                      SizedBox(height: context.h(4)),
+                      Text(
+                        "Manage your imagifyai account settings",
+                        style: context.appTextStyles?.profileScreenSubtitle,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: context.h(24)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Image.asset(
+                          AppAssets.phoneIcon,
+                          height: context.h(24),
+                          width: context.w(24),
+                          color: context.iconColor,
+                        ),
+                        SizedBox(height: context.h(11)),
+                        Text(
+                          '+923174869556',
+                          style: context.appTextStyles?.profileContactInfo,
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Image.asset(
+                          AppAssets.emailIcon,
+                          height: context.h(24),
+                          width: context.w(24),
+                          color: context.iconColor,
+                        ),
+                        SizedBox(height: context.h(11)),
+                        Text(
+                          'info@nexvoltsolutions.com',
+                          style: context.appTextStyles?.profileContactInfo,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: context.h(20)),
+                CustomTextField(
+                  validatorType: "name",
+                  hintText: 'Enter your first name',
+                  hintStyle: context.appTextStyles?.authHintText,
+                  label: "First Name",
+                  enabledBorderColor: context.colorScheme.onSurface,
+                ),
+                SizedBox(height: context.h(16)),
+                CustomTextField(
+                  validatorType: "name",
+                  hintText: 'Enter your last name',
+                  hintStyle: context.appTextStyles?.authHintText,
+                  label: "Last Name",
+                  enabledBorderColor: context.colorScheme.onSurface,
+                ),
+                SizedBox(height: context.h(16)),
+                CustomTextField(
+                  validatorType: "email",
+                  hintText: 'Enter your email name',
+                  hintStyle: context.appTextStyles?.authHintText,
+                  label: "Email",
+                  enabledBorderColor: context.colorScheme.onSurface,
+                ),
+                SizedBox(height: context.h(20)),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    "Select Subject",
+                    style: context.appTextStyles?.profileSectionTitle,
+                    textAlign: TextAlign.start,
+                  ),
+                ),
+                SizedBox(height: context.h(20)),
+                Wrap(
+                  spacing: context.w(10),
+                  runSpacing: context.h(13),
+                  children: List.generate(subjects.length, (index) {
+                    final isSelected =
+                        contactUsViewModel.selectedSubjectIndex == index;
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          contactUsViewModel.setSelectedSubjectIndex(index);
+                        },
+                        borderRadius: BorderRadius.circular(8),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.w(8),
+                            vertical: context.h(4),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeInOut,
+                                padding: EdgeInsets.all(context.w(4)),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? context.primaryColor
+                                      : Colors.transparent,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? context.primaryColor
+                                        : context.colorScheme.onSurface
+                                              .withOpacity(0.5),
+                                    width: 2,
+                                  ),
+                                ),
+                                child: AnimatedSwitcher(
+                                  duration: const Duration(milliseconds: 200),
+                                  child: isSelected
+                                      ? Icon(
+                                          Icons.check,
+                                          key: const ValueKey('check'),
+                                          color: context.colorScheme.onPrimary,
+                                          size: 14,
+                                        )
+                                      : SizedBox(
+                                          key: const ValueKey('empty'),
+                                          width: 14,
+                                          height: 14,
+                                        ),
+                                ),
                               ),
-                            ),
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 200),
-                              child: isSelected
-                                  ? Icon(
-                                      Icons.check,
-                                      key: const ValueKey('check'),
-                                      color: context.colorScheme.onPrimary,
-                                      size: 14,
-                                    )
-                                  : SizedBox(
-                                      key: const ValueKey('empty'),
-                                      width: 14,
-                                      height: 14,
-                                    ),
-                            ),
+                              SizedBox(width: context.w(8)),
+                              Text(
+                                subjects[index],
+                                style:
+                                    (context
+                                                .appTextStyles
+                                                ?.profileContactInfo ??
+                                            TextStyle())
+                                        .copyWith(
+                                          color: isSelected
+                                              ? context.primaryColor
+                                              : context.textColor,
+                                        ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: context.w(8)),
-                          Text(
-                            subjects[index],
-                            style:
-                                (context.appTextStyles?.profileContactInfo ??
-                                        TextStyle())
-                                    .copyWith(
-                                      color: isSelected
-                                          ? context.primaryColor
-                                          : context.textColor,
-                                    ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                    );
+                  }),
+                ),
+                SizedBox(height: context.h(20)),
+                SizedBox(
+                  width: context.w(double.infinity),
+
+                  child: CustomTextField(
+                    validatorType: "name",
+                    maxLength: 100,
+                    hintText: 'Write your message...',
+                    hintStyle: context.appTextStyles?.authHintText,
+                    label: "Message",
+                    enabledBorderColor: context.colorScheme.onSurface,
+                    maxLines: 5,
                   ),
-                );
-              }),
-            ),
-            SizedBox(height: context.h(20)),
-            CustomTextField(
-              validatorType: "name",
-              hintText: 'Write your message...',
-              hintStyle: context.appTextStyles?.authHintText,
-              label: "Message",
-              enabledBorderColor: context.colorScheme.onSurface,
-            ),
-            SizedBox(height: context.h(100)),
-            CustomButton(
-              width: context.w(350),
-              text: "Save Changes",
-              borderColor: null,
-              gradient: AppColors.gradient,
-              iconWidth: null,
-              iconHeight: null,
-              icon: null,
-            ),
-            SizedBox(height: context.h(20)),
-          ],
+                ),
+                SizedBox(height: context.h(32)),
+                CustomButton(
+                  width: context.w(350),
+                  text: "Save Changes",
+                  borderColor: null,
+                  gradient: AppColors.gradient,
+                  iconWidth: null,
+                  iconHeight: null,
+                  icon: null,
+                ),
+                SizedBox(height: context.h(20)),
+              ],
             ),
           );
         },

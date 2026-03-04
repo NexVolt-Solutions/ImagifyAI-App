@@ -18,6 +18,7 @@ import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -474,8 +475,11 @@ class ImageCreatedViewModel extends ChangeNotifier {
         isError: false,
       );
 
-      // Show interstitial ad after successful download (natural break)
-      await InterstitialAdService.showInterstitialAd();
+      // Show interstitial ad after every 10th generation (same threshold as daily limit)
+      final used = await GenerationLimitService.getGenerationsUsedToday();
+      if (used >= 10 && used % 10 == 0) {
+        await InterstitialAdService.showInterstitialAd();
+      }
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);
@@ -573,26 +577,21 @@ class ImageCreatedViewModel extends ChangeNotifier {
     String wallpaperId,
   ) async {
     try {
-      // Get the directory for saving images
-      final directory = await getApplicationDocumentsDirectory();
-      final imageDir = Directory('${directory.path}/imagifyai/Wallpapers');
+      // Save to device gallery so it appears in Photos/Gallery app
+      final baseName =
+          'ImagifyAI_wallpaper_${wallpaperId}_${DateTime.now().millisecondsSinceEpoch}';
 
-      // Create directory if it doesn't exist
-      if (!await imageDir.exists()) {
-        await imageDir.create(recursive: true);
+      final result = await ImageGallerySaver.saveImage(
+        imageBytes,
+        quality: 100,
+        name: baseName,
+      );
+
+      if (result == null ||
+          (result is Map && (result['isSuccess'] == false))) {
+        throw Exception(
+            result is Map ? result['error']?.toString() ?? 'Save failed' : 'Save failed');
       }
-
-      final imageUrl = wallpaper!.imageUrl;
-      final extension = imageUrl.isNotEmpty && imageUrl.contains('.')
-          ? imageUrl.split('.').last
-          : 'jpg';
-      final fileName =
-          'wallpaper_${wallpaperId}_${DateTime.now().millisecondsSinceEpoch}.$extension';
-      final filePath = '${imageDir.path}/$fileName';
-
-      // Write image bytes to file
-      final file = File(filePath);
-      await file.writeAsBytes(imageBytes);
     } catch (e) {
       throw Exception('Failed to save image: ${e.toString()}');
     }

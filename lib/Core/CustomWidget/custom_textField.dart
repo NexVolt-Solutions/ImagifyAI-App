@@ -36,6 +36,8 @@ class CustomTextField extends StatelessWidget {
   final Color? focusedBorderColor;
   final double? borderWidth;
   final Widget? prefixIcon;
+  final int? maxLength;
+  final int? maxLines;
 
   final Widget? suffixIcon;
   final Color? iconColor;
@@ -56,6 +58,8 @@ class CustomTextField extends StatelessWidget {
     this.focusedBorderColor,
     this.label,
     this.borderWidth,
+    this.maxLength,
+    this.maxLines,
     this.prefixIcon,
     this.suffixIcon,
     this.iconColor,
@@ -90,6 +94,8 @@ class CustomTextField extends StatelessWidget {
           keyboardType: keyboard ?? TextInputType.text,
           onChanged: onChanged,
           enabled: isEnabled,
+          maxLength: maxLength,
+          maxLines: maxLines ?? 1,
           validator: _validate,
           style: context.appTextStyles?.customTextFieldInput,
           decoration: InputDecoration(

@@ -8,7 +8,7 @@ class GenerationLimitService {
   static const String _keyLastLimitDate = 'generation_limit_date';
 
   /// Free generations per day before requiring an ad or limit.
-  static const int dailyLimit = 5;
+  static const int dailyLimit = 10;
 
   static String _todayString() {
     final now = DateTime.now();

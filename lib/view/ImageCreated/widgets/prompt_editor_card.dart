@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
+/// Simple prompt editor: one text field, copy button. Hint and text at start.
 class PromptEditorCard extends StatelessWidget {
   const PromptEditorCard({
     super.key,
@@ -14,42 +17,52 @@ class PromptEditorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final surface = theme.colorScheme.surface;
+    final onSurface = theme.colorScheme.onSurface;
+    final pad = context.w(16);
+
     return Container(
-      padding: context.padAll(20),
+      padding: EdgeInsets.fromLTRB(pad, pad, pad, pad),
       decoration: BoxDecoration(
-        color: context.surfaceColor,
+        color: surface,
         borderRadius: BorderRadius.circular(context.radius(12)),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       child: Stack(
         children: [
-          TextFormField(
+          TextField(
             controller: controller,
-            maxLines: 4,
-            minLines: 1,
-            enabled: true,
-            readOnly: false,
-            style: context.appTextStyles?.imageCreatedPromptText,
-            textAlign: TextAlign.center,
+            maxLines: 10,
+            minLines: 5,
+            style: theme.textTheme.bodyMedium?.copyWith(color: onSurface),
             decoration: InputDecoration(
+              isDense: true,
               border: InputBorder.none,
-              hintText: 'Enter your prompt...',
-              hintStyle: context.appTextStyles?.imageCreatedPromptHint,
-              contentPadding: EdgeInsets.only(
-                bottom: context.h(30),
-                right: context.w(40),
-                left: context.w(10),
-                top: context.h(10),
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              hintText: 'Edit your prompt...',
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: context.subtitleColor,
               ),
             ),
             textInputAction: TextInputAction.newline,
             keyboardType: TextInputType.multiline,
           ),
           Positioned(
-            bottom: context.h(10),
-            right: context.w(10),
-            child: GestureDetector(
-              onTap: onCopyTap,
-              child: Icon(Icons.copy, color: context.textColor, size: 20),
+            bottom: 0,
+            right: 0,
+            child: IconButton(
+              onPressed: onCopyTap,
+              icon: SvgPicture.asset(AppAssets.copyIcon),
+              tooltip: 'Copy prompt',
+              style: IconButton.styleFrom(
+                minimumSize: const Size(24, 24),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
           ),
         ],

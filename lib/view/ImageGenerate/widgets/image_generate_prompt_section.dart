@@ -80,7 +80,9 @@ class ImageGeneratePromptSection extends StatelessWidget {
                       blendMode: BlendMode.srcIn,
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(context.radius(8)),
+                          borderRadius: BorderRadius.circular(
+                            context.radius(8),
+                          ),
                           border: Border.all(
                             color: context.colorScheme.primary,
                             width: context.w(1.5),
@@ -90,7 +92,9 @@ class ImageGeneratePromptSection extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             if (vm.isGettingSuggestion)
-                              AppLoadingIndicator.small(color: context.textColor)
+                              AppLoadingIndicator.small(
+                                color: context.textColor,
+                              )
                             else
                               ShaderMask(
                                 shaderCallback: (bounds) =>
@@ -100,7 +104,7 @@ class ImageGeneratePromptSection extends StatelessWidget {
                                   AppAssets.imageIcon,
                                   height: context.h(17),
                                   width: context.w(17),
-                                  color: Colors.white,
+                                  color: context.iconColor,
                                   fit: BoxFit.contain,
                                 ),
                               ),
@@ -110,8 +114,12 @@ class ImageGeneratePromptSection extends StatelessWidget {
                                   AppColors.gradient.createShader(bounds),
                               blendMode: BlendMode.srcIn,
                               child: Text(
-                                vm.isGettingSuggestion ? 'Loading...' : 'AI Suggestion',
-                                style: context.appTextStyles?.imageGenerateAISuggestion,
+                                vm.isGettingSuggestion
+                                    ? 'Loading...'
+                                    : 'AI Suggestion',
+                                style: context
+                                    .appTextStyles
+                                    ?.imageGenerateAISuggestion,
                               ),
                             ),
                           ],

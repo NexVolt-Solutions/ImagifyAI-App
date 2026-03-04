@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
@@ -274,37 +277,82 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
               children: [
                 SafeArea(
                   child: ListView(
+                    physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,
                     padding: context.padSym(h: 20),
                     children: [
-                      Text(
-                        'Your Creation',
-                        style: context.appTextStyles?.imageCreatedTitle,
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: context.h(20)),
-                      Container(
-                        height: context.h(410),
-                        width: context.w(350),
-                        decoration: BoxDecoration(
-                          color: context.backgroundColor,
-                          borderRadius: BorderRadius.circular(
-                            context.radius(12),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Container(
+                            height: context.h(400),
+                            width: context.w(350),
+                            decoration: BoxDecoration(
+                              color: context.backgroundColor,
+                              borderRadius: BorderRadius.circular(
+                                context.radius(12),
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                context.radius(12),
+                              ),
+                              child: CreationImagePreview(
+                                imageUrl: imageUrl,
+                                viewModel: imageCreatedViewModel,
+                                elapsedTimeStream:
+                                    _elapsedTimeController?.stream,
+                                initialElapsed:
+                                    imageCreatedViewModel.elapsedPollingTime,
+                                isMounted: () => mounted,
+                              ),
+                            ),
                           ),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(
-                            context.radius(12),
+                          Positioned(
+                            bottom: context.h(12),
+                            right: context.w(12),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: AppColors.gradient,
+                                borderRadius: BorderRadius.circular(
+                                  context.radius(8),
+                                ),
+                              ),
+                              child: InkWell(
+                                onTap:
+                                    (imageUrl.isNotEmpty &&
+                                        imageUrl != 'null' &&
+                                        !imageCreatedViewModel.isPolling &&
+                                        !imageCreatedViewModel.isDownloading)
+                                    ? () => imageCreatedViewModel.saveToDevice(
+                                        context,
+                                      )
+                                    : null,
+                                child: Padding(
+                                  padding: EdgeInsets.all(context.w(8)),
+                                  child: imageCreatedViewModel.isDownloading
+                                      ? SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: AppLoadingIndicator.medium(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
+                                          ),
+                                        )
+                                      : Image.asset(
+                                          AppAssets.downloadIcon,
+                                          width: 24,
+                                          height: 24,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
+                                        ),
+                                ),
+                              ),
+                            ),
                           ),
-                          child: CreationImagePreview(
-                            imageUrl: imageUrl,
-                            viewModel: imageCreatedViewModel,
-                            elapsedTimeStream: _elapsedTimeController?.stream,
-                            initialElapsed:
-                                imageCreatedViewModel.elapsedPollingTime,
-                            isMounted: () => mounted,
-                          ),
-                        ),
+                        ],
                       ),
                       SizedBox(height: context.h(20)),
                       PromptEditorCard(

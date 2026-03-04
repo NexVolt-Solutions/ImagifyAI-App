@@ -5,7 +5,7 @@ import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 
-/// Row showing daily usage (X/5) and "Watch ad for +1" button.
+/// Row showing daily usage (X/10) and "Watch ad for +1" button.
 class LimitAndWatchAdRow extends StatelessWidget {
   const LimitAndWatchAdRow({super.key});
 
