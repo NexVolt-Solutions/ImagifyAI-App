@@ -190,7 +190,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
           if (kDebugMode) {
             print('✅ Image is ready! URL: ${updatedWallpaper.imageUrl}');
             print(
-              '⏱️ Total generation time: ${elapsedTime}s (${_pollingAttempts} polling attempts)',
+              '⏱️ Total generation time: ${elapsedTime}s ($_pollingAttempts polling attempts)',
             );
             print('📝 Preserved prompt: $preservedPrompt');
           }

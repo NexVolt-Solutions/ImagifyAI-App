@@ -21,6 +21,7 @@ class AuthRepository implements IAuthRepository {
 
   final ApiService _apiService;
 
+  @override
   Future<RegisterResponse> register({
     required String username,
     required String email,
@@ -49,7 +50,7 @@ class AuthRepository implements IAuthRepository {
       try {
         final response = RegisterResponse.fromJson(json);
         return response;
-      } catch (e, stackTrace) {
+      } catch (e) {
         // If parsing fails, check if there's an error message in the response
         final errorMsg =
             json['message']?.toString() ??
@@ -57,7 +58,7 @@ class AuthRepository implements IAuthRepository {
             'Failed to parse registration response';
         throw ApiException(errorMsg);
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       if (e is ApiException) {
         rethrow;
       }
@@ -65,6 +66,7 @@ class AuthRepository implements IAuthRepository {
     }
   }
 
+  @override
   Future<VerifyResponse> verifyEmail({required String code}) async {
     // Convert code string to integer to match API spec: {"code": 999999}
     final codeInt = int.tryParse(code) ?? 0;
@@ -77,11 +79,13 @@ class AuthRepository implements IAuthRepository {
     return VerifyResponse.fromJson(json);
   }
 
+  @override
   Future<Map<String, dynamic>> resendCode() async {
     final json = await _apiService.post(ApiConstants.resendCode);
     return json;
   }
 
+  @override
   Future<LoginResponse> login({
     required String email,
     required String password,
@@ -94,6 +98,7 @@ class AuthRepository implements IAuthRepository {
     return LoginResponse.fromJson(json);
   }
 
+  @override
   Future<RefreshResponse> refreshToken({required String refreshToken}) async {
     final json = await _apiService.post(
       ApiConstants.refresh,
@@ -103,6 +108,7 @@ class AuthRepository implements IAuthRepository {
     return RefreshResponse.fromJson(json);
   }
 
+  @override
   Future<ForgotPasswordResponse> forgotPassword({required String email}) async {
     final json = await _apiService.post(
       ApiConstants.forgotPassword,
@@ -112,6 +118,7 @@ class AuthRepository implements IAuthRepository {
     return ForgotPasswordResponse.fromJson(json);
   }
 
+  @override
   Future<LogoutResponse> signOut({required String refreshToken}) async {
     final json = await _apiService.post(
       ApiConstants.signOut,
@@ -121,6 +128,7 @@ class AuthRepository implements IAuthRepository {
     return LogoutResponse.fromJson(json);
   }
 
+  @override
   Future<User> getCurrentUser({
     required String accessToken,
     required String userId,
@@ -169,11 +177,12 @@ class AuthRepository implements IAuthRepository {
       }
 
       return user;
-    } catch (e, stackTrace) {
+    } catch (e) {
       rethrow;
     }
   }
 
+  @override
   Future<UpdateUserResponse> updateUser({
     String? firstName,
     String? lastName,
@@ -218,6 +227,7 @@ class AuthRepository implements IAuthRepository {
 
   // Update Username & Profile Image (multipart/form-data)
   // According to docs: PUT /users/{user_id}/profile
+  @override
   Future<UpdateUserResponse> updateUserProfile({
     String? username,
     File? profileImage,
@@ -257,6 +267,7 @@ class AuthRepository implements IAuthRepository {
     return UpdateUserResponse.fromJson(json);
   }
 
+  @override
   Future<UpdateProfilePictureResponse> updateProfilePicture({
     required File profileImage,
     required String accessToken,
@@ -288,6 +299,7 @@ class AuthRepository implements IAuthRepository {
     return UpdateProfilePictureResponse.fromJson(json);
   }
 
+  @override
   Future<UpdatePasswordResponse> updatePassword({
     required String oldPassword,
     required String password,
@@ -324,6 +336,7 @@ class AuthRepository implements IAuthRepository {
     return UpdatePasswordResponse.fromJson(json);
   }
 
+  @override
   Future<Map<String, dynamic>> verifyForgotOtp({required String code}) async {
     final json = await _apiService.post(
       ApiConstants.verifyForgotOtp,
@@ -332,6 +345,7 @@ class AuthRepository implements IAuthRepository {
     return json;
   }
 
+  @override
   Future<Map<String, dynamic>> setNewPassword({
     required String password,
     required String confirmPassword,
@@ -343,6 +357,7 @@ class AuthRepository implements IAuthRepository {
     return json;
   }
 
+  @override
   Future<Map<String, dynamic>> resetPassword({
     required String oldPassword,
     required String password,
@@ -367,6 +382,7 @@ class AuthRepository implements IAuthRepository {
     return json;
   }
 
+  @override
   Future<LoginResponse> googleSignIn({
     required String idToken,
     required String name,
@@ -382,6 +398,7 @@ class AuthRepository implements IAuthRepository {
     return LoginResponse.fromJson(json);
   }
 
+  @override
   Future<void> deleteAccount({
     required String userId,
     required String accessToken,

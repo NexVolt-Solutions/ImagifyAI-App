@@ -15,13 +15,11 @@ class AppTheme {
       colorScheme: ColorScheme.light(
         primary: AppColors.primeryColor, // Golden
         secondary: AppColors.lightGoldenAccent, // Brighter gold
-        surface: AppColors.lightSurface, // Warm cream
-        background: AppColors.lightBackground, // Warm ivory
+        surface: AppColors.lightSurface, // Warm ivory
         error: AppColors.errorColor,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.lightTextPrimary, // Dark brown
-        onBackground: AppColors.lightTextPrimary, // Dark brown
         onError: Colors.white,
       ),
 
@@ -205,12 +203,10 @@ class AppTheme {
         primary: AppColors.primeryColor,
         secondary: AppColors.lightPurple,
         surface: AppColors.containerColor,
-        background: AppColors.blackColor,
         error: AppColors.errorColor,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: Colors.white,
-        onBackground: Colors.white,
         onError: Colors.white,
       ),
 
@@ -1301,32 +1297,31 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
       onboardingTitle: onboardingTitle ?? this.onboardingTitle,
       onboardingSubtitle: onboardingSubtitle ?? this.onboardingSubtitle,
       onboardingButton: onboardingButton ?? this.onboardingButton,
-      profileName: profileName ?? this.profileName,
-      profileEmail: profileEmail ?? this.profileEmail,
-      profileListItemTitle: profileListItemTitle ?? this.profileListItemTitle,
+      profileName: profileName ?? profileName,
+      profileEmail: profileEmail ?? profileEmail,
+      profileListItemTitle: profileListItemTitle ?? profileListItemTitle,
       profileListItemSubtitle:
-          profileListItemSubtitle ?? this.profileListItemSubtitle,
-      profileScreenTitle: profileScreenTitle ?? this.profileScreenTitle,
-      profileScreenSubtitle:
-          profileScreenSubtitle ?? this.profileScreenSubtitle,
-      profileSectionTitle: profileSectionTitle ?? this.profileSectionTitle,
-      profileHelperText: profileHelperText ?? this.profileHelperText,
-      profileContactInfo: profileContactInfo ?? this.profileContactInfo,
-      profileCardTitle: profileCardTitle ?? this.profileCardTitle,
-      profileBodyText: profileBodyText ?? this.profileBodyText,
-      profileDateText: profileDateText ?? this.profileDateText,
-      customTextFieldLabel: customTextFieldLabel ?? this.customTextFieldLabel,
-      customTextFieldInput: customTextFieldInput ?? this.customTextFieldInput,
-      customButtonText: customButtonText ?? this.customButtonText,
-      normalTextTitle: normalTextTitle ?? this.normalTextTitle,
-      normalTextSubtitle: normalTextSubtitle ?? this.normalTextSubtitle,
-      promptContainerText: promptContainerText ?? this.promptContainerText,
-      sizeContainerText: sizeContainerText ?? this.sizeContainerText,
-      customTextRichText1: customTextRichText1 ?? this.customTextRichText1,
-      customTextRichText2: customTextRichText2 ?? this.customTextRichText2,
-      passwordTextStyle: passwordTextStyle ?? this.passwordTextStyle,
-      homeAlignText: homeAlignText ?? this.homeAlignText,
-      alignTextStyle: alignTextStyle ?? this.alignTextStyle,
+          profileListItemSubtitle ?? profileListItemSubtitle,
+      profileScreenTitle: profileScreenTitle ?? profileScreenTitle,
+      profileScreenSubtitle: profileScreenSubtitle ?? profileScreenSubtitle,
+      profileSectionTitle: profileSectionTitle ?? profileSectionTitle,
+      profileHelperText: profileHelperText ?? profileHelperText,
+      profileContactInfo: profileContactInfo ?? profileContactInfo,
+      profileCardTitle: profileCardTitle ?? profileCardTitle,
+      profileBodyText: profileBodyText ?? profileBodyText,
+      profileDateText: profileDateText ?? profileDateText,
+      customTextFieldLabel: customTextFieldLabel ?? customTextFieldLabel,
+      customTextFieldInput: customTextFieldInput ?? customTextFieldInput,
+      customButtonText: customButtonText ?? customButtonText,
+      normalTextTitle: normalTextTitle ?? normalTextTitle,
+      normalTextSubtitle: normalTextSubtitle ?? normalTextSubtitle,
+      promptContainerText: promptContainerText ?? promptContainerText,
+      sizeContainerText: sizeContainerText ?? sizeContainerText,
+      customTextRichText1: customTextRichText1 ?? customTextRichText1,
+      customTextRichText2: customTextRichText2 ?? customTextRichText2,
+      passwordTextStyle: passwordTextStyle ?? passwordTextStyle,
+      homeAlignText: homeAlignText ?? homeAlignText,
+      alignTextStyle: alignTextStyle ?? alignTextStyle,
     );
   }
 

@@ -223,17 +223,17 @@ class SignUpViewModel extends ChangeNotifier {
 
       errorMessage = e.message;
       _showMessage(context, e.message);
-    } on SocketException catch (e) {
+    } on SocketException {
       errorMessage =
           'No internet connection. Please check your network and try again.';
       _showMessage(context, errorMessage!);
     } on HttpException catch (e) {
       errorMessage = 'Network error: ${e.message}';
       _showMessage(context, errorMessage!);
-    } on FormatException catch (e) {
+    } on FormatException {
       errorMessage = 'Invalid response from server. Please try again.';
       _showMessage(context, errorMessage!);
-    } catch (e, stackTrace) {
+    } catch (e) {
       final errorMsg = e.toString();
       if (errorMsg.contains('Exception') || errorMsg.contains('Error')) {
         errorMessage = errorMsg.split(':').last.trim();

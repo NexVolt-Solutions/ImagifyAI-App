@@ -64,7 +64,6 @@ class ProfileMenuList extends StatelessWidget {
                       viewModel.setNotificationsEnabled(val);
                     }
                   },
-                  activeColor: context.textColor,
                 )
               : Icon(
                   Icons.arrow_forward_ios,

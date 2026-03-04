@@ -172,8 +172,9 @@ class _LibraryState extends State<Library> {
                                                 child,
                                                 loadingProgress,
                                               ) {
-                                                if (loadingProgress == null)
+                                                if (loadingProgress == null) {
                                                   return child;
+                                                }
                                                 return Container(
                                                   color: context.surfaceColor,
                                                   child: Center(

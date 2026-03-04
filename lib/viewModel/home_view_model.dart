@@ -585,7 +585,7 @@ class HomeViewModel extends ChangeNotifier {
       if (kDebugMode) {
         print('✅ Styles loaded successfully');
         print('Total styles: ${_stylesMap.length}');
-        print('Style names: ${styles}');
+        print('Style names: $styles');
         print('═══════════════════════════════════════════════════════════');
         print('=== LOAD STYLES (HOME): SUCCESS ===');
         print('═══════════════════════════════════════════════════════════');

@@ -118,7 +118,7 @@ class LibraryViewModel extends ChangeNotifier {
       } else {
         hasMorePages = false;
       }
-    } on ApiException catch (e) {
+    } on ApiException {
       // Don't show error to user for load more failures
     } catch (e) {
       // Don't show error to user for load more failures
