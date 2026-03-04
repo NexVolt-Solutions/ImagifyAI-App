@@ -152,9 +152,7 @@ class _SignInState extends State<SignIn> {
                                   ),
                                   width: context.w(350),
                                   gradient: AppColors.gradient,
-                                  text: signInViewModel.isLoading
-                                      ? 'Signing you in...'
-                                      : 'Sign In',
+                                  text: 'Sign In',
                                   isLoading: signInViewModel.isLoading,
                                   iconWidth: null,
                                   iconHeight: null,

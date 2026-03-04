@@ -1,6 +1,6 @@
 # Firebase Integration Checklist
 
-Your app currently **does not** have Firebase connected. Analytics and other Firebase features will only work after you complete the steps below.
+Your app may already have Firebase connected (e.g. `Firebase.initializeApp()` in `main.dart` and `google-services.json` / `GoogleService-Info.plist` in place). If so, use this doc to verify or add features. If not, follow the steps below.
 
 ---
 

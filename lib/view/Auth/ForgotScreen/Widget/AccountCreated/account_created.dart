@@ -7,8 +7,8 @@ import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 
-class AccoundCreated extends StatelessWidget {
-  const AccoundCreated({super.key});
+class AccountCreated extends StatelessWidget {
+  const AccountCreated({super.key});
 
   @override
   Widget build(BuildContext context) {

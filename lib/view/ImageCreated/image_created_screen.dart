@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,7 +7,10 @@ import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
+import 'package:imagifyai/Core/services/generation_limit_service.dart';
+import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 import 'package:imagifyai/viewModel/image_created_view_model.dart';
 import 'package:provider/provider.dart';
@@ -70,10 +72,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
             _pollingTimer = null;
             _elapsedTimeController?.close();
             _elapsedTimeController = null;
-            if (kDebugMode) {
-              print('✅ Image already available, skipping polling');
-              print('Image URL: ${args.imageUrl}');
-            }
           }
         }
       }
@@ -142,11 +140,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
       // If image is not ready, start polling
       if (currentWallpaper.imageUrl.isEmpty ||
           currentWallpaper.imageUrl == 'null') {
-        if (kDebugMode) {
-          print(
-            '🔄 Wallpaper ID changed, restarting polling for new wallpaper: ${currentWallpaper.id}',
-          );
-        }
         _startPolling(viewModel);
       }
     } else if (viewModel.isPolling &&
@@ -155,14 +148,76 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
       // Wallpaper ID didn't change but polling should be active
       // Make sure polling is running
       if (_pollingTimer == null || !_pollingTimer!.isActive) {
-        if (kDebugMode) {
-          print(
-            '🔄 Polling should be active but timer not running, restarting...',
-          );
-        }
         _startPolling(viewModel);
       }
     }
+  }
+
+  Future<void> _onTryAgainTapped(BuildContext context) async {
+    final can = await GenerationLimitService.canGenerate();
+    if (!mounted) return;
+    final viewModel = context.read<ImageCreatedViewModel>();
+    final editedPrompt = _promptController.text.trim();
+
+    Future<void> doRecreate() async {
+      await viewModel.recreate(context, editedPrompt: editedPrompt);
+      if (mounted && editedPrompt.isNotEmpty) {
+        final wp = viewModel.wallpaper;
+        if (wp != null && wp.prompt == editedPrompt) {
+          _promptController.text = editedPrompt;
+        }
+      }
+    }
+
+    if (can) {
+      await doRecreate();
+      return;
+    }
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          'Daily limit reached',
+          style: context.appTextStyles?.imageGenerateSectionTitle,
+        ),
+        content: Text(
+          'You\'ve used your free generations for today. Watch a short ad for 1 more?',
+          style: context.appTextStyles?.imageGeneratePromptText,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.primaryColor),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              final shown = await RewardedAdService.showRewardedAd(
+                onReward: () {
+                  if (dialogContext.mounted) Navigator.pop(dialogContext);
+                  doRecreate();
+                },
+              );
+              if (!dialogContext.mounted) return;
+              if (!shown) {
+                SnackbarUtil.showTopSnackBar(
+                  dialogContext,
+                  'Ad not ready. Try again in a moment.',
+                  isError: true,
+                );
+              }
+            },
+            child: Text(
+              'Watch ad',
+              style: TextStyle(color: context.primaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -236,6 +291,17 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                     SvgPicture.asset(
                       AppAssets.imagifyaiLogo,
                       fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      left: 0,
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Icon(
+                          Icons.arrow_back_ios,
+                          color: Theme.of(context).iconTheme.color,
+                          size: 20,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -388,20 +454,6 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                           errorMsg =
                                               'Connection error\nPlease check your internet';
                                           isNetworkError = true;
-                                        }
-
-                                        if (kDebugMode) {
-                                          print(
-                                            '❌ Error loading image: $error',
-                                          );
-                                          print('Image URL: $imageUrl');
-                                          print(
-                                            'Error type: ${error.runtimeType}',
-                                          );
-                                          print(
-                                            'Is network error: $isNetworkError',
-                                          );
-                                          print('Retry count: $_retryCount');
                                         }
 
                                         // Auto-retry for network errors (up to 3 times)
@@ -613,47 +665,41 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                     ),
                     SizedBox(height: context.h(16)),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CustomButton(
-                          onPressed: () async {
-                            final editedPrompt = _promptController.text.trim();
-                            await imageCreatedViewModel.recreate(
-                              context,
-                              editedPrompt: editedPrompt,
-                            );
-                            // Update prompt controller with the edited prompt after recreation
-                            // This ensures the text field shows the edited prompt even if API returns old one
-                            if (mounted && editedPrompt.isNotEmpty) {
-                              // The wallpaper object will have the edited prompt, but we keep the controller in sync
-                              final wp = imageCreatedViewModel.wallpaper;
-                              if (wp != null && wp.prompt == editedPrompt) {
-                                _promptController.text = editedPrompt;
-                              }
-                            }
-                          },
-                          width: context.w(165),
-                          iconHeight: 24,
-                          iconWidth: 24,
-                          gradient: AppColors.gradient,
-                          text: imageCreatedViewModel.isLoading
-                              ? 'Regenerating...'
-                              : 'Try Again',
-                          isLoading: imageCreatedViewModel.isLoading,
-                          icon: AppAssets.reCreateIcon,
+                        Expanded(
+                          child: CustomButton(
+                            onPressed: () => _onTryAgainTapped(context),
+                            iconHeight: 24,
+                            iconWidth: 24,
+                            gradient: AppColors.gradient,
+                            text: 'Try Again',
+                            isLoading: imageCreatedViewModel.isLoading,
+                            icon: AppAssets.reCreateIcon,
+                          ),
                         ),
-                        CustomButton(
-                          onPressed: () =>
-                              imageCreatedViewModel.showDownloadDialog(context),
-                          width: context.w(165),
-                          iconHeight: 24,
-                          iconWidth: 24,
-                          gradient: AppColors.gradient,
-                          text: imageCreatedViewModel.isDownloading
-                              ? 'Preparing...'
-                              : 'Get Wallpaper',
-                          isLoading: imageCreatedViewModel.isDownloading,
-                          icon: AppAssets.downloadIcon,
+                        SizedBox(width: context.w(12)),
+                        Expanded(
+                          child: CustomButton(
+                            onPressed: () =>
+                                imageCreatedViewModel.saveToDevice(context),
+                            iconHeight: 24,
+                            iconWidth: 24,
+                            gradient: AppColors.gradient,
+                            text: 'Save',
+                            isLoading: imageCreatedViewModel.isDownloading,
+                            icon: AppAssets.downloadIcon,
+                          ),
+                        ),
+                        SizedBox(width: context.w(12)),
+                        Expanded(
+                          child: CustomButton(
+                            onPressed: () =>
+                                imageCreatedViewModel.share(context),
+                            iconHeight: 24,
+                            iconWidth: 24,
+                            gradient: AppColors.gradient,
+                            text: 'Share',
+                          ),
                         ),
                       ],
                     ),

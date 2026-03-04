@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
@@ -70,18 +69,9 @@ class OnBoardingScreenViewModel extends ChangeNotifier {
   /// Mark onboarding as completed and save to storage
   Future<void> completeOnboarding() async {
     try {
-      final saved = await TokenStorageService.setOnboardingCompleted(true);
-      if (kDebugMode) {
-        if (saved) {
-          print('✅ Onboarding marked as completed');
-        } else {
-          print('❌ Failed to save onboarding completion status');
-        }
-      }
+      await TokenStorageService.setOnboardingCompleted(true);
     } catch (e) {
-      if (kDebugMode) {
-        print('Error completing onboarding: $e');
-      }
+      // ignore
     }
   }
 }

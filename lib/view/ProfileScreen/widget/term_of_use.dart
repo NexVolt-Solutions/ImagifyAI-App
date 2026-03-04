@@ -54,7 +54,7 @@ class TermOfUse extends StatelessWidget {
             Align(
               alignment: Alignment.topLeft,
               child: Text(
-                "Last updated: [Insert Date]",
+                "Last updated: February 2025",
                 style: context.appTextStyles?.profileDateText,
                 textAlign: TextAlign.start,
               ),
@@ -250,7 +250,7 @@ class TermOfUse extends StatelessWidget {
             Align(
               alignment: Alignment.topLeft,
               child: Text(
-                'If you have questions about these Terms, please contact us at: 📧 support@imagifyai.com 📍 [Insert office address, if any]',
+                'If you have questions about these Terms, please contact us at: 📧 support@imagifyai.com',
                 style: context.appTextStyles?.profileBodyText,
                 textAlign: TextAlign.start,
               ),

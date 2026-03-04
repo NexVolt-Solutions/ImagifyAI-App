@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
@@ -20,40 +19,22 @@ class SplashScreenViewModel extends ChangeNotifier {
       }
     }
 
-    Future.delayed(const Duration(seconds: 3), () async {
+    Future.delayed(const Duration(milliseconds: 800), () async {
       if (context.mounted) {
         if (isLoggedIn) {
-          // User is logged in, navigate to home screen
-          if (kDebugMode) {
-            print('=== SPLASH SCREEN: USER IS LOGGED IN ===');
-            print('Navigating to BottomNavScreen (Home)...');
-          }
           Navigator.pushReplacementNamed(context, RoutesName.BottomNavScreen);
         } else {
-          // Check if onboarding has been completed
           bool onboardingCompleted = false;
           try {
             onboardingCompleted =
                 await TokenStorageService.isOnboardingCompleted();
           } catch (e) {
-            if (kDebugMode) {
-              print('Error checking onboarding status: $e');
-            }
+            // ignore
           }
 
           if (onboardingCompleted) {
-            // Onboarding completed, navigate to sign in screen
-            if (kDebugMode) {
-              print('=== SPLASH SCREEN: ONBOARDING COMPLETED ===');
-              print('Navigating to SignInScreen...');
-            }
             Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
           } else {
-            // Onboarding not completed, show onboarding screen
-            if (kDebugMode) {
-              print('=== SPLASH SCREEN: ONBOARDING NOT COMPLETED ===');
-              print('Navigating to OnboardingScreen...');
-            }
             Navigator.pushReplacementNamed(
               context,
               RoutesName.OnboardingScreen,

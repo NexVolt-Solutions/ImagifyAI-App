@@ -20,6 +20,52 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _hasLoaded = false;
 
+  Future<void> _showSignOutConfirmation(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(
+          'Sign out',
+          style: TextStyle(
+            color: context.textColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to sign out?',
+          style: TextStyle(color: context.textColor),
+        ),
+        backgroundColor: context.backgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(context.radius(12)),
+          side: BorderSide(color: context.primaryColor, width: 2),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.subtitleColor),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(
+              'Sign out',
+              style: TextStyle(
+                color: context.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      context.read<SignInViewModel>().logout(context);
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -163,9 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 SizedBox(height: context.h(20)),
                 CustomButton(
-                  onPressed: () =>
-                      context.read<SignInViewModel>().logout(context),
-
+                  onPressed: () => _showSignOutConfirmation(context),
                   width: context.w(350),
                   gradient: AppColors.gradient,
                   text: 'Sign out',

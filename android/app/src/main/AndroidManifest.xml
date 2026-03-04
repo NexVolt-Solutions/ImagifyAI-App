@@ -39,6 +39,10 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- AdMob App ID (from secrets.properties or key.properties ADMOB_APP_ID) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${ADMOB_APP_ID}"/>
         <!-- Google Sign-In: Web Client ID from imagifyai-f8cad set in code (ApiConstants.googleWebClientId). -->
     </application>
     <!-- Required to query activities that can process text, see:

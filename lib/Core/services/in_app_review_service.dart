@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
 import 'package:in_app_review/in_app_review.dart';
@@ -59,9 +58,8 @@ class InAppReviewService {
       if (!await _inAppReview.isAvailable()) return;
       await prefs.setBool(_keyReviewRequested, true);
       await _inAppReview.requestReview();
-      if (kDebugMode) print('InAppReview: requested (after soft feedback yes)');
     } catch (e) {
-      if (kDebugMode) print('InAppReview requestReviewIfEligible: $e');
+      // request review failed
     }
   }
 
@@ -94,11 +92,8 @@ class InAppReviewService {
         _keyFirstOpenDate,
         DateTime.now().toIso8601String(),
       );
-      if (kDebugMode) {
-        print('InAppReview: first open date recorded');
-      }
     } catch (e) {
-      if (kDebugMode) print('InAppReview recordFirstOpen: $e');
+      // record first open failed
     }
   }
 
@@ -114,11 +109,6 @@ class InAppReviewService {
       int count = prefs.getInt(_keyCompletedGenerations) ?? 0;
       count++;
       await prefs.setInt(_keyCompletedGenerations, count);
-
-      if (kDebugMode) {
-        print('InAppReview: completed generations = $count');
-      }
-
       AnalyticsService.logImageGenerated(count);
 
       final isMilestone = generationMilestones.contains(count);
@@ -129,8 +119,6 @@ class InAppReviewService {
         } else {
           await prefs.setBool(_keyReviewRequested, true);
           await _inAppReview.requestReview();
-          if (kDebugMode)
-            print('InAppReview: requested at milestone $count generations');
         }
         return;
       }
@@ -144,7 +132,7 @@ class InAppReviewService {
         if (liked == true) await requestReviewIfEligible();
       }
     } catch (e) {
-      if (kDebugMode) print('InAppReview recordCompletedGeneration: $e');
+      // record completed generation failed
     }
   }
 
@@ -171,13 +159,8 @@ class InAppReviewService {
 
       await prefs.setBool(_keyReviewRequested, true);
       await _inAppReview.requestReview();
-      if (kDebugMode) {
-        print(
-          'InAppReview: requested after $daysSinceFirstOpen days + $generationCount generations',
-        );
-      }
     } catch (e) {
-      if (kDebugMode) print('InAppReview checkFiveDay: $e');
+      // check five day failed
     }
   }
 
@@ -198,13 +181,6 @@ class InAppReviewService {
       await prefs.setStringList(_keyTriedStyles, tried);
 
       AnalyticsService.logStyleSelected(styleName, true);
-
-      if (kDebugMode) {
-        print(
-          'InAppReview: new style tried "$styleName" (total ${tried.length})',
-        );
-      }
-
       if (!await _inAppReview.isAvailable()) return;
 
       if (context != null && context.mounted) {
@@ -213,10 +189,9 @@ class InAppReviewService {
       } else {
         await prefs.setBool(_keyReviewRequested, true);
         await _inAppReview.requestReview();
-        if (kDebugMode) print('InAppReview: requested after trying new style');
       }
     } catch (e) {
-      if (kDebugMode) print('InAppReview recordStyleTried: $e');
+      // record style tried failed
     }
   }
 
@@ -233,10 +208,9 @@ class InAppReviewService {
       } else {
         await prefs.setBool(_keyReviewRequested, true);
         await _inAppReview.requestReview();
-        if (kDebugMode) print('InAppReview: requested after share');
       }
     } catch (e) {
-      if (kDebugMode) print('InAppReview recordShare: $e');
+      // record share failed
     }
   }
 
@@ -249,9 +223,8 @@ class InAppReviewService {
 
       await prefs.setBool(_keyReviewRequested, true);
       await _inAppReview.requestReview();
-      if (kDebugMode) print('InAppReview: requested after Pro upgrade');
     } catch (e) {
-      if (kDebugMode) print('InAppReview recordProUpgrade: $e');
+      // record Pro upgrade failed
     }
   }
 
@@ -264,20 +237,12 @@ class InAppReviewService {
       int count = prefs.getInt(_keyAppOpenCount) ?? 0;
       count++;
       await prefs.setInt(_keyAppOpenCount, count);
-
-      if (kDebugMode && count % appOpenMilestone == 0) {
-        print(
-          'InAppReview: app open count = $count (milestone $appOpenMilestone)',
-        );
-      }
-
       if (count % appOpenMilestone == 0 && await _inAppReview.isAvailable()) {
         await prefs.setBool(_keyReviewRequested, true);
         await _inAppReview.requestReview();
-        if (kDebugMode) print('InAppReview: requested after $count app opens');
       }
     } catch (e) {
-      if (kDebugMode) print('InAppReview recordAppOpen: $e');
+      // record app open failed
     }
   }
 }

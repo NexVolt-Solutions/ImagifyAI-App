@@ -92,9 +92,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                           formKey: _formKey,
                         ),
                         gradient: AppColors.gradient,
-                        text: forgotPasswordViewModel.isLoading
-                            ? 'Sending...'
-                            : 'Send Reset Code',
+                        text: 'Send Reset Code',
                         isLoading: forgotPasswordViewModel.isLoading,
                       ),
                     ],

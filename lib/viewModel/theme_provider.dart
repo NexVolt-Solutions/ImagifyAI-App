@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider extends ChangeNotifier {
@@ -26,25 +25,15 @@ class ThemeProvider extends ChangeNotifier {
       if (savedTheme != null) {
         _themeMode = ThemeMode.values.firstWhere(
           (mode) => mode.toString() == savedTheme,
-          orElse: () => ThemeMode.dark, // Fallback to dark if saved value is invalid
+          orElse: () => ThemeMode.dark,
         );
-        if (kDebugMode) {
-          print('✅ Theme loaded from storage: $_themeMode');
-        }
         notifyListeners();
       } else {
-        // No saved preference - ensure default is dark
         _themeMode = ThemeMode.dark;
-        if (kDebugMode) {
-          print('✅ No saved theme preference, using default: $_themeMode');
-        }
         notifyListeners();
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error loading theme: $e');
-      }
-      // On error, ensure default is dark
+      _themeMode = ThemeMode.dark;
       _themeMode = ThemeMode.dark;
       notifyListeners();
     }
@@ -55,13 +44,8 @@ class ThemeProvider extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_themeKey, _themeMode.toString());
-      if (kDebugMode) {
-        print('✅ Theme saved to storage: $_themeMode');
-      }
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error saving theme: $e');
-      }
+      // ignore
     }
   }
 
@@ -71,9 +55,6 @@ class ThemeProvider extends ChangeNotifier {
       _themeMode = mode;
       await _saveThemeMode();
       notifyListeners();
-      if (kDebugMode) {
-        print('🔄 Theme changed to: $mode');
-      }
     }
   }
 

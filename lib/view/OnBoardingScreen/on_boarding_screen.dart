@@ -34,6 +34,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: [
                 SvgPicture.asset(AppAssets.starLogo, fit: BoxFit.cover),
                 SvgPicture.asset(AppAssets.imagifyaiLogo, fit: BoxFit.cover),
+                Positioned(
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: () async {
+                      await viewModel.completeOnboarding();
+                      if (context.mounted) {
+                        Navigator.pushReplacementNamed(
+                          context,
+                          RoutesName.SignInScreen,
+                        );
+                      }
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.all(context.w(16)),
+                      child: Text(
+                        'Skip',
+                        style: context.appTextStyles?.onboardingButton,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

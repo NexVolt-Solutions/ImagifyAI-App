@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
-import 'package:imagifyai/view/Auth/ForgotScreen/Widget/AccountCreated/accound_created.dart';
+import 'package:imagifyai/view/Auth/ForgotScreen/Widget/AccountCreated/account_created.dart';
 import 'package:imagifyai/view/Auth/ForgotScreen/Widget/ConfirmEmail/confirm_email.dart';
 import 'package:imagifyai/view/Auth/ForgotScreen/Widget/SetNewPassword/set_new_password_screen.dart';
 import 'package:imagifyai/view/Auth/ForgotScreen/Widget/Verification/forgot_verification_screen.dart';
@@ -13,12 +13,13 @@ import 'package:imagifyai/view/ImageCreated/image_created_screen.dart';
 import 'package:imagifyai/view/ImageGenerate/image_generate_screen.dart';
 import 'package:imagifyai/view/OnBoardingScreen/on_boarding_screen.dart';
 import 'package:imagifyai/view/ProfileScreen/profile_screen.dart';
+import 'package:imagifyai/view/ProfileScreen/widget/change_password_screen.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/contact_us.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/edit_profile.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/library.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/privacy_policy.dart';
 import 'package:imagifyai/view/ProfileScreen/widget/term_of_use.dart';
-import 'package:imagifyai/view/SplahScrren/splash_screen.dart';
+import 'package:imagifyai/view/SplashScreen/splash_screen.dart';
 import 'package:imagifyai/view/Verification/verification.dart';
 
 class Routes {
@@ -110,14 +111,19 @@ class Routes {
       case RoutesName.AccountCreatedScreen:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => AccoundCreated(),
+          builder: (_) => const AccountCreated(),
         );
       case RoutesName.LibraryScreen:
         return MaterialPageRoute(settings: settings, builder: (_) => Library());
+      case RoutesName.ChangePasswordScreen:
+        return MaterialPageRoute(
+          settings: settings,
+          builder: (_) => const ChangePasswordScreen(),
+        );
       default:
         return MaterialPageRoute(
           settings: settings,
-          builder: (_) => Scaffold(
+          builder: (ctx) => Scaffold(
             body: Stack(
               children: [
                 const Center(
@@ -136,6 +142,7 @@ class Routes {
                   top: 50,
                   left: 20,
                   child: InkWell(
+                    onTap: () => Navigator.of(ctx).pop(),
                     child: const Icon(
                       Icons.arrow_back_ios,
                       color: Colors.black,

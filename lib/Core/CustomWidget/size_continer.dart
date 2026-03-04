@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
-import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class SizeContiner extends StatelessWidget {

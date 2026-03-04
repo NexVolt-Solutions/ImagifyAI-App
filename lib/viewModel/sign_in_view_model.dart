@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
@@ -39,28 +38,16 @@ class SignInViewModel extends ChangeNotifier {
   Future<bool> refreshTokenSilently() async {
     // If refresh token is not in memory, try loading from storage
     if ((_refreshToken ?? '').isEmpty) {
-      if (kDebugMode) {
-        print('⚠️ Refresh token not in memory, trying to load from storage...');
-      }
       try {
         final refreshTokenFromStorage =
             await TokenStorageService.getRefreshToken();
         if (refreshTokenFromStorage != null &&
             refreshTokenFromStorage.isNotEmpty) {
           _refreshToken = refreshTokenFromStorage;
-          if (kDebugMode) {
-            print('✅ Refresh token loaded from storage');
-          }
         } else {
-          if (kDebugMode) {
-            print('⚠️ No refresh token available for silent refresh');
-          }
           return false;
         }
       } catch (e) {
-        if (kDebugMode) {
-          print('❌ Error loading refresh token from storage: $e');
-        }
         return false;
       }
     }
@@ -72,9 +59,6 @@ class SignInViewModel extends ChangeNotifier {
 
       // Check if we got valid tokens
       if (response.accessToken == null || response.accessToken!.isEmpty) {
-        if (kDebugMode) {
-          print('❌ Refresh response missing access token');
-        }
         // Clear invalid tokens
         _accessToken = null;
         _refreshToken = null;
@@ -93,95 +77,33 @@ class SignInViewModel extends ChangeNotifier {
         // Save userId from refresh response if provided (preferred source)
         String? userIdToSave = response.userId;
 
-        // If not in response, try to extract from JWT token
         if (userIdToSave == null || userIdToSave.isEmpty) {
-          if (kDebugMode) {
-            print(
-              '⚠️  User ID not in refresh response, extracting from new JWT...',
-            );
-          }
           try {
             userIdToSave = JwtDecoder.getUserId(_accessToken!);
-            if (userIdToSave != null && userIdToSave.isNotEmpty) {
-              if (kDebugMode) {
-                print('✅ User ID extracted from new JWT: $userIdToSave');
-              }
-            } else {
-              if (kDebugMode) {
-                print('❌ User ID not found in new JWT token');
-              }
-            }
           } catch (e) {
-            if (kDebugMode) {
-              print('❌ Error extracting userId from new JWT: $e');
-            }
-          }
-        } else {
-          if (kDebugMode) {
-            print('✅ User ID from refresh response: $userIdToSave');
+            // ignore
           }
         }
 
-        // Save userId if we found it (from response or JWT)
         if (userIdToSave != null && userIdToSave.isNotEmpty) {
           await TokenStorageService.saveUserId(userIdToSave);
-          if (kDebugMode) {
-            print('✅ User ID saved to storage: $userIdToSave');
-          }
         } else {
-          // If still no userId, check if we have one in storage already
-          final existingUserId = await TokenStorageService.getUserId();
-          if (existingUserId == null || existingUserId.isEmpty) {
-            if (kDebugMode) {
-              print('⚠️  Warning: No user ID available after token refresh');
-            }
-          } else {
-            if (kDebugMode) {
-              print('✅ Using existing user ID from storage: $existingUserId');
-            }
-          }
+          await TokenStorageService.getUserId();
         }
       }
 
-      if (kDebugMode) {
-        print('✅ Token refreshed silently');
-      }
       notifyListeners();
       return true;
     } on ApiException catch (e) {
-      if (kDebugMode) {
-        print('❌ Failed to refresh token silently: ${e.message}');
-        print('   Status code: ${e.statusCode}');
-      }
-
-      // Only clear tokens on authentication errors (401, 403), not server errors (500, 503, etc.)
-      // Server errors might be temporary and we don't want to log the user out
       if (e.statusCode == 401 || e.statusCode == 403) {
-        if (kDebugMode) {
-          print('⚠️  Authentication error during refresh, clearing tokens...');
-        }
-        // Clear invalid tokens on authentication failure
         _accessToken = null;
         _refreshToken = null;
         await TokenStorageService.clearTokens();
         notifyListeners();
         return false;
-      } else {
-        // Server error (500, 503, etc.) - don't clear tokens, might be temporary
-        if (kDebugMode) {
-          print(
-            '⚠️  Server error during refresh (${e.statusCode}), keeping existing tokens',
-          );
-          print('   This might be a temporary server issue');
-        }
-        // Don't clear tokens on server errors - they might still be valid
-        return false;
       }
+      return false;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Unexpected error refreshing token silently: $e');
-      }
-
       return false;
     }
   }
@@ -193,9 +115,6 @@ class SignInViewModel extends ChangeNotifier {
     // If "Remember Me" is unchecked, clear saved email
     if (!rememberMe) {
       TokenStorageService.clearRememberedEmail();
-      if (kDebugMode) {
-        print('✅ Remembered email cleared (Remember Me unchecked)');
-      }
     }
   }
 
@@ -207,18 +126,11 @@ class SignInViewModel extends ChangeNotifier {
 
     // Validate form - if validation fails, stop here
     if (formKey.currentState == null) {
-      if (kDebugMode) {
-        print('⚠️ Form key state is null');
-      }
       return;
     }
 
     final isValid = formKey.currentState!.validate();
     if (!isValid) {
-      if (kDebugMode) {
-        print('❌ Form validation failed - preventing submission');
-        print('Email: ${emailController.text.trim()}');
-      }
       return;
     }
 
@@ -261,54 +173,13 @@ class SignInViewModel extends ChangeNotifier {
                 decoded['id']?.toString();
           }
         } catch (e) {
-          if (kDebugMode) {
-            print('❌ Failed to decode JWT: $e');
-          }
+          // ignore
         }
       }
 
-      // Save user_id if found in either response or JWT
       final userIdToSave = userIdFromResponse ?? userIdFromJwt;
       if (userIdToSave != null && userIdToSave.isNotEmpty) {
         await TokenStorageService.saveUserId(userIdToSave);
-      }
-
-      if (kDebugMode) {
-        print('=== LOGIN SUCCESSFUL ===');
-        print(
-          'Access token received: ${_accessToken != null && _accessToken!.isNotEmpty}',
-        );
-        print(
-          'Refresh token received: ${_refreshToken != null && _refreshToken!.isNotEmpty}',
-        );
-        print('Access token length: ${_accessToken?.length ?? 0}');
-        print('Login response data: ${response.data}');
-        print('=== JWT TOKEN PAYLOAD ===');
-        if (_accessToken != null && _accessToken!.isNotEmpty) {
-          try {
-            final decoded = JwtDecoder.decode(_accessToken!);
-            if (decoded != null) {
-              print('JWT Payload keys: ${decoded.keys.toList()}');
-              print('JWT Payload: $decoded');
-            }
-          } catch (e) {
-            print('❌ Failed to decode JWT: $e');
-          }
-        }
-        if (userIdToSave != null && userIdToSave.isNotEmpty) {
-          print('=== USER ID SAVED ===');
-          print('User ID: $userIdToSave');
-          print('Saved: true');
-          print('✅ User ID saved to storage: $userIdToSave');
-          print(
-            '   Source: ${userIdFromResponse != null ? "Login Response" : "JWT Token"}',
-          );
-        } else {
-          print(
-            '❌ CRITICAL: User ID not found in login response or JWT token!',
-          );
-          print('❌ Cannot fetch user profile without user_id');
-        }
       }
 
       // Save tokens to SharedPreferences
@@ -319,39 +190,21 @@ class SignInViewModel extends ChangeNotifier {
       // Save email if "Remember Me" is checked
       if (rememberMe) {
         await TokenStorageService.saveRememberedEmail(email);
-        if (kDebugMode) {
-          print('✅ Email saved for "Remember Me": $email');
-        }
       } else {
-        // Clear remembered email if "Remember Me" is unchecked
         await TokenStorageService.clearRememberedEmail();
-        if (kDebugMode) {
-          print('✅ Remembered email cleared (Remember Me unchecked)');
-        }
       }
 
-      // Fetch and save user data after successful login
-      if (userIdToSave != null && 
-          userIdToSave.isNotEmpty && 
-          _accessToken != null && 
+      if (userIdToSave != null &&
+          userIdToSave.isNotEmpty &&
+          _accessToken != null &&
           _accessToken!.isNotEmpty) {
         try {
-          if (kDebugMode) {
-            print('=== FETCHING USER DATA AFTER LOGIN ===');
-          }
-          // User data is automatically saved to cache in getCurrentUser
           await _authRepository.getCurrentUser(
             accessToken: _accessToken!,
             userId: userIdToSave,
           );
-          if (kDebugMode) {
-            print('✅ User data fetched and cached after login');
-          }
         } catch (e) {
-          if (kDebugMode) {
-            print('⚠️ Failed to fetch user data after login: $e');
-            print('   User can still use the app, data will be fetched when needed');
-          }
+          // User can still use the app, data will be fetched when needed
         }
       }
 
@@ -396,13 +249,8 @@ class SignInViewModel extends ChangeNotifier {
       try {
         await googleSignIn.signOut();
         await googleSignIn.disconnect();
-        if (kDebugMode) {
-          print('✅ Google Sign-In cache cleared to force account picker');
-        }
       } catch (e) {
-        if (kDebugMode) {
-          print('⚠️ Ignoring Google signOut/disconnect error: $e');
-        }
+        // Ignore signOut/disconnect errors
       }
 
       // Sign in with Google (will now show the account picker)
@@ -420,46 +268,7 @@ class SignInViewModel extends ChangeNotifier {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      if (kDebugMode) {
-        print('=== GOOGLE AUTH DETAILS ===');
-        print('ID Token: ${googleAuth.idToken != null ? "Present" : "NULL"}');
-        print(
-          'Access Token: ${googleAuth.accessToken != null ? "Present" : "NULL"}',
-        );
-        print('Email: ${googleUser.email}');
-        print('Display Name: ${googleUser.displayName}');
-        print(
-          'Server Client ID configured: ${ApiConstants.googleWebClientId.isNotEmpty}',
-        );
-      }
-
       if (googleAuth.idToken == null) {
-        if (kDebugMode) {
-          print('❌ ID Token is NULL. Common causes:');
-          print(
-            '   1. Web Client ID (serverClientId) not configured in ApiConstants.googleWebClientId',
-          );
-          print('   2. OAuth consent screen not properly configured');
-          print('   3. App is in testing mode and user not added as test user');
-          print('   4. Scopes not properly configured in OAuth consent screen');
-          print('');
-          print('📋 SOLUTION:');
-          print(
-            '   1. Go to Google Cloud Console: https://console.cloud.google.com/apis/credentials',
-          );
-          print(
-            '   2. Create OAuth client ID → Application type: "Web application"',
-          );
-          print('   3. Copy the Client ID');
-          print(
-            '   4. Add it to lib/Core/Constants/api_constants.dart as googleWebClientId',
-          );
-          print('   5. Also ensure OAuth consent screen is configured with:');
-          print('      - User type: External');
-          print('      - Scopes: email, profile, openid');
-          print('      - Test users: Add your email (${googleUser.email})');
-        }
-
         String errorMessage = 'Failed to get ID token from Google.\n\n';
         if (ApiConstants.googleWebClientId.isEmpty) {
           errorMessage +=
@@ -472,41 +281,6 @@ class SignInViewModel extends ChangeNotifier {
         }
 
         throw Exception(errorMessage);
-      }
-
-      if (kDebugMode) {
-        print('=== GOOGLE SIGN-IN ===');
-        print('User: ${googleUser.displayName}');
-        print('Email: ${googleUser.email}');
-        print('ID Token received: ${googleAuth.idToken != null}');
-
-        // Decode and log ID token payload for backend debugging
-        if (googleAuth.idToken != null) {
-          try {
-            final decodedToken = JwtDecoder.decode(googleAuth.idToken!);
-            if (decodedToken != null) {
-              print('=== GOOGLE ID TOKEN PAYLOAD ===');
-              print('Token audience (aud): ${decodedToken['aud']}');
-              print('Token issuer (iss): ${decodedToken['iss']}');
-              print('Token subject (sub): ${decodedToken['sub']}');
-              print('Token email: ${decodedToken['email']}');
-              print('Token email_verified: ${decodedToken['email_verified']}');
-              print('Token name: ${decodedToken['name']}');
-              print('Token picture: ${decodedToken['picture']}');
-              print('Token issued at (iat): ${decodedToken['iat']}');
-              print('Token expires (exp): ${decodedToken['exp']}');
-              print('All token keys: ${decodedToken.keys.toList()}');
-              print('');
-              print('⚠️  Backend must verify this token using Web Client ID:');
-              print('   ${ApiConstants.googleWebClientId}');
-              print(
-                '   Expected audience (aud) should match the Web Client ID above',
-              );
-            }
-          } catch (e) {
-            print('⚠️  Could not decode ID token for debugging: $e');
-          }
-        }
       }
 
       // Call backend API with Google credentials
@@ -537,90 +311,34 @@ class SignInViewModel extends ChangeNotifier {
                 decoded['id']?.toString();
           }
         } catch (e) {
-          if (kDebugMode) {
-            print('❌ Failed to decode JWT: $e');
-          }
+          // ignore
         }
       }
 
-      // Save user_id if found in either response or JWT
       final userIdToSave = userIdFromResponse ?? userIdFromJwt;
       if (userIdToSave != null && userIdToSave.isNotEmpty) {
         await TokenStorageService.saveUserId(userIdToSave);
       }
 
-      if (kDebugMode) {
-        print('=== GOOGLE SIGN-IN SUCCESSFUL ===');
-        print(
-          'Access token received: ${_accessToken != null && _accessToken!.isNotEmpty}',
-        );
-        print(
-          'Refresh token received: ${_refreshToken != null && _refreshToken!.isNotEmpty}',
-        );
-        print('Access token length: ${_accessToken?.length ?? 0}');
-        print('=== JWT TOKEN PAYLOAD ===');
-        if (_accessToken != null && _accessToken!.isNotEmpty) {
-          try {
-            final decoded = JwtDecoder.decode(_accessToken!);
-            if (decoded != null) {
-              print('JWT Payload keys: ${decoded.keys.toList()}');
-              print('JWT Payload: $decoded');
-            }
-          } catch (e) {
-            print('❌ Failed to decode JWT: $e');
-          }
-        }
-        if (userIdToSave != null && userIdToSave.isNotEmpty) {
-          print('=== USER ID SAVED ===');
-          print('User ID: $userIdToSave');
-          print('Saved: true');
-          print('✅ User ID saved to storage: $userIdToSave');
-          print(
-            '   Source: ${userIdFromResponse != null ? "Google Sign-In Response" : "JWT Token"}',
-          );
-        } else {
-          print(
-            '❌ CRITICAL: User ID not found in Google sign-in response or JWT token!',
-          );
-          print('❌ Cannot fetch user profile without user_id');
-        }
-      }
-
-      // Save tokens to SharedPreferences
       if (_accessToken != null && _refreshToken != null) {
         await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
       }
 
-      // Save email for "Remember Me" (Google sign-in always remembers)
       if (googleUser.email.isNotEmpty) {
         await TokenStorageService.saveRememberedEmail(googleUser.email);
-        if (kDebugMode) {
-          print('✅ Email saved for "Remember Me": ${googleUser.email}');
-        }
       }
 
-      // Fetch and save user data after successful Google login
-      if (userIdToSave != null && 
-          userIdToSave.isNotEmpty && 
-          _accessToken != null && 
+      if (userIdToSave != null &&
+          userIdToSave.isNotEmpty &&
+          _accessToken != null &&
           _accessToken!.isNotEmpty) {
         try {
-          if (kDebugMode) {
-            print('=== FETCHING USER DATA AFTER GOOGLE LOGIN ===');
-          }
-          // User data is automatically saved to cache in getCurrentUser
           await _authRepository.getCurrentUser(
             accessToken: _accessToken!,
             userId: userIdToSave,
           );
-          if (kDebugMode) {
-            print('✅ User data fetched and cached after Google login');
-          }
         } catch (e) {
-          if (kDebugMode) {
-            print('⚠️ Failed to fetch user data after Google login: $e');
-            print('   User can still use the app, data will be fetched when needed');
-          }
+          // User can still use the app, data will be fetched when needed
         }
       }
 
@@ -634,12 +352,6 @@ class SignInViewModel extends ChangeNotifier {
           errorMessageLower.contains('standard login')) {
         // Get email from googleUser if available
         String? userEmail = googleUser?.email;
-
-        if (kDebugMode) {
-          print('=== EMAIL REGISTERED WITH PASSWORD ===');
-          print('Email: ${userEmail ?? "Unknown"}');
-          print('Navigating to sign in screen...');
-        }
 
         // Save email for sign-in screen (pre-fill) if available
         if (userEmail != null && userEmail.isNotEmpty) {
@@ -672,15 +384,6 @@ class SignInViewModel extends ChangeNotifier {
           // Error code 10 = DEVELOPER_ERROR
           userMessage =
               'Google Sign-In configuration error. Please contact support or try again later.';
-          if (kDebugMode) {
-            print('❌ Google Sign-In DEVELOPER_ERROR (10): $errorDetails');
-            print('   This usually means:');
-            print(
-              '   - SHA-1 fingerprint not configured in Firebase/Google Cloud Console',
-            );
-            print('   - OAuth client ID is incorrect');
-            print('   - Package name mismatch');
-          }
         } else if (errorDetails.contains('ApiException: 7')) {
           // Error code 7 = NETWORK_ERROR
           userMessage =
@@ -701,19 +404,9 @@ class SignInViewModel extends ChangeNotifier {
       }
 
       errorMessage = userMessage;
-      if (kDebugMode) {
-        print('❌ Google Sign-In PlatformException:');
-        print('   Code: ${e.code}');
-        print('   Message: ${e.message}');
-        print('   Details: ${e.details}');
-      }
       _showMessage(context, userMessage);
     } catch (e) {
       errorMessage = 'Failed to sign in with Google. Please try again.';
-      if (kDebugMode) {
-        print('❌ Google Sign-In Error: $e');
-        print('   Error type: ${e.runtimeType}');
-      }
       _showMessage(context, errorMessage!);
     } finally {
       isLoading = false;
@@ -791,13 +484,8 @@ class SignInViewModel extends ChangeNotifier {
               : ApiConstants.googleWebClientId,
         );
         await googleSignIn.signOut();
-        if (kDebugMode) {
-          print('✅ Google Sign-In account selection cleared');
-        }
       } catch (e) {
-        if (kDebugMode) {
-          print('⚠️ Google Sign-In sign out error (ignored): $e');
-        }
+        // Ignore sign out error
       }
 
       emailController.clear();
@@ -834,65 +522,32 @@ class SignInViewModel extends ChangeNotifier {
         _accessToken = accessToken;
         _refreshToken = refreshToken;
 
-        if (kDebugMode) {
-          print('=== TOKENS LOADED FROM STORAGE ===');
-          print(
-            'Access token loaded: ${_accessToken != null && _accessToken!.isNotEmpty}',
-          );
-          print(
-            'Refresh token loaded: ${_refreshToken != null && _refreshToken!.isNotEmpty}',
-          );
-        }
-
-        // Check if userId exists in storage, if not, try to extract from JWT
         final existingUserId = await TokenStorageService.getUserId();
         if (existingUserId == null || existingUserId.isEmpty) {
-          if (kDebugMode) {
-            print('⚠️  User ID not in storage, extracting from JWT...');
-          }
           try {
             final userIdFromJwt = JwtDecoder.getUserId(accessToken);
             if (userIdFromJwt != null && userIdFromJwt.isNotEmpty) {
               await TokenStorageService.saveUserId(userIdFromJwt);
-              if (kDebugMode) {
-                print('✅ User ID extracted from JWT and saved: $userIdFromJwt');
-              }
-            } else {
-              if (kDebugMode) {
-                print('❌ User ID not found in JWT token');
-              }
             }
           } catch (e) {
-            if (kDebugMode) {
-              print('❌ Error extracting userId from JWT: $e');
-            }
+            // ignore
           }
         }
 
         notifyListeners();
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading tokens from storage: $e');
-        // Retry once after a delay
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          final accessToken = await TokenStorageService.getAccessToken();
-          final refreshToken = await TokenStorageService.getRefreshToken();
-
-          if (accessToken != null && refreshToken != null) {
-            _accessToken = accessToken;
-            _refreshToken = refreshToken;
-            notifyListeners();
-            if (kDebugMode) {
-              print('Retry successful - tokens loaded');
-            }
-          }
-        } catch (retryError) {
-          if (kDebugMode) {
-            print('Retry also failed: $retryError');
-          }
+      try {
+        await Future.delayed(const Duration(milliseconds: 500));
+        final accessToken = await TokenStorageService.getAccessToken();
+        final refreshToken = await TokenStorageService.getRefreshToken();
+        if (accessToken != null && refreshToken != null) {
+          _accessToken = accessToken;
+          _refreshToken = refreshToken;
+          notifyListeners();
         }
+      } catch (retryError) {
+        // ignore
       }
     }
   }
@@ -903,16 +558,11 @@ class SignInViewModel extends ChangeNotifier {
       final rememberedEmail = await TokenStorageService.getRememberedEmail();
       if (rememberedEmail != null && rememberedEmail.isNotEmpty) {
         emailController.text = rememberedEmail;
-        rememberMe = true; // Set remember me to true if email was saved
-        if (kDebugMode) {
-          print('✅ Remembered email loaded: $rememberedEmail');
-        }
+        rememberMe = true;
         notifyListeners();
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error loading remembered email: $e');
-      }
+      // ignore
     }
   }
 

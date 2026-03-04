@@ -1,10 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/firebase_analytics_delegate.dart';
 import 'package:imagifyai/Core/services/local_notification_service.dart';
+import 'package:imagifyai/Core/services/interstitial_ad_service.dart';
+import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/firebase_options.dart';
 import 'package:imagifyai/repositories/auth_repository.dart';
@@ -12,9 +16,26 @@ import 'package:imagifyai/view/my_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   AnalyticsService.delegate = FirebaseAnalyticsDelegate();
   await LocalNotificationService.initialize();
+  await MobileAds.instance.initialize();
+
+  // Only in debug: use test device IDs so test ads show; never in release (Play Store).
+  if (kDebugMode) {
+    await MobileAds.instance.updateRequestConfiguration(
+      RequestConfiguration(
+        testDeviceIds: [
+          '26FF934A589AEA5FF1D9F910862DC114', // Add more from log if needed.
+        ],
+      ),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 1500));
+  }
+
+  RewardedAdService.loadRewardedAd();
+  InterstitialAdService.loadInterstitialAd();
   _setupTokenRefresh();
   runApp(const MyApp());
 }
@@ -22,61 +43,28 @@ void main() async {
 void _setupTokenRefresh() {
   // Set up automatic token refresh callback for ApiService
   ApiService.setTokenRefreshCallback(() async {
-    if (kDebugMode) {
-      print('🔄 Token refresh callback invoked');
-    }
     try {
-      // Get refresh token from storage
       final refreshToken = await TokenStorageService.getRefreshToken();
       if (refreshToken == null || refreshToken.isEmpty) {
-        if (kDebugMode) {
-          print('❌ No refresh token available in storage');
-        }
         return null;
       }
 
-      if (kDebugMode) {
-        print('✅ Refresh token found, calling refresh API...');
-      }
-
-      // Refresh the token using AuthRepository
       final authRepository = AuthRepository();
       final response = await authRepository.refreshToken(
         refreshToken: refreshToken,
       );
 
-      // Save new tokens
       if (response.accessToken != null && response.refreshToken != null) {
         await TokenStorageService.saveTokens(
           response.accessToken!,
           response.refreshToken!,
         );
-        if (kDebugMode) {
-          print('✅ New tokens saved successfully');
-        }
         return response.accessToken;
       }
 
-      if (kDebugMode) {
-        print('❌ Refresh response missing tokens');
-      }
       return null;
     } catch (e) {
-      if (kDebugMode) {
-        print('❌ Token refresh failed: $e');
-      }
-      // Token refresh failed
       return null;
     }
   });
-
-  if (kDebugMode) {
-    // Verify the callback was actually set
-    final isSet = ApiService.hasTokenRefreshCallback;
-    print('✅ Token refresh callback has been set up in main()');
-    print('   Callback is set: $isSet');
-    if (!isSet) {
-      print('   ⚠️  ERROR: Callback is null after setup in main()!');
-    }
-  }
 }
