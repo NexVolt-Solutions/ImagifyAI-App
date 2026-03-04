@@ -45,7 +45,7 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
                   child: Padding(
                     padding: EdgeInsets.only(left: context.h(8)),
                     child: IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () => viewModel.navigateBack(context),
                       icon: Icon(
                         Icons.arrow_back_ios,
                         color: Theme.of(context).iconTheme.color,

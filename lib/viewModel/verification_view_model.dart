@@ -12,6 +12,7 @@ class VerificationViewModel extends ChangeNotifier {
   VerificationViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository() {
     _startTimer();
+    codeController.addListener(_clearErrorOnCodeChange);
   }
 
   final IAuthRepository _authRepository;
@@ -19,6 +20,13 @@ class VerificationViewModel extends ChangeNotifier {
   // FormKey removed - should be created in widget state to avoid GlobalKey conflicts
   final emailController = TextEditingController();
   final codeController = TextEditingController();
+
+  void _clearErrorOnCodeChange() {
+    if (errorMessage != null) {
+      errorMessage = null;
+      notifyListeners();
+    }
+  }
 
   /// Loading state for the Verify Account action only.
   bool isLoading = false;
@@ -60,6 +68,32 @@ class VerificationViewModel extends ChangeNotifier {
     emailController.text = email;
   }
 
+  /// Clear all fields and error. Call when entering the screen so stale data is not shown.
+  void clearForm() {
+    emailController.clear();
+    codeController.clear();
+    errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Called when the verification screen is entered. Clears form, applies route args (email, autoResend).
+  void onScreenEnter(BuildContext context) {
+    clearForm();
+    final args = ModalRoute.of(context)?.settings.arguments;
+    String? email;
+    bool autoResend = false;
+    if (args is String && args.isNotEmpty) {
+      email = args;
+    } else if (args is Map) {
+      email = args['email']?.toString();
+      autoResend = args['autoResend'] == true;
+    }
+    if (email != null && email.isNotEmpty) {
+      setEmail(email);
+      if (autoResend) autoResendCode(context);
+    }
+  }
+
   Future<void> verify(
     BuildContext context, {
     required GlobalKey<FormState> formKey,
@@ -70,16 +104,17 @@ class VerificationViewModel extends ChangeNotifier {
 
     // Validate that code is exactly 6 digits
     if (code.isEmpty || code.length != 6) {
-      _showMessage(
-        context,
-        'Please enter the complete 6-digit verification code',
-      );
+      errorMessage = 'Please enter the complete 6-digit verification code';
+      notifyListeners();
+      _showMessage(context, errorMessage!);
       return;
     }
 
     // Validate that code contains only digits
     if (!RegExp(r'^\d{6}$').hasMatch(code)) {
-      _showMessage(context, 'Verification code must contain only numbers');
+      errorMessage = 'Verification code must contain only numbers';
+      notifyListeners();
+      _showMessage(context, errorMessage!);
       return;
     }
 

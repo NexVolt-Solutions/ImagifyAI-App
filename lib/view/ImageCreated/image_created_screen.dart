@@ -266,9 +266,10 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
         return Scaffold(
           backgroundColor: context.backgroundColor,
           appBar: const ImageCreatedAppBar(),
-          body: Stack(
-            children: [
-              SafeArea(
+          body: SafeArea(
+            child: Stack(
+              children: [
+                SafeArea(
                 child: ListView(
                   shrinkWrap: true,
                   padding: context.padSym(h: 20),
@@ -324,16 +325,17 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                     SizedBox(height: context.h(20)),
                   ],
                 ),
-              ),
-              if (imageCreatedViewModel.isPolling)
-                Consumer<ImageCreatedViewModel>(
-                  builder: (context, vm, _) => LoadingOverlay(
-                    progress: vm.creationProgress,
-                    currentStage: vm.currentStage,
-                    elapsedTime: vm.elapsedPollingTimeFormatted,
-                  ),
                 ),
-            ],
+                if (imageCreatedViewModel.isPolling)
+                  Consumer<ImageCreatedViewModel>(
+                    builder: (context, vm, _) => LoadingOverlay(
+                      progress: vm.creationProgress,
+                      currentStage: vm.currentStage,
+                      elapsedTime: vm.elapsedPollingTimeFormatted,
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },

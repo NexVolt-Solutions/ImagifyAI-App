@@ -18,6 +18,10 @@ class SetNewPasswordViewModel extends ChangeNotifier {
   bool isLoading = false;
   String? errorMessage;
 
+  void navigateBack(BuildContext context) {
+    Navigator.pop(context);
+  }
+
   Future<void> setNewPassword(
     BuildContext context,
     GlobalKey<FormState> formKey,

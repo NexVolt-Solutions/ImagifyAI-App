@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/verification_view_model.dart';
@@ -42,29 +43,13 @@ class _VerificationState extends State<Verification> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_initialized) return;
-
-    final args = ModalRoute.of(context)?.settings.arguments;
-    String? email;
-    bool autoResend = false;
-
-    if (args is String && args.isNotEmpty) {
-      email = args;
-    } else if (args is Map) {
-      email = args['email']?.toString();
-      autoResend = args['autoResend'] == true;
-    }
-
-    if (email != null && email.isNotEmpty) {
-      final verificationViewModel = context.read<VerificationViewModel>();
-      verificationViewModel.setEmail(email);
-
-      if (autoResend) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          verificationViewModel.autoResendCode(context);
-        });
-      }
-    }
     _initialized = true;
+    final vm = context.read<VerificationViewModel>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      vm.onScreenEnter(context);
+      _formKey.currentState?.reset();
+    });
   }
 
   @override
@@ -79,8 +64,10 @@ class _VerificationState extends State<Verification> {
         final focusedBorderColor = colorScheme.primary;
         // White for fields that already have a digit (1, 2, etc.)
         final filledBorderColor = Colors.white;
+        // Red for error state (invalid or failed verification)
+        final errorBorderColor = colorScheme.error;
 
-        final defaultPinTheme = PinTheme(
+        final basePinTheme = PinTheme(
           width: _VerificationLayout.pinSize,
           height: _VerificationLayout.pinSize,
           textStyle: context.appTextStyles?.authOTPText,
@@ -94,7 +81,8 @@ class _VerificationState extends State<Verification> {
           ),
         );
 
-        final focusedPinTheme = defaultPinTheme.copyWith(
+        final defaultPinTheme = basePinTheme;
+        final focusedPinTheme = basePinTheme.copyWith(
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(_VerificationLayout.pinRadius),
@@ -104,8 +92,7 @@ class _VerificationState extends State<Verification> {
             ),
           ),
         );
-
-        final filledPinTheme = defaultPinTheme.copyWith(
+        final filledPinTheme = basePinTheme.copyWith(
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(_VerificationLayout.pinRadius),
@@ -115,6 +102,21 @@ class _VerificationState extends State<Verification> {
             ),
           ),
         );
+        final errorPinTheme = basePinTheme.copyWith(
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(_VerificationLayout.pinRadius),
+            border: Border.all(
+              color: errorBorderColor,
+              width: _VerificationLayout.pinBorderWidthFocused,
+            ),
+          ),
+        );
+
+        final hasError = vm.errorMessage != null;
+        final effectiveDefault = hasError ? errorPinTheme : defaultPinTheme;
+        final effectiveFocused = hasError ? errorPinTheme : focusedPinTheme;
+        final effectiveFilled = hasError ? errorPinTheme : filledPinTheme;
 
         final emailDisplay = vm.emailController.text.isNotEmpty
             ? vm.emailController.text
@@ -166,110 +168,98 @@ class _VerificationState extends State<Verification> {
           body: SafeArea(
             child: Form(
               key: _formKey,
-              child: ListView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: _VerificationLayout.screenPaddingH,
-                ),
-                children: [
-                  SizedBox(height: context.h(_VerificationLayout.titleTop)),
-                  Text(
-                    'Verification',
-                    style: context.appTextStyles?.authTitlePrimary,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(
-                    height: context.h(_VerificationLayout.sectionSpacing),
-                  ),
-                  Center(child: SvgPicture.asset(AppAssets.verifIcon)),
-                  SizedBox(
-                    height: context.h(_VerificationLayout.sectionSpacing),
-                  ),
-                  Text(
-                    'Verify Your Account',
-                    style: context.appTextStyles?.authTitleWhite,
-                    textAlign: TextAlign.start,
-                  ),
-                  SizedBox(
-                    height: context.h(_VerificationLayout.sectionSpacing),
-                  ),
-                  Text(
-                    'Enter the 6-digit code that we have sent to $emailDisplay',
-                    style: context.appTextStyles?.authBodyRegular,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(
-                    height: context.h(_VerificationLayout.sectionSpacing),
-                  ),
-                  Pinput(
-                    length: 6,
-                    controller: vm.codeController,
-                    defaultPinTheme: defaultPinTheme,
-                    focusedPinTheme: focusedPinTheme,
-                    submittedPinTheme: filledPinTheme,
-                    followingPinTheme: defaultPinTheme,
-                    separatorBuilder: (_) => SizedBox(
-                      width: context.w(_VerificationLayout.pinSpacing),
-                    ),
-                    showCursor: true,
-                    keyboardType: TextInputType.number,
-                    onCompleted: (pin) {
-                      vm.codeController.text = pin;
-                    },
-                    preFilledWidget: Center(
-                      child: Text(
-                        '−',
-                        style: context.appTextStyles?.authOTPLarge,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Center(child: Image.asset(AppAssets.forgotIcon)),
+                      SizedBox(
+                        height: context.h(_VerificationLayout.sectionSpacing),
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: context.h(_VerificationLayout.sectionSpacing),
-                  ),
-                  // Resend only when OTP expired / user wants new code (separate flow from verify)
-                  if (!vm.canResend)
-                    Text(
-                      vm.timerText,
-                      style: context.appTextStyles?.authTimerText,
-                      textAlign: TextAlign.center,
-                    )
-                  else
-                    TextButton(
-                      onPressed: (vm.isResendLoading || vm.isLoading)
-                          ? null
-                          : () => vm.resendCode(context),
-                      child: vm.isResendLoading
-                          ? Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                      Text(
+                        'Verify Your Account',
+                        style: context.appTextStyles?.authTitleWhite,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        height: context.h(_VerificationLayout.sectionSpacing),
+                      ),
+                      Text(
+                        'Enter the 6-digit code that we have sent to $emailDisplay',
+                        style: context.appTextStyles?.authBodyRegular,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(
+                        height: context.h(_VerificationLayout.sectionSpacing),
+                      ),
+                      Pinput(
+                        length: 6,
+                        controller: vm.codeController,
+                        defaultPinTheme: effectiveDefault,
+                        focusedPinTheme: effectiveFocused,
+                        submittedPinTheme: effectiveFilled,
+                        followingPinTheme: effectiveDefault,
+                        separatorBuilder: (_) => SizedBox(
+                          width: context.w(_VerificationLayout.pinSpacing),
+                        ),
+                        showCursor: true,
+                        keyboardType: TextInputType.number,
+                        onCompleted: (pin) {
+                          vm.codeController.text = pin;
+                        },
+                        preFilledWidget: Center(
+                          child: Text(
+                            '−',
+                            style: context.appTextStyles?.authOTPLarge,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: context.h(_VerificationLayout.sectionSpacing),
+                      ),
+                      // Resend only when OTP expired / user wants new code (separate flow from verify)
+                      if (!vm.canResend)
+                        Text(
+                          vm.timerText,
+                          style: context.appTextStyles?.authTimerText,
+                          textAlign: TextAlign.center,
+                        )
+                      else
+                        TextButton(
+                          onPressed: (vm.isResendLoading || vm.isLoading)
+                              ? null
+                              : () => vm.resendCode(context),
+                          child: vm.isResendLoading
+                              ? SizedBox(
+                                  width: 24,
+                                  height: 24,
+                                  child: AppLoadingIndicator.medium(
                                     color: colorScheme.primary,
                                   ),
+                                )
+                              : Text(
+                                  'Resend Code',
+                                  style:
+                                      context.appTextStyles?.authGoogleButton,
                                 ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Sending…',
-                                  style: context.appTextStyles?.authResendText,
-                                ),
-                              ],
-                            )
-                          : Text(
-                              'Resend Code',
-                              style: context.appTextStyles?.authGoogleButton,
-                            ),
-                    ),
-                  SizedBox(height: context.h(_VerificationLayout.buttonTop)),
-                  CustomButton(
-                    onPressed: () => vm.verify(context, formKey: _formKey),
-                    gradient: AppColors.gradient,
-                    text: 'Verify Account',
-                    isLoading: vm.isLoading,
+                        ),
+                      SizedBox(
+                        height: context.h(_VerificationLayout.buttonTop),
+                      ),
+                      CustomButton(
+                        onPressed: () => vm.verify(context, formKey: _formKey),
+                        gradient: AppColors.gradient,
+                        text: 'Verify Account',
+                        isLoading: vm.isLoading,
+                      ),
+                      SizedBox(height: context.h(80)),
+                    ],
                   ),
-                  SizedBox(height: context.h(80)),
-                ],
+                ),
               ),
             ),
           ),

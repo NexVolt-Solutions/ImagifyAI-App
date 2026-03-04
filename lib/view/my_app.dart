@@ -5,7 +5,9 @@ import 'package:imagifyai/Core/utils/Routes/routes.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/theme/app_theme.dart';
 import 'package:imagifyai/domain/repositories/auth_repository.dart';
+import 'package:imagifyai/viewModel/account_created_view_model.dart';
 import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
+import 'package:imagifyai/viewModel/confirm_email_view_model.dart';
 import 'package:imagifyai/viewModel/edit_profile_view_model.dart';
 import 'package:imagifyai/viewModel/library_view_model.dart';
 import 'package:imagifyai/viewModel/forgot_password_view_model.dart';
@@ -103,11 +105,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         ChangeNotifierProvider(create: (context) => SignUpViewModel()),
         ChangeNotifierProvider(create: (context) => SignInViewModel()),
         ChangeNotifierProvider(create: (context) => ForgotPasswordViewModel()),
+        ChangeNotifierProvider(create: (context) => ConfirmEmailViewModel()),
         ChangeNotifierProvider(create: (context) => VerificationViewModel()),
         ChangeNotifierProvider(
           create: (context) => ForgotVerificationViewModel(),
         ),
         ChangeNotifierProvider(create: (context) => SetNewPasswordViewModel()),
+        ChangeNotifierProvider(create: (context) => AccountCreatedViewModel()),
         ChangeNotifierProvider(create: (context) => LibraryViewModel()),
         ChangeNotifierProvider(create: (context) => HomeViewModel()),
         ChangeNotifierProvider(create: (context) => BottomNavScreenViewModel()),

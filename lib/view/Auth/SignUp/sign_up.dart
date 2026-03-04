@@ -11,7 +11,6 @@ import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_text_rich.dart';
 import 'package:imagifyai/Core/CustomWidget/password_text.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
-import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/viewModel/sign_up_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -59,7 +58,8 @@ class _SignUpState extends State<SignUp> {
                   Positioned(
                     left: 0,
                     child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () =>
+                          signUpViewModel.navigateBack(context),
                       child: Icon(
                         Icons.arrow_back_ios,
                         color: Theme.of(context).iconTheme.color,
@@ -264,26 +264,26 @@ class _SignUpState extends State<SignUp> {
                             context.radius(8),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            if (signUpViewModel.isGoogleLoading)
-                              const AppLoadingIndicator.medium()
-                            else
-                              Image.asset(
-                                AppAssets.googleIcon,
-                                height: context.h(23.94),
-                                width: context.w(23.94),
+                        child: signUpViewModel.isGoogleLoading
+                            ? const Center(
+                                child: AppLoadingIndicator.medium(),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    AppAssets.googleIcon,
+                                    height: context.h(23.94),
+                                    width: context.w(23.94),
+                                  ),
+                                  SizedBox(width: context.w(8)),
+                                  Text(
+                                    'Continue with Google',
+                                    style:
+                                        context.appTextStyles?.authGoogleButton,
+                                  ),
+                                ],
                               ),
-                            SizedBox(width: context.w(8)),
-                            Text(
-                              signUpViewModel.isGoogleLoading
-                                  ? 'Signing in...'
-                                  : 'Continue with Google',
-                              style: context.appTextStyles?.authGoogleButton,
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                   ),
@@ -294,12 +294,8 @@ class _SignUpState extends State<SignUp> {
                     text2: 'SignIn',
                     textSize1: context.text(14),
                     textSize2: context.text(14),
-                    onTap2: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        RoutesName.SignInScreen,
-                      );
-                    },
+                    onTap2: () =>
+                        signUpViewModel.navigateToSignIn(context),
                   ),
                   SizedBox(height: context.h(20)),
                 ],

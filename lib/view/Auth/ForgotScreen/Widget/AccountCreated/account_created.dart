@@ -5,14 +5,16 @@ import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
-import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
+import 'package:imagifyai/viewModel/account_created_view_model.dart';
+import 'package:provider/provider.dart';
 
 class AccountCreated extends StatelessWidget {
   const AccountCreated({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Consumer<AccountCreatedViewModel>(
+      builder: (context, viewModel, _) => Scaffold(
       backgroundColor: context.backgroundColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
@@ -26,7 +28,7 @@ class AccountCreated extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.only(left: context.h(8)),
                 child: IconButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => viewModel.navigateBack(context),
                   icon: Icon(
                     Icons.arrow_back_ios,
                     color: Theme.of(context).iconTheme.color,
@@ -60,20 +62,14 @@ class AccountCreated extends StatelessWidget {
             ),
             SizedBox(height: context.h(253)),
             CustomButton(
-              onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  RoutesName.SignInScreen,
-                  (route) => false,
-                );
-              },
-
+              onPressed: () => viewModel.navigateToSignIn(context),
               gradient: AppColors.gradient,
               text: 'Login',
             ),
           ],
         ),
       ),
+    ),
     );
   }
 }

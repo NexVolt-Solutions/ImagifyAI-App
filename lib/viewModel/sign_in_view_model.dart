@@ -135,6 +135,14 @@ class SignInViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void navigateToForgotPassword(BuildContext context) {
+    Navigator.pushNamed(context, RoutesName.ForgotScreen);
+  }
+
+  void navigateToSignUp(BuildContext context) {
+    Navigator.pushNamed(context, RoutesName.SignUpScreen);
+  }
+
   Future<void> login(
     BuildContext context, {
     required GlobalKey<FormState> formKey,

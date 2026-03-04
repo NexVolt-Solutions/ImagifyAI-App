@@ -8,7 +8,6 @@ import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_text_rich.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
-import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -148,12 +147,9 @@ class _SignInState extends State<SignIn> {
                                     CustomTextRich(
                                       text2: 'Forgot Password?',
                                       textSize2: context.text(14),
-                                      onTap2: () {
-                                        Navigator.pushNamed(
-                                          context,
-                                          RoutesName.ForgotScreen,
-                                        );
-                                      },
+                                      onTap2: () =>
+                                          signInViewModel.navigateToForgotPassword(
+                                              context),
                                     ),
                                   ],
                                 ),
@@ -200,29 +196,29 @@ class _SignInState extends State<SignIn> {
                                           context.radius(8),
                                         ),
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          if (signInViewModel.isGoogleLoading)
-                                            const AppLoadingIndicator.medium()
-                                          else
-                                            Image.asset(
-                                              AppAssets.googleIcon,
-                                              height: context.h(23.94),
-                                              width: context.w(23.94),
+                                      child: signInViewModel.isGoogleLoading
+                                          ? const Center(
+                                              child:
+                                                  AppLoadingIndicator.medium(),
+                                            )
+                                          : Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Image.asset(
+                                                  AppAssets.googleIcon,
+                                                  height: context.h(23.94),
+                                                  width: context.w(23.94),
+                                                ),
+                                                SizedBox(width: context.w(8)),
+                                                Text(
+                                                  'Continue with Google',
+                                                  style: context
+                                                      .appTextStyles
+                                                      ?.authGoogleButton,
+                                                ),
+                                              ],
                                             ),
-                                          SizedBox(width: context.w(8)),
-                                          Text(
-                                            signInViewModel.isGoogleLoading
-                                                ? 'Signing in...'
-                                                : 'Continue with Google',
-                                            style: context
-                                                .appTextStyles
-                                                ?.authGoogleButton,
-                                          ),
-                                        ],
-                                      ),
                                     ),
                                   ),
                                 ),
@@ -232,12 +228,8 @@ class _SignInState extends State<SignIn> {
                                   text2: 'SignUp',
                                   textSize1: context.text(14),
                                   textSize2: context.text(14),
-                                  onTap2: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      RoutesName.SignUpScreen,
-                                    );
-                                  },
+                                  onTap2: () =>
+                                      signInViewModel.navigateToSignUp(context),
                                 ),
                                 SizedBox(height: context.h(20)),
                               ],

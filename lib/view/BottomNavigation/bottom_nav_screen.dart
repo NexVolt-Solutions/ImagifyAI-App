@@ -89,16 +89,18 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
       child: Scaffold(
         backgroundColor: context.backgroundColor,
         appBar: LogoAppBar(),
-        body: Stack(
-          children: [
-            bottomNavScreenViewModel
-                .screens[bottomNavScreenViewModel.currentIndex],
-            BottomNavBar(
+        body: SafeArea(
+          child: Stack(
+            children: [
+              bottomNavScreenViewModel
+                  .screens[bottomNavScreenViewModel.currentIndex],
+              BottomNavBar(
               bottomData: bottomNavScreenViewModel.bottomData,
               currentIndex: bottomNavScreenViewModel.currentIndex,
               onTap: bottomNavScreenViewModel.updateIndex,
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
