@@ -19,6 +19,7 @@ class CustomTextField extends StatelessWidget {
 
   final String? hintText;
   final String? label;
+
   /// When set, shown when the field is empty (instead of generic "This field is required").
   /// Use e.g. "Email is required" or "Password is required" for sign-in.
   final String? emptyErrorMessage;
@@ -81,10 +82,7 @@ class CustomTextField extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (label != null) ...[
-          Text(
-            label!,
-            style: context.appTextStyles?.customTextFieldLabel,
-          ),
+          Text(label!, style: context.appTextStyles?.customTextFieldLabel),
           const SizedBox(height: _TextFieldSizes.labelSpacing),
         ],
         TextFormField(
@@ -130,10 +128,7 @@ class CustomTextField extends StatelessWidget {
             // Enabled: neutral border
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_radius),
-              borderSide: BorderSide(
-                color: enabledColor,
-                width: _borderWidth,
-              ),
+              borderSide: BorderSide(color: enabledColor, width: _borderWidth),
             ),
             // Focused: primary, thicker
             focusedBorder: OutlineInputBorder(
@@ -146,26 +141,17 @@ class CustomTextField extends StatelessWidget {
             // Default / base
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_radius),
-              borderSide: BorderSide(
-                color: enabledColor,
-                width: _borderWidth,
-              ),
+              borderSide: BorderSide(color: enabledColor, width: _borderWidth),
             ),
             // Disabled: muted
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_radius),
-              borderSide: BorderSide(
-                color: disabledColor,
-                width: _borderWidth,
-              ),
+              borderSide: BorderSide(color: disabledColor, width: _borderWidth),
             ),
             // Error: error color, default width
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(_radius),
-              borderSide: BorderSide(
-                color: errorColor,
-                width: _borderWidth,
-              ),
+              borderSide: BorderSide(color: errorColor, width: _borderWidth),
             ),
             // Focused + error: error color, thicker
             focusedErrorBorder: OutlineInputBorder(

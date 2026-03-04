@@ -22,6 +22,20 @@ class SignIn extends StatefulWidget {
 class _SignInState extends State<SignIn> {
   // Create formKey in widget state to ensure uniqueness per widget instance
   final _formKey = GlobalKey<FormState>();
+  bool _didClearFormOnEnter = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didClearFormOnEnter) {
+      _didClearFormOnEnter = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<SignInViewModel>().clearForm();
+        _formKey.currentState?.reset();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +88,7 @@ class _SignInState extends State<SignIn> {
                                       context.appTextStyles?.authTitlePrimary,
                                   textAlign: TextAlign.center,
                                 ),
-                                SizedBox(height: context.h(24)),
+                                SizedBox(height: context.h(16)),
                                 CustomTextField(
                                   controller: signInViewModel.emailController,
                                   prefixIcon: Icon(Icons.email),
@@ -87,7 +101,7 @@ class _SignInState extends State<SignIn> {
                                   enabledBorderColor:
                                       context.colorScheme.onSurface,
                                 ),
-                                SizedBox(height: context.h(24)),
+                                SizedBox(height: context.h(16)),
                                 CustomTextField(
                                   controller:
                                       signInViewModel.passwordController,
@@ -148,10 +162,12 @@ class _SignInState extends State<SignIn> {
                             Column(
                               children: [
                                 CustomButton(
-                                  onPressed: () => signInViewModel.login(
-                                    context,
-                                    formKey: _formKey,
-                                  ),
+                                  onPressed: signInViewModel.isGoogleLoading
+                                      ? null
+                                      : () => signInViewModel.login(
+                                          context,
+                                          formKey: _formKey,
+                                        ),
                                   width: context.w(350),
                                   gradient: AppColors.gradient,
                                   text: 'Sign In',
@@ -162,13 +178,15 @@ class _SignInState extends State<SignIn> {
                                 ),
                                 SizedBox(height: context.h(20)),
                                 GestureDetector(
-                                  onTap: signInViewModel.isLoading
+                                  onTap:
+                                      (signInViewModel.isLoading ||
+                                          signInViewModel.isGoogleLoading)
                                       ? null
                                       : () => signInViewModel.signInWithGoogle(
                                           context,
                                         ),
                                   child: Opacity(
-                                    opacity: signInViewModel.isLoading
+                                    opacity: signInViewModel.isGoogleLoading
                                         ? 0.7
                                         : 1.0,
                                     child: Container(
@@ -186,7 +204,7 @@ class _SignInState extends State<SignIn> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          if (signInViewModel.isLoading)
+                                          if (signInViewModel.isGoogleLoading)
                                             const AppLoadingIndicator.medium()
                                           else
                                             Image.asset(
@@ -196,7 +214,7 @@ class _SignInState extends State<SignIn> {
                                             ),
                                           SizedBox(width: context.w(8)),
                                           Text(
-                                            signInViewModel.isLoading
+                                            signInViewModel.isGoogleLoading
                                                 ? 'Signing in...'
                                                 : 'Continue with Google',
                                             style: context

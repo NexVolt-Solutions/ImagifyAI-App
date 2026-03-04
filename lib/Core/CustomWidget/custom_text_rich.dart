@@ -27,7 +27,7 @@ class CustomTextRich extends StatelessWidget {
           TextSpan(
             children: [
               TextSpan(
-                text: text1,
+                text: "${text1} ",
                 style: context.appTextStyles?.customTextRichText1.copyWith(
                   fontSize: textSize1 ?? textSize2 ?? context.text(14),
                 ),

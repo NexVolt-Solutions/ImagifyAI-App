@@ -7,7 +7,7 @@ class AppAssets {
   //icons
   static const String googleIcon = "assets/icon/google.png";
   static const String startIcon = "assets/icon/start.svg";
-  static const String verifIcon = "assets/icon/veriIcon.png";
+  static const String verifIcon = "assets/icon/verificationIcon.svg";
   static const String dotConIcon = "assets/icon/dotContainerIcon.png";
   static const String conIcon = "assets/icon/s.jpg";
   static const String magicStarIcon = "assets/icon/magicStar.png";

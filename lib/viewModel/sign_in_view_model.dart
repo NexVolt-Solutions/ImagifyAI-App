@@ -34,6 +34,7 @@ class SignInViewModel extends ChangeNotifier {
   final passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool isGoogleLoading = false;
   String? errorMessage;
   bool rememberMe = true;
   String? _refreshToken;
@@ -126,11 +127,19 @@ class SignInViewModel extends ChangeNotifier {
     }
   }
 
+  /// Clears email, password and error so the form is fresh when navigating back to this screen.
+  void clearForm() {
+    emailController.clear();
+    passwordController.clear();
+    errorMessage = null;
+    notifyListeners();
+  }
+
   Future<void> login(
     BuildContext context, {
     required GlobalKey<FormState> formKey,
   }) async {
-    if (isLoading) return;
+    if (isLoading || isGoogleLoading) return;
 
     // Validate form - if validation fails, stop here
     if (formKey.currentState == null) {
@@ -233,9 +242,9 @@ class SignInViewModel extends ChangeNotifier {
   }
 
   Future<void> signInWithGoogle(BuildContext context) async {
-    if (isLoading) return;
+    if (isLoading || isGoogleLoading) return;
 
-    isLoading = true;
+    isGoogleLoading = true;
     errorMessage = null;
     notifyListeners();
 
@@ -266,7 +275,7 @@ class SignInViewModel extends ChangeNotifier {
 
       if (googleUser == null) {
         // User cancelled the sign-in
-        isLoading = false;
+        isGoogleLoading = false;
         notifyListeners();
         return;
       }
@@ -417,7 +426,7 @@ class SignInViewModel extends ChangeNotifier {
       errorMessage = 'Failed to sign in with Google. Please try again.';
       _showMessage(context, errorMessage!);
     } finally {
-      isLoading = false;
+      isGoogleLoading = false;
       notifyListeners();
     }
   }

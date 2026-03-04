@@ -20,7 +20,10 @@ class VerificationViewModel extends ChangeNotifier {
   final emailController = TextEditingController();
   final codeController = TextEditingController();
 
+  /// Loading state for the Verify Account action only.
   bool isLoading = false;
+  /// Loading state for the Resend Code action only. Separate from verify flow.
+  bool isResendLoading = false;
   String? errorMessage;
 
   Timer? _timer;
@@ -110,14 +113,15 @@ class VerificationViewModel extends ChangeNotifier {
     }
   }
 
+  /// Resend OTP only. Does not call verify. Use when timer expired or user wants a new code.
   Future<void> resendCode(
     BuildContext context, {
     bool forceResend = false,
   }) async {
     // If forceResend is true, bypass the timer check (for auto-resend scenarios)
-    if (!forceResend && (isLoading || !_canResend)) return;
+    if (!forceResend && (isResendLoading || !_canResend)) return;
 
-    isLoading = true;
+    isResendLoading = true;
     errorMessage = null;
     notifyListeners();
 
@@ -128,7 +132,7 @@ class VerificationViewModel extends ChangeNotifier {
           'A new verification code has been sent to your email';
       _showMessage(context, message, isError: false);
 
-      // Restart the timer
+      // Restart the timer so Resend hides again until next expiry
       _startTimer();
     } on ApiException catch (e) {
       errorMessage = e.message;
@@ -138,7 +142,7 @@ class VerificationViewModel extends ChangeNotifier {
           'Hmm, something unexpected happened. Let\'s try that again!';
       _showMessage(context, errorMessage!);
     } finally {
-      isLoading = false;
+      isResendLoading = false;
       notifyListeners();
     }
   }
