@@ -347,12 +347,17 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Future<Map<String, dynamic>> setNewPassword({
+    required String email,
     required String password,
     required String confirmPassword,
   }) async {
     final json = await _apiService.post(
       ApiConstants.setNewPassword,
-      body: {'password': password, 'confirm_password': confirmPassword},
+      body: {
+        'password': password,
+        'confirm_password': confirmPassword,
+        'email': email,
+      },
     );
     return json;
   }
