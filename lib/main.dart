@@ -18,9 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // .env not bundled (e.g. release without .env); EnvConstants use fallbacks
-  }
+  } catch (_) {}
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   AnalyticsService.delegate = FirebaseAnalyticsDelegate();
   await LocalNotificationService.initialize();
