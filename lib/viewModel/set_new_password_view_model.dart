@@ -13,6 +13,7 @@ class SetNewPasswordViewModel extends ChangeNotifier {
 
   GlobalKey<FormState>? formKey;
   final passwordController = TextEditingController();
+  final emailController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
   bool isLoading = false;
@@ -30,6 +31,7 @@ class SetNewPasswordViewModel extends ChangeNotifier {
     if (!(formKey.currentState?.validate() ?? false)) return;
 
     final password = passwordController.text.trim();
+    final email = emailController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
     if (password != confirmPassword) {
@@ -43,6 +45,7 @@ class SetNewPasswordViewModel extends ChangeNotifier {
 
     try {
       final response = await _authRepository.setNewPassword(
+        email: email,
         password: password,
         confirmPassword: confirmPassword,
       );
@@ -53,6 +56,7 @@ class SetNewPasswordViewModel extends ChangeNotifier {
 
       // Clear form and controllers before navigation
       passwordController.clear();
+      emailController.clear();
       confirmPasswordController.clear();
       formKey.currentState?.reset();
 
@@ -92,6 +96,7 @@ class SetNewPasswordViewModel extends ChangeNotifier {
   @override
   void dispose() {
     passwordController.dispose();
+    emailController.dispose();
     confirmPasswordController.dispose();
     super.dispose();
   }

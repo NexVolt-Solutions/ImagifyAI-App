@@ -76,6 +76,7 @@ abstract class IAuthRepository {
   Future<Map<String, dynamic>> verifyForgotOtp({required String code});
 
   Future<Map<String, dynamic>> setNewPassword({
+    required String email,
     required String password,
     required String confirmPassword,
   });
