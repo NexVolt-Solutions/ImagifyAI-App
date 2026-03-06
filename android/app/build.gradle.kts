@@ -30,7 +30,7 @@ val admobAppId = (keystoreProperties["ADMOB_APP_ID"] ?: secretsProperties["ADMOB
 
 android {
     namespace = "com.imagifyai.app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = "27.0.12077973"
 
 

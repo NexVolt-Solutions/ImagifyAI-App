@@ -46,7 +46,7 @@ dependencies:
   http: ^1.2.2
   image_picker: ^1.1.2
   path_provider: ^2.1.1
-  image_gallery_saver: ^2.0.3
+  gal: ^1.1.0
   permission_handler: ^11.3.1
   flutter_inset_shadow: ^2.0.3
   shared_preferences: ^2.2.2
