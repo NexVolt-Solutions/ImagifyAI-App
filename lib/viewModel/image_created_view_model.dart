@@ -18,7 +18,7 @@ import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:gal/gal.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -584,17 +584,13 @@ class ImageCreatedViewModel extends ChangeNotifier {
       final baseName =
           'ImagifyAI_wallpaper_${wallpaperId}_${DateTime.now().millisecondsSinceEpoch}';
 
-      final result = await ImageGallerySaver.saveImage(
-        imageBytes,
-        quality: 100,
-        name: baseName,
-      );
+      // Get temporary directory to save the image file first
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/$baseName.png');
+      await file.writeAsBytes(imageBytes);
 
-      if (result == null ||
-          (result is Map && (result['isSuccess'] == false))) {
-        throw Exception(
-            result is Map ? result['error']?.toString() ?? 'Save failed' : 'Save failed');
-      }
+      // Save using gal package
+      await Gal.putImage(file.path);
     } catch (e) {
       throw Exception('Failed to save image: ${e.toString()}');
     }

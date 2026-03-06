@@ -149,7 +149,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 editProfileViewModel.selectedIndex == index;
                             return GestureDetector(
                               onTap: () {
-                                editProfileViewModel.setSelectedPasswordRequirementIndex(index);
+                                editProfileViewModel
+                                    .setSelectedPasswordRequirementIndex(index);
                               },
                               child: PasswordText(
                                 text: editProfileViewModel.items[index],
@@ -171,14 +172,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Expanded(
                       child: CustomButton(
                         onPressed: () async {
-                          if (accessToken == null || accessToken.isEmpty) return;
-                          final success = await editProfileViewModel.updatePassword(
-                            context: context,
-                            accessToken: accessToken,
-                          );
+                          if (accessToken == null || accessToken.isEmpty)
+                            return;
+                          final success = await editProfileViewModel
+                              .updatePassword(
+                                context: context,
+                                accessToken: accessToken,
+                              );
                           if (mounted && success) Navigator.pop(context);
                         },
-                        text: 'Update Password',
+                        text: 'Update',
                         isLoading: editProfileViewModel.isLoading,
                         gradient: AppColors.gradient,
                       ),

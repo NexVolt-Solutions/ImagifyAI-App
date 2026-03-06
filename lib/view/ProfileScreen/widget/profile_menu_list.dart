@@ -51,9 +51,15 @@ class ProfileMenuList extends StatelessWidget {
           trailing: item['trailingType'] == 'switch'
               ? Switch(
                   inactiveThumbColor: context.subtitleColor,
+                  inactiveTrackColor: Colors.transparent,
                   activeTrackColor: context.textColor,
                   activeThumbColor: context.primaryColor,
-
+                  trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return Colors.transparent; // no border when active
+                    }
+                    return context.subtitleColor; // border when inactive
+                  }),
                   value: isThemeItem
                       ? isDarkMode
                       : viewModel.notificationsEnabled,
@@ -65,6 +71,21 @@ class ProfileMenuList extends StatelessWidget {
                     }
                   },
                 )
+              //  Switch(
+              //     inactiveThumbColor: context.subtitleColor,
+              //     activeTrackColor: context.textColor,
+              //     activeThumbColor: context.primaryColor,
+              //     value: isThemeItem
+              //         ? isDarkMode
+              //         : viewModel.notificationsEnabled,
+              //     onChanged: (val) {
+              //       if (isThemeItem) {
+              //         themeProvider?.toggleTheme();
+              //       } else {
+              //         viewModel.setNotificationsEnabled(val);
+              //       }
+              //     },
+              //   )
               : Icon(
                   Icons.arrow_forward_ios,
                   color: context.textColor,

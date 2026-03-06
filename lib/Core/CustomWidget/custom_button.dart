@@ -35,7 +35,7 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double? buttonWidth = width ?? double.infinity;
+    final double buttonWidth = width ?? double.infinity;
     final isFilled = gradient != null;
     // Filled (gradient): white text/icon. Outline (no gradient): theme onSurface so light theme = dark text, dark theme = white.
     final contentColor = isFilled
