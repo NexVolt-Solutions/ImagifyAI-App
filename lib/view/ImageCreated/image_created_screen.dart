@@ -9,6 +9,7 @@ import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/services/content_report_service.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 import 'package:imagifyai/view/ImageCreated/widgets/action_buttons_row.dart';
@@ -226,43 +227,27 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
   Widget build(BuildContext context) {
     return Consumer<ImageCreatedViewModel>(
       builder: (context, imageCreatedViewModel, _) {
-        // Check if we need to restart polling (e.g., after recreate)
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            _restartPollingIfNeeded(imageCreatedViewModel);
-          }
-        });
-
         final wp = imageCreatedViewModel.wallpaper;
         final imageUrl = wp?.imageUrl ?? '';
 
-        // Reset retry count if image URL changed (defer to avoid notifyListeners during build)
-        if (imageUrl.isNotEmpty &&
-            imageUrl != 'null' &&
-            imageUrl != _lastImageUrl) {
-          _lastImageUrl = imageUrl;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) imageCreatedViewModel.clearImageLoadError();
-          });
-        }
-
-        // Ensure isPolling is false if image is available
-        if (wp != null &&
-            imageUrl.isNotEmpty &&
-            imageUrl != 'null' &&
-            imageCreatedViewModel.isPolling) {
-          // Image is available but isPolling is still true, force update
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              imageCreatedViewModel.setWallpaper(wp);
-            }
-          });
-        }
+        // Single post-frame callback to avoid multiple schedule passes and potential jank
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          _restartPollingIfNeeded(imageCreatedViewModel);
+          if (imageUrl.isNotEmpty && imageUrl != 'null' && imageUrl != _lastImageUrl) {
+            _lastImageUrl = imageUrl;
+            imageCreatedViewModel.clearImageLoadError();
+          }
+          if (wp != null &&
+              imageUrl.isNotEmpty &&
+              imageUrl != 'null' &&
+              imageCreatedViewModel.isPolling) {
+            imageCreatedViewModel.setWallpaper(wp);
+          }
+        });
 
         // Update prompt controller if wallpaper changes (but preserve user edits during recreation)
         if (wp != null && wp.prompt.isNotEmpty) {
-          // Only update if the wallpaper prompt is different and we're not in the middle of recreation
-          // This ensures the edited prompt stays visible after recreation
           if (_promptController.text != wp.prompt &&
               !imageCreatedViewModel.isLoading) {
             _promptController.text = wp.prompt;
@@ -271,7 +256,20 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
 
         return Scaffold(
           backgroundColor: context.backgroundColor,
-          appBar: const ImageCreatedAppBar(),
+          appBar: ImageCreatedAppBar(
+            onReportTap: (wp != null && (wp.imageUrl.isNotEmpty && wp.imageUrl != 'null'))
+                ? () {
+                    final w = wp;
+                    ContentReportService.showReportDialog(
+                      context,
+                      contentId: w.id,
+                      imageUrl: w.imageUrl,
+                      prompt: w.prompt,
+                      sourceLabel: 'Image Created',
+                    );
+                  }
+                : null,
+          ),
           body: SafeArea(
             child: Stack(
               children: [

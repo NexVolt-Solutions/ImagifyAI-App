@@ -5,7 +5,12 @@ import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class ImageCreatedAppBar extends StatelessWidget
     implements PreferredSizeWidget {
-  const ImageCreatedAppBar({super.key});
+  const ImageCreatedAppBar({
+    super.key,
+    this.onReportTap,
+  });
+
+  final VoidCallback? onReportTap;
 
   @override
   Size get preferredSize => const Size.fromHeight(65);
@@ -34,6 +39,19 @@ class ImageCreatedAppBar extends StatelessWidget
                   ),
                 ),
               ),
+              if (onReportTap != null)
+                Positioned(
+                  right: 0,
+                  child: IconButton(
+                    onPressed: onReportTap,
+                    icon: Icon(
+                      Icons.flag_outlined,
+                      color: Theme.of(context).iconTheme.color,
+                      size: 22,
+                    ),
+                    tooltip: 'Report content',
+                  ),
+                ),
             ],
           ),
         ),

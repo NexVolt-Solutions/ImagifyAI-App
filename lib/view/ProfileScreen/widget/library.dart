@@ -295,6 +295,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:imagifyai/Core/services/content_report_service.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
@@ -303,6 +304,7 @@ import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
 import 'package:imagifyai/viewModel/image_generate_view_model.dart';
+import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 import 'package:imagifyai/viewModel/library_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -389,123 +391,57 @@ class _LibraryState extends State<Library> {
               onRefresh: () async {
                 await libraryViewModel.loadWallpapers(context, refresh: true);
               },
-              child: ListView(
+              child: CustomScrollView(
                 controller: _scrollController,
-                padding: EdgeInsets.symmetric(horizontal: context.h(20)),
-                children: [
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "Explore Prompt",
-                      style: context.appTextStyles?.profileScreenTitle,
-                      textAlign: TextAlign.start,
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            "Explore Prompt",
+                            style: context.appTextStyles?.profileScreenTitle,
+                            textAlign: TextAlign.start,
+                          ),
+                        ),
+                        SizedBox(height: context.h(10)),
+                      ]),
                     ),
                   ),
-                  SizedBox(height: context.h(10)),
                   if (isLoading)
-                    const Center(child: AppLoadingIndicator.large())
+                    const SliverToBoxAdapter(
+                      child: Center(child: AppLoadingIndicator.large()),
+                    )
                   else if (items.isEmpty)
-                    _LibraryEmptyState(
-                      onCreateTap: () => Navigator.pop(context),
+                    SliverToBoxAdapter(
+                      child: _LibraryEmptyState(
+                        onCreateTap: () => Navigator.pop(context),
+                      ),
                     )
                   else
-                    GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: items.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: context.w(10),
-                        mainAxisSpacing: context.h(10),
-                        mainAxisExtent: context.h(200),
-                      ),
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        final imageUrl =
-                            (item.thumbnailUrl.isNotEmpty
-                                    ? item.thumbnailUrl
-                                    : item.imageUrl)
-                                .trim();
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: context.padAll(7),
-                                decoration: BoxDecoration(
-                                  color: context.backgroundColor,
-                                  borderRadius: BorderRadius.circular(
-                                    context.radius(12),
-                                  ),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                    context.radius(12),
-                                  ),
-                                  child: imageUrl.isNotEmpty
-                                      ? Image.network(
-                                          imageUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
-                                              Container(
-                                                color: context.surfaceColor,
-                                                child: Icon(
-                                                  Icons.image_not_supported,
-                                                  color: context.subtitleColor,
-                                                  size: 40,
-                                                ),
-                                              ),
-                                          loadingBuilder:
-                                              (
-                                                context,
-                                                child,
-                                                loadingProgress,
-                                              ) {
-                                                if (loadingProgress == null) {
-                                                  return child;
-                                                }
-                                                return Container(
-                                                  color: context.surfaceColor,
-                                                  child: Center(
-                                                    child:
-                                                        AppLoadingIndicator.medium(),
-                                                  ),
-                                                );
-                                              },
-                                        )
-                                      : Container(
-                                          color: context.surfaceColor,
-                                          child: Icon(
-                                            Icons.image_not_supported,
-                                            color: context.subtitleColor,
-                                            size: 40,
-                                          ),
-                                        ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: context.h(8)),
-                            Text(
-                              item.title.isNotEmpty
-                                  ? item.title
-                                  : (item.prompt.isNotEmpty
-                                        ? item.prompt
-                                        : 'Wallpaper'),
-                              style: context.appTextStyles?.profileCardTitle,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(height: context.h(6)),
-                            CustomButton(
-                              height: context.h(24),
-                              width: context.w(120),
-                              fontSize: context.text(11),
-                              gradient: AppColors.gradient,
-                              text: "Use This Prompt",
-                              onPressed: () {
-                                // 1. Set prompt in viewmodel (flag is raised inside)
+                    SliverPadding(
+                      padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                      sliver: SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: context.w(10),
+                          mainAxisSpacing: context.h(10),
+                          mainAxisExtent: context.h(200),
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final item = items[index];
+                            final imageUrl =
+                                (item.thumbnailUrl.isNotEmpty
+                                        ? item.thumbnailUrl
+                                        : item.imageUrl)
+                                    .trim();
+                            return _LibraryGridTile(
+                              item: item,
+                              imageUrl: imageUrl,
+                              onUsePrompt: () {
                                 context
                                     .read<ImageGenerateViewModel>()
                                     .setPromptFromLibrary(
@@ -514,22 +450,30 @@ class _LibraryState extends State<Library> {
                                           ? item.style
                                           : null,
                                     );
-                                // 2. Switch to Create tab (index 1)
                                 context
                                     .read<BottomNavScreenViewModel>()
                                     .updateIndex(1);
-                                // 3. Pop library screen
                                 Navigator.pop(context);
                               },
-                            ),
-                          ],
-                        );
-                      },
+                              onReport: () => ContentReportService.showReportDialog(
+                                context,
+                                contentId: item.id,
+                                imageUrl: imageUrl,
+                                prompt: item.prompt,
+                                sourceLabel: 'Explore Prompt',
+                              ),
+                            );
+                          },
+                          childCount: items.length,
+                        ),
+                      ),
                     ),
                   if (libraryViewModel.isLoadingMore)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: context.h(20)),
-                      child: const Center(child: AppLoadingIndicator.large()),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: context.h(20)),
+                        child: const Center(child: AppLoadingIndicator.large()),
+                      ),
                     ),
                 ],
               ),
@@ -537,6 +481,107 @@ class _LibraryState extends State<Library> {
           ),
         );
       },
+    );
+  }
+}
+
+class _LibraryGridTile extends StatelessWidget {
+  final Wallpaper item;
+  final String imageUrl;
+  final VoidCallback onUsePrompt;
+  final VoidCallback onReport;
+
+  const _LibraryGridTile({
+    required this.item,
+    required this.imageUrl,
+    required this.onUsePrompt,
+    required this.onReport,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Container(
+            padding: context.padAll(7),
+            decoration: BoxDecoration(
+              color: context.backgroundColor,
+              borderRadius: BorderRadius.circular(context.radius(12)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(context.radius(12)),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: context.surfaceColor,
+                        child: Icon(
+                          Icons.image_not_supported,
+                          color: context.subtitleColor,
+                          size: 40,
+                        ),
+                      ),
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: context.surfaceColor,
+                          child: Center(
+                            child: AppLoadingIndicator.medium(),
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      color: context.surfaceColor,
+                      child: Icon(
+                        Icons.image_not_supported,
+                        color: context.subtitleColor,
+                        size: 40,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+        SizedBox(height: context.h(8)),
+        Text(
+          item.title.isNotEmpty
+              ? item.title
+              : (item.prompt.isNotEmpty ? item.prompt : 'Wallpaper'),
+          style: context.appTextStyles?.profileCardTitle,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: context.h(6)),
+        CustomButton(
+          height: context.h(24),
+          width: context.w(120),
+          fontSize: context.text(11),
+          gradient: AppColors.gradient,
+          text: "Use This Prompt",
+          onPressed: onUsePrompt,
+        ),
+        SizedBox(height: context.h(6)),
+        GestureDetector(
+          onTap: onReport,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.flag_outlined, size: 14, color: context.subtitleColor),
+              SizedBox(width: context.w(4)),
+              Text(
+                'Report',
+                style: (context.appTextStyles?.profileListItemSubtitle ?? TextStyle())
+                    .copyWith(color: context.subtitleColor, fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
