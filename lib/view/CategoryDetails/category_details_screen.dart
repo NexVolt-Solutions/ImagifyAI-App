@@ -86,6 +86,7 @@ class CategoryDetailsScreen extends StatelessWidget {
                         builder: (context) => FullScreenImageViewer(
                           imageUrl: imageUrl,
                           heroTag: 'category_${wallpaper.id}_$index',
+                          wallpaper: wallpaper,
                         ),
                         fullscreenDialog: true,
                       ),

@@ -10,10 +10,12 @@ class ActionButtonsRow extends StatelessWidget {
     super.key,
     required this.viewModel,
     required this.onTryAgainTap,
+    required this.onReportTap,
   });
 
   final ImageCreatedViewModel viewModel;
   final VoidCallback onTryAgainTap;
+  final VoidCallback onReportTap;
 
   @override
   Widget build(BuildContext context) {
@@ -22,23 +24,31 @@ class ActionButtonsRow extends StatelessWidget {
         Expanded(
           child: CustomButton(
             onPressed: onTryAgainTap,
-            iconHeight: context.h(32),
+            iconHeight: context.h(28),
             gradient: AppColors.gradient,
             text: 'Try Again',
             isLoading: viewModel.isLoading,
             icon: AppAssets.reCreateIcon,
           ),
         ),
-        SizedBox(width: context.w(12)),
-
+        SizedBox(width: context.w(8)),
         Expanded(
           child: CustomButton(
             onPressed: () => viewModel.share(context),
-            iconHeight: context.h(28),
+            iconHeight: context.h(24),
             gradient: AppColors.gradient,
             icon: AppAssets.shareIcon,
-
             text: 'Share',
+          ),
+        ),
+        SizedBox(width: context.w(8)),
+        Expanded(
+          child: CustomButton(
+            onPressed: onReportTap,
+            iconHeight: context.h(24),
+            gradient: AppColors.gradient,
+            icon: null,
+            text: 'Report',
           ),
         ),
       ],

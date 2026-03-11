@@ -7,6 +7,7 @@ import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:imagifyai/Core/services/content_report_service.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/image_generate_prompt_section.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/inspiration_gallery.dart';
@@ -148,64 +149,79 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
   @override
   Widget build(BuildContext context) {
     final imageGenerateViewModel = Provider.of<ImageGenerateViewModel>(context);
-    return Scaffold(
-      backgroundColor: context.backgroundColor,
-
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: context.w(20)),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: context.h(20)),
-                    ImageGeneratePromptSection(),
-                    SizedBox(height: context.h(20)),
-                    InspirationGallery(
-                      onScrollToStyle: (name) =>
-                          _scrollToStyleByName(name, context),
+    return SafeArea(
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: context.w(20)),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: context.h(20)),
+                  ImageGeneratePromptSection(),
+                  SizedBox(height: context.h(20)),
+                  InspirationGallery(
+                    onScrollToStyle: (name) =>
+                        _scrollToStyleByName(name, context),
+                  ),
+                  SizedBox(height: context.h(20)),
+                  SizeSelectorRow(),
+                  SizedBox(height: context.h(20)),
+                  StyleSelectorList(
+                    scrollController: _styleScrollController,
+                    onScrollToStyle: (index) =>
+                        _scrollToSelectedStyle(index, context),
+                  ),
+                  SizedBox(height: context.h(20)),
+                  CustomButton(
+                    onPressed: () => _onCreateMagicTapped(context),
+                    width: context.w(350),
+                    iconHeight: 24,
+                    iconWidth: 24,
+                    gradient: AppColors.gradient,
+                    text: 'Create Magic',
+                    icon: AppAssets.magicStarIcon,
+                    isLoading: imageGenerateViewModel.isCreating,
+                  ),
+                  SizedBox(height: context.h(16)),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () => ContentReportService.showReportInfoDialog(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.flag_outlined, size: 16, color: context.subtitleColor),
+                          SizedBox(width: 6),
+                          Text(
+                            'Report offensive content',
+                            style: TextStyle(
+                              color: context.subtitleColor,
+                              fontSize: 13,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    SizedBox(height: context.h(20)),
-                    SizeSelectorRow(),
-                    SizedBox(height: context.h(20)),
-                    StyleSelectorList(
-                      scrollController: _styleScrollController,
-                      onScrollToStyle: (index) =>
-                          _scrollToSelectedStyle(index, context),
-                    ),
-                    SizedBox(height: context.h(20)),
-                    CustomButton(
-                      onPressed: () => _onCreateMagicTapped(context),
-                      width: context.w(350),
-                      iconHeight: 24,
-                      iconWidth: 24,
-                      gradient: AppColors.gradient,
-                      text: 'Create Magic',
-                      icon: AppAssets.magicStarIcon,
-                      isLoading: imageGenerateViewModel.isCreating,
-                    ),
-                    SizedBox(height: context.h(12)),
-                    // LimitAndWatchAdRow(),
-                    // SizedBox(height: context.h(100)),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: context.h(120)),
+                ],
               ),
             ),
-            // Loading Overlay
-            if (imageGenerateViewModel.isCreating)
-              Consumer<ImageGenerateViewModel>(
-                builder: (context, vm, _) => LoadingOverlay(
-                  progress: vm.creationProgress,
-                  currentStage: vm.currentStage,
-                  elapsedTime: vm.elapsedPollingTimeFormatted,
-                ),
+          ),
+          // Loading Overlay
+          if (imageGenerateViewModel.isCreating)
+            Consumer<ImageGenerateViewModel>(
+              builder: (context, vm, _) => LoadingOverlay(
+                progress: vm.creationProgress,
+                currentStage: vm.currentStage,
+                elapsedTime: vm.elapsedPollingTimeFormatted,
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

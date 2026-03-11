@@ -43,6 +43,7 @@ class CustomListView extends StatelessWidget {
                         builder: (context) => FullScreenImageViewer(
                           imageUrl: imageUrl,
                           heroTag: 'wallpaper_${wallpaper.id}_$index',
+                          wallpaper: wallpaper,
                         ),
                         fullscreenDialog: true,
                       ),

@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
+import 'package:imagifyai/Core/Constants/env_constants.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
@@ -31,6 +33,49 @@ class ContentReportService {
 
   static const String _supportEmail = 'support@imagifyai.com';
 
+  /// Shows info dialog explaining where users can report. Call from Profile or Create screen.
+  static void showReportInfoDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) {
+        final primaryColor = Theme.of(ctx).colorScheme.primary;
+        final textColor = Theme.of(ctx).brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black;
+        final bgColor = Theme.of(ctx).scaffoldBackgroundColor;
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.flag_outlined, color: primaryColor),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Report offensive content',
+                  style: TextStyle(color: textColor, fontSize: 18),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: bgColor,
+          content: Text(
+            'To report AI-generated content you find inappropriate:\n\n'
+            '• When viewing a generated image: tap the Report (flag) icon or "Report content" button\n'
+            '• In Explore Prompt: tap Report below any image\n'
+            '• In full-screen view: tap the flag icon in the top right\n\n'
+            'You can report from any AI-generated image in the app.',
+            style: TextStyle(color: textColor, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text('Got it', style: TextStyle(color: primaryColor)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   /// Shows a report dialog for the given content. Call from Image Created or Explore Prompt screens.
   static Future<void> showReportDialog(
     BuildContext context, {
@@ -45,7 +90,9 @@ class ContentReportService {
       context: context,
       backgroundColor: context.backgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(context.radius(16))),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(context.radius(16)),
+        ),
       ),
       builder: (ctx) => _ReportContentSheet(
         contentId: contentId,
@@ -57,7 +104,12 @@ class ContentReportService {
 
     if (!context.mounted || selected == null) return;
 
-    await _submitReport(context, contentId: contentId, reason: selected, prompt: prompt);
+    await _submitReport(
+      context,
+      contentId: contentId,
+      reason: selected,
+      prompt: prompt,
+    );
   }
 
   static Future<void> _submitReport(
@@ -72,15 +124,28 @@ class ContentReportService {
         : null;
 
     try {
-      // Try API first if backend supports it
-      final path = '${ApiConstants.wallpapers}/$contentId/report';
+      // POST /api/v1/wallpapers/{wallpaper_id}/report
+      final path = '${ApiConstants.reportWallpaper}/$contentId/report';
+      final body = <String, String>{
+        'reason': reason,
+        'prompt': (prompt != null && prompt.trim().isNotEmpty)
+            ? prompt.trim()
+            : 'N/A',
+      };
+      if (kDebugMode) {
+        debugPrint('[REPORT] POST ${EnvConstants.apiBaseUrl}$path');
+        debugPrint('[REPORT] body: $body');
+      }
       await ApiService().post(
         path,
         headers: headers,
-        body: {'reason': reason, 'prompt': prompt ?? ''},
+        body: body,
         retryOnTokenExpiry: true,
       );
-      AnalyticsService.logEvent('content_reported', {'content_id': contentId, 'reason': reason});
+      AnalyticsService.logEvent('content_reported', {
+        'content_id': contentId,
+        'reason': reason,
+      });
       if (context.mounted) {
         SnackbarUtil.showTopSnackBar(
           context,
@@ -88,14 +153,21 @@ class ContentReportService {
           isError: false,
         );
       }
-    } catch (_) {
+    } catch (e, st) {
+      if (kDebugMode) {
+        debugPrint('[REPORT] API failed: $e');
+        debugPrint('[REPORT] stack: $st');
+      }
       // Fallback: open email client for report (ensures compliance even without backend)
       await _reportViaEmail(
         contentId: contentId,
         reason: reason,
         prompt: prompt,
       );
-      AnalyticsService.logEvent('content_reported_email', {'content_id': contentId, 'reason': reason});
+      AnalyticsService.logEvent('content_reported_email', {
+        'content_id': contentId,
+        'reason': reason,
+      });
       if (context.mounted) {
         SnackbarUtil.showTopSnackBar(
           context,
@@ -121,9 +193,7 @@ class ContentReportService {
       'Prompt: ${prompt ?? "N/A"}\n\n'
       '---\nPlease describe the issue in more detail below:\n',
     );
-    final uri = Uri.parse(
-      'mailto:$_supportEmail?subject=$subject&body=$body',
-    );
+    final uri = Uri.parse('mailto:$_supportEmail?subject=$subject&body=$body');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
@@ -148,30 +218,36 @@ class _ReportContentSheet extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.all(context.w(20)),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.flag_outlined, color: context.primaryColor, size: 24),
-                SizedBox(width: context.w(12)),
-                SizedBox(
-                  width: context.w(280),
-                  child: Text(
-                    'Report content',
-                    style: context.appTextStyles?.profileScreenTitle,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.flag_outlined,
+                    color: context.primaryColor,
+                    size: 24,
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: context.h(8)),
-            Text(
-              'Help us keep Imagify AI safe. Select a reason for this report.',
-              style: context.appTextStyles?.profileScreenSubtitle,
-            ),
-            SizedBox(height: context.h(20)),
-            ...ReportReason.reasons.map((r) => Padding(
+                  SizedBox(width: context.w(12)),
+                  SizedBox(
+                    width: context.w(280),
+                    child: Text(
+                      'Report content',
+                      style: context.appTextStyles?.profileScreenTitle,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: context.h(8)),
+              Text(
+                'Help us keep Imagify AI safe. Select a reason for this report.',
+                style: context.appTextStyles?.profileScreenSubtitle,
+              ),
+              SizedBox(height: context.h(20)),
+              ...ReportReason.reasons.map(
+                (r) => Padding(
                   padding: EdgeInsets.only(bottom: context.h(8)),
                   child: Material(
                     color: Colors.transparent,
@@ -185,27 +261,42 @@ class _ReportContentSheet extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.report_outlined, color: context.subtitleColor, size: 20),
+                            Icon(
+                              Icons.report_outlined,
+                              color: context.subtitleColor,
+                              size: 20,
+                            ),
                             SizedBox(width: context.w(12)),
                             Expanded(
                               child: Text(
                                 r.label,
-                                style: context.appTextStyles?.profileListItemSubtitle,
+                                style: context
+                                    .appTextStyles
+                                    ?.profileListItemSubtitle,
                               ),
                             ),
-                            Icon(Icons.chevron_right, color: context.subtitleColor, size: 20),
+                            Icon(
+                              Icons.chevron_right,
+                              color: context.subtitleColor,
+                              size: 20,
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ),
-                )),
-            SizedBox(height: context.h(8)),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel', style: TextStyle(color: context.subtitleColor)),
-            ),
-          ],
+                ),
+              ),
+              SizedBox(height: context.h(8)),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(color: context.subtitleColor),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

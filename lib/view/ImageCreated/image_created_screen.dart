@@ -377,6 +377,18 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                       ActionButtonsRow(
                         viewModel: imageCreatedViewModel,
                         onTryAgainTap: () => _onTryAgainTapped(context),
+                        onReportTap: wp != null
+                            ? () {
+                                final w = wp;
+                                ContentReportService.showReportDialog(
+                                  context,
+                                  contentId: w.id,
+                                  imageUrl: w.imageUrl.isNotEmpty && w.imageUrl != 'null' ? w.imageUrl : null,
+                                  prompt: w.prompt,
+                                  sourceLabel: 'Image Created',
+                                );
+                              }
+                            : () {},
                       ),
                       SizedBox(height: context.h(20)),
                     ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
+import 'package:imagifyai/Core/services/content_report_service.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
@@ -64,6 +65,13 @@ class ProfileScreenViewModel extends ChangeNotifier {
       'leading': AppAssets.shieldIcon,
       'title': 'Privacy Policy',
       'subtitle': 'Learn how we protect your privacy',
+      'trailingType': 'arrow',
+      'switchValue': false,
+    },
+    {
+      'leading': AppAssets.shieldIcon,
+      'title': 'Report offensive content',
+      'subtitle': 'Flag inappropriate AI-generated content',
       'trailingType': 'arrow',
       'switchValue': false,
     },
@@ -160,9 +168,12 @@ class ProfileScreenViewModel extends ChangeNotifier {
     } else if (index == 5) {
       Navigator.pushNamed(context, RoutesName.PrivicyScreen);
     } else if (index == 6) {
-      Navigator.pushNamed(context, RoutesName.TermScreen);
+      ContentReportService.showReportInfoDialog(context);
     } else if (index == 7) {
+      Navigator.pushNamed(context, RoutesName.TermScreen);
+    } else if (index == 8) {
       Navigator.pushNamed(context, RoutesName.ContactScreen);
     }
   }
+
 }
