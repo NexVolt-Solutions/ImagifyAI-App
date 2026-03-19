@@ -8,6 +8,9 @@ class ProfileImage extends StatelessWidget {
   final double? width;
   final BoxFit? fit;
   final bool forceRefresh;
+
+  /// When > 0, appends `v` query param so [Image.network] refetches (same URL, new bytes).
+  final int cacheNonce;
   const ProfileImage({
     super.key,
     required this.imagePath,
@@ -15,17 +18,24 @@ class ProfileImage extends StatelessWidget {
     this.width,
     this.fit,
     this.forceRefresh = false,
+    this.cacheNonce = 0,
   });
 
   bool get isNetworkImage =>
       imagePath.startsWith('http://') || imagePath.startsWith('https://');
 
-  /// Add cache-busting parameter to URL if forceRefresh is true
+  /// Cache-busting: forceRefresh uses timestamp; cacheNonce uses stable version from view models.
   String get imageUrl {
-    if (!isNetworkImage || !forceRefresh) return imagePath;
+    if (!isNetworkImage) return imagePath;
     final uri = Uri.parse(imagePath);
     final queryParams = Map<String, String>.from(uri.queryParameters);
-    queryParams['_t'] = DateTime.now().millisecondsSinceEpoch.toString();
+    if (forceRefresh) {
+      queryParams['_t'] = DateTime.now().millisecondsSinceEpoch.toString();
+    }
+    if (cacheNonce > 0) {
+      queryParams['v'] = cacheNonce.toString();
+    }
+    if (queryParams.isEmpty) return imagePath;
     return uri.replace(queryParameters: queryParams).toString();
   }
 
@@ -57,7 +67,7 @@ class ProfileImage extends StatelessWidget {
               height: height,
               width: width,
               fit: fit,
-              key: ValueKey(imagePath), // Force reload when URL changes
+              key: ValueKey('$imagePath-$cacheNonce'),
               cacheWidth: width?.toInt(),
               cacheHeight: height?.toInt(),
               errorBuilder: (context, error, stackTrace) {

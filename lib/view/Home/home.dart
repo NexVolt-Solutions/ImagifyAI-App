@@ -70,6 +70,7 @@ class _HomeState extends State<Home> {
                     currentUser: homeViewModel.currentUser,
                     displayName: UserProfileHeader.getDisplayName(homeViewModel.currentUser),
                     isProfileLoading: homeViewModel.isLoadingUser,
+                    profileImageCacheNonce: homeViewModel.profileImageCacheNonce,
                   ),
                   SliverToBoxAdapter(child: SizedBox(height: context.h(24))),
                   SliverToBoxAdapter(

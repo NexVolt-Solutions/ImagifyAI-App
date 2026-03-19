@@ -155,6 +155,8 @@ class _EditProfileState extends State<EditProfile> {
                                     height: context.h(82),
                                     width: context.w(82),
                                     fit: BoxFit.cover,
+                                    cacheNonce:
+                                        profileViewModel.profileImageCacheNonce,
                                   ),
                             Positioned(
                               bottom: 0,

@@ -181,7 +181,18 @@ class CustomTextField extends StatelessWidget {
       return "This field is required";
     }
 
-    if (validatorType == "password") return null;
+    if (validatorType == "password") {
+      if (value.length < 8) {
+        return "Password must be at least 8 characters";
+      }
+      if (!RegExp(r'[0-9]').hasMatch(value)) {
+        return "Password must contain at least 1 number";
+      }
+      if (!RegExp(r'[A-Za-z]').hasMatch(value)) {
+        return "Password must contain at least 1 letter";
+      }
+      return null;
+    }
 
     if (validatorType == "name" && value.length < 3) {
       return "Enter a valid name";

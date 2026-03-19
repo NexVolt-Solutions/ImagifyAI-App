@@ -7,8 +7,13 @@ import 'package:imagifyai/models/user/user.dart';
 
 class ProfileHeaderSection extends StatelessWidget {
   final User? user;
+  final int profileImageCacheNonce;
 
-  const ProfileHeaderSection({super.key, required this.user});
+  const ProfileHeaderSection({
+    super.key,
+    required this.user,
+    this.profileImageCacheNonce = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +40,7 @@ class ProfileHeaderSection extends StatelessWidget {
                 height: context.h(100),
                 width: context.h(100),
                 fit: BoxFit.cover,
+                cacheNonce: profileImageCacheNonce,
               ),
             ),
           ),

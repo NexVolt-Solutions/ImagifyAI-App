@@ -49,13 +49,14 @@ class EditProfileViewModel extends ChangeNotifier {
   void loadUserData(User? user) {
     if (user == null) return;
 
-    // Only update if user data actually changed
+    // Only update if user data actually changed (include profile image URL)
     if (currentUser?.id == user.id &&
         currentUser?.firstName == user.firstName &&
         currentUser?.lastName == user.lastName &&
         currentUser?.email == user.email &&
         currentUser?.phoneNumber == user.phoneNumber &&
-        currentUser?.username == user.username) {
+        currentUser?.username == user.username &&
+        currentUser?.profileImageUrl == user.profileImageUrl) {
       return; // No changes, skip update
     }
 
@@ -122,13 +123,20 @@ class EditProfileViewModel extends ChangeNotifier {
         currentUser = await _authRepository.getCurrentUser(
           accessToken: accessToken,
           userId: userId,
+          forceRefresh: true,
         );
         loadUserData(currentUser);
 
-        // Also update ProfileScreenViewModel
         final profileViewModel = context.read<ProfileScreenViewModel>();
         profileViewModel.currentUser = currentUser;
+        profileViewModel.bumpProfileImageCacheNonce();
+
+        final homeViewModel = context.read<HomeViewModel>();
+        homeViewModel.currentUser = currentUser;
+        homeViewModel.bumpProfileImageCacheNonce();
+
         profileViewModel.notifyListeners();
+        homeViewModel.notifyListeners();
       }
     } on ApiException catch (e) {
       errorMessage = e.message;
@@ -315,6 +323,7 @@ class EditProfileViewModel extends ChangeNotifier {
         currentUser = await _authRepository.getCurrentUser(
           accessToken: accessToken,
           userId: userId,
+          forceRefresh: true,
         );
         loadUserData(currentUser);
       }
@@ -329,6 +338,10 @@ class EditProfileViewModel extends ChangeNotifier {
       // Update HomeViewModel with new user data (force reload to get latest)
       final homeViewModel = context.read<HomeViewModel>();
       await homeViewModel.loadCurrentUser(context, forceReload: true);
+
+      // Bust in-memory image cache so avatars refresh even if URL string is unchanged
+      profileViewModel.bumpProfileImageCacheNonce();
+      homeViewModel.bumpProfileImageCacheNonce();
 
       Navigator.pop(context);
     } on ApiException catch (e) {

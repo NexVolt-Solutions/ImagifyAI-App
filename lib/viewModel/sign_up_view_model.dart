@@ -18,8 +18,6 @@ import 'package:flutter/foundation.dart';
 class SignUpViewModel extends ChangeNotifier {
   final IAuthRepository _authRepository;
 
-  // FormKey is no longer stored here to avoid GlobalKey conflicts
-  // It will be passed from the widget when needed
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -27,30 +25,26 @@ class SignUpViewModel extends ChangeNotifier {
 
   int selectedIndex = -1;
 
-  /// Loading state for email/password registration only.
   bool isLoading = false;
 
-  /// Loading state for Google sign-in only (so Create Account doesn't show Google loading).
   bool isGoogleLoading = false;
   String? errorMessage;
   File? profileImage;
 
   final List<String> items = const [
     "1 or more numbers (0-9)",
-    "1 or more English letters (A-Z, a,z)",
-    "7 or more charactrers",
+    "1 or more English letters (A-Z, a-z)",
+    "8 or more characters",
   ];
 
   SignUpViewModel({IAuthRepository? authRepository})
     : _authRepository = authRepository ?? AuthRepository() {
-    // Add listener to password controller for real-time validation
     passwordController.addListener(_validatePassword);
   }
 
-  // Password validation methods
   bool get hasNumber => RegExp(r'[0-9]').hasMatch(passwordController.text);
   bool get hasLetter => RegExp(r'[A-Za-z]').hasMatch(passwordController.text);
-  bool get hasMinLength => passwordController.text.length >= 7;
+  bool get hasMinLength => passwordController.text.length >= 8;
 
   bool isRequirementMet(int index) {
     switch (index) {
@@ -116,7 +110,6 @@ class SignUpViewModel extends ChangeNotifier {
   }) async {
     if (isLoading || isGoogleLoading) return;
 
-    // Validate form - if validation fails, stop here
     if (formKey.currentState == null) {
       return;
     }
@@ -129,6 +122,14 @@ class SignUpViewModel extends ChangeNotifier {
     if (passwordController.text.trim() !=
         confirmPasswordController.text.trim()) {
       _showMessage(context, 'Password and Confirm Password must match');
+      return;
+    }
+
+    if (!hasNumber || !hasLetter || !hasMinLength) {
+      _showMessage(
+        context,
+        'Password must contain at least 8 characters, 1 number, and 1 letter',
+      );
       return;
     }
 
@@ -157,9 +158,8 @@ class SignUpViewModel extends ChangeNotifier {
       final email = emailController.text.trim();
       _showMessage(context, message, isError: false);
 
-      // Clear all form fields before navigating (save email first for verification screen)
       usernameController.clear();
-      emailController.clear(); // Clear email field too
+      emailController.clear();
       passwordController.clear();
       confirmPasswordController.clear();
       profileImage = null;
@@ -170,21 +170,16 @@ class SignUpViewModel extends ChangeNotifier {
       Navigator.pushNamed(
         context,
         RoutesName.VerificationScreen,
-        arguments: email, // Use saved email value
+        arguments: email,
       );
     } on ApiException catch (e) {
-      // Backend now allows duplicate usernames and only checks for duplicate emails
-      // Error messages will reflect this (e.g., "Email already exists" instead of "Username already taken")
-
       final errorMessageLower = e.message.toLowerCase();
       final email = emailController.text.trim();
 
-      // Check if error is about email already registered/exists
       if (errorMessageLower.contains('email') &&
           (errorMessageLower.contains('already') ||
               errorMessageLower.contains('exists') ||
               errorMessageLower.contains('registered'))) {
-        // Check if email is already verified
         if (errorMessageLower.contains('verified')) {
           _showMessage(
             context,
@@ -192,23 +187,16 @@ class SignUpViewModel extends ChangeNotifier {
             isError: false,
           );
 
-          // Clear form fields before navigating
           clearForm();
 
-          // Navigate to sign in screen
           Navigator.pushReplacementNamed(context, RoutesName.SignInScreen);
 
-          return; // Exit early - don't show the error message again
+          return;
         } else {
-          // Navigate to verification screen and automatically resend OTP
-          // Pass email and autoResend flag in arguments
           Navigator.pushNamed(
             context,
             RoutesName.VerificationScreen,
-            arguments: {
-              'email': email,
-              'autoResend': true, // Flag to auto-resend OTP
-            },
+            arguments: {'email': email, 'autoResend': true},
           );
 
           _showMessage(
@@ -217,7 +205,7 @@ class SignUpViewModel extends ChangeNotifier {
             isError: false,
           );
 
-          return; // Exit early - don't show the error message again
+          return;
         }
       }
 
@@ -268,11 +256,9 @@ class SignUpViewModel extends ChangeNotifier {
     errorMessage = null;
     notifyListeners();
 
-    // Declare googleUser outside try block to access in catch block
     GoogleSignInAccount? googleUser;
 
     try {
-      // Initialize Google Sign-In with server client ID for ID token generation
       final GoogleSignIn googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile', 'openid'],
         serverClientId: ApiConstants.googleWebClientId.isEmpty
@@ -280,7 +266,6 @@ class SignUpViewModel extends ChangeNotifier {
             : ApiConstants.googleWebClientId,
       );
 
-      // Always sign out/disconnect first so the account picker shows every time
       try {
         await googleSignIn.signOut();
         await googleSignIn.disconnect();
@@ -295,17 +280,14 @@ class SignUpViewModel extends ChangeNotifier {
         }
       }
 
-      // Sign in with Google (will now show the account picker)
       googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
-        // User cancelled the sign-in
         isGoogleLoading = false;
         notifyListeners();
         return;
       }
 
-      // Get authentication details
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
@@ -321,7 +303,6 @@ class SignUpViewModel extends ChangeNotifier {
           'Server Client ID configured: ${ApiConstants.googleWebClientId.isNotEmpty}',
         );
 
-        // Decode and log ID token payload for backend debugging
         if (googleAuth.idToken != null) {
           try {
             final decodedToken = JwtDecoder.decode(googleAuth.idToken!);

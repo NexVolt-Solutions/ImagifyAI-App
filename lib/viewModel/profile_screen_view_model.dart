@@ -19,6 +19,15 @@ class ProfileScreenViewModel extends ChangeNotifier {
   String? errorMessage;
   bool notificationsEnabled = true;
 
+  /// Increment after profile photo changes so widgets use a new network cache key.
+  int _profileImageCacheNonce = 0;
+  int get profileImageCacheNonce => _profileImageCacheNonce;
+
+  void bumpProfileImageCacheNonce() {
+    _profileImageCacheNonce++;
+    notifyListeners();
+  }
+
   void setNotificationsEnabled(bool value) {
     if (notificationsEnabled == value) return;
     notificationsEnabled = value;
@@ -95,7 +104,8 @@ class ProfileScreenViewModel extends ChangeNotifier {
     String? accessToken,
     bool forceReload = false,
   }) async {
-    if (isLoading) return;
+    // Allow force reload while a previous load is in flight (e.g. after saving edit profile)
+    if (isLoading && !forceReload) return;
 
     if (accessToken == null || accessToken.isEmpty) {
       // User not logged in, clear cached user
@@ -143,6 +153,7 @@ class ProfileScreenViewModel extends ChangeNotifier {
       currentUser = await _authRepository.getCurrentUser(
         accessToken: accessToken,
         userId: userId,
+        forceRefresh: forceReload,
       );
       errorMessage = null; // Clear any previous errors on success
     } on ApiException catch (e) {

@@ -97,7 +97,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: context.h(20)),
               children: [
-                ProfileHeaderSection(user: user),
+                ProfileHeaderSection(
+                  user: user,
+                  profileImageCacheNonce:
+                      profileScreenViewModel.profileImageCacheNonce,
+                ),
                 ProfileMenuList(viewModel: profileScreenViewModel),
                 SizedBox(height: context.h(20)),
                 CustomButton(

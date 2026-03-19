@@ -42,6 +42,15 @@ class HomeViewModel extends ChangeNotifier {
   String? errorMessage;
   Wallpaper? createdWallpaper;
   User? currentUser;
+  /// Bumped when profile image updates so home header refetches the image.
+  int _profileImageCacheNonce = 0;
+  int get profileImageCacheNonce => _profileImageCacheNonce;
+
+  void bumpProfileImageCacheNonce() {
+    _profileImageCacheNonce++;
+    notifyListeners();
+  }
+
   Map<String, List<Wallpaper>> groupedWallpapers = {};
 
   int selectedIndex = 0;
@@ -109,7 +118,7 @@ class HomeViewModel extends ChangeNotifier {
       print('currentUser: ${currentUser != null ? "exists" : "null"}');
     }
 
-    if (isLoadingUser) {
+    if (isLoadingUser && !forceReload) {
       if (kDebugMode) {
         print('⚠️  Already loading user, skipping...');
       }
@@ -277,6 +286,7 @@ class HomeViewModel extends ChangeNotifier {
       currentUser = await _authRepository.getCurrentUser(
         accessToken: validAccessToken,
         userId: userId,
+        forceRefresh: forceReload,
       );
       errorMessage = null; // Clear any previous errors on success
 
@@ -326,6 +336,7 @@ class HomeViewModel extends ChangeNotifier {
                 currentUser = await _authRepository.getCurrentUser(
                   accessToken: tokenFromStorage,
                   userId: userId,
+                  forceRefresh: forceReload,
                 );
               } else {
                 throw Exception('No access token available after refresh');
@@ -334,6 +345,7 @@ class HomeViewModel extends ChangeNotifier {
               currentUser = await _authRepository.getCurrentUser(
                 accessToken: refreshedAccessToken,
                 userId: userId,
+                forceRefresh: forceReload,
               );
             }
             errorMessage = null; // Clear any previous errors on success

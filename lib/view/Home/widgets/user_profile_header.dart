@@ -9,12 +9,14 @@ class UserProfileHeader extends StatelessWidget {
   final User? currentUser;
   final String displayName;
   final bool isProfileLoading;
+  final int profileImageCacheNonce;
 
   const UserProfileHeader({
     super.key,
     required this.currentUser,
     required this.displayName,
     this.isProfileLoading = false,
+    this.profileImageCacheNonce = 0,
   });
 
   static String getDisplayName(User? user) {
@@ -71,13 +73,14 @@ class UserProfileHeader extends StatelessWidget {
     final url = currentUser?.profileImageUrl;
     final hasUrl = url != null && url.isNotEmpty;
     if (hasUrl) {
+      final imageUrl = _avatarUrlWithCacheNonce(url, profileImageCacheNonce);
       return ClipOval(
         child: Image.network(
-          url,
+          imageUrl,
           height: context.h(50),
           width: context.h(50),
           fit: BoxFit.cover,
-          key: ValueKey(url),
+          key: ValueKey('$url-$profileImageCacheNonce'),
           cacheWidth: context.h(50).toInt(),
           cacheHeight: context.h(50).toInt(),
           errorBuilder: (_, __, ___) => _buildPlaceholder(context),
@@ -98,6 +101,13 @@ class UserProfileHeader extends StatelessWidget {
       );
     }
     return _buildPlaceholder(context);
+  }
+
+  static String _avatarUrlWithCacheNonce(String url, int nonce) {
+    if (nonce <= 0) return url;
+    final uri = Uri.parse(url);
+    final q = Map<String, String>.from(uri.queryParameters)..['v'] = '$nonce';
+    return uri.replace(queryParameters: q).toString();
   }
 
   Widget _buildPlaceholder(BuildContext context) {
