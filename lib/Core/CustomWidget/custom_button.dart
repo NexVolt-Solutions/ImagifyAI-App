@@ -59,10 +59,15 @@ class CustomButton extends StatelessWidget {
           actualWidth = null;
         }
 
+        final maxW = constraints.maxWidth;
+        final tightWidth = maxW.isFinite && maxW < 160;
+        final horizontalPadding = tightWidth ? 8.0 : context.w(24);
+        final labelBounded = maxW.isFinite;
+
         Widget buttonContent = Container(
           height: height ?? context.h(48),
           width: actualWidth,
-          padding: EdgeInsets.symmetric(horizontal: context.w(24)),
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
           decoration: BoxDecoration(
             gradient: gradient,
 
@@ -73,7 +78,9 @@ class CustomButton extends StatelessWidget {
               ? Center(child: AppLoadingIndicator.medium(color: contentColor))
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: labelBounded
+                      ? MainAxisSize.max
+                      : MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (icon != null) ...[
@@ -85,20 +92,39 @@ class CustomButton extends StatelessWidget {
                         contentColor,
                       ),
                     ],
-                    if (text != null) SizedBox(width: context.w(5)),
-                    Text(
-                      text ?? "",
-                      style:
-                          (context.appTextStyles?.customButtonText ??
-                                  TextStyle(color: contentColor))
-                              .copyWith(
-                                fontSize: fontSize ?? context.text(14),
-                                color: contentColor,
-                              ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      textAlign: TextAlign.center,
-                    ),
+                    if (text != null && (text!.isNotEmpty)) ...[
+                      SizedBox(width: icon != null ? context.w(5) : 0),
+                      if (labelBounded)
+                        Flexible(
+                          child: Text(
+                            text!,
+                            style:
+                                (context.appTextStyles?.customButtonText ??
+                                        TextStyle(color: contentColor))
+                                    .copyWith(
+                                      fontSize: fontSize ?? context.text(14),
+                                      color: contentColor,
+                                    ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      else
+                        Text(
+                          text!,
+                          style:
+                              (context.appTextStyles?.customButtonText ??
+                                      TextStyle(color: contentColor))
+                                  .copyWith(
+                                    fontSize: fontSize ?? context.text(14),
+                                    color: contentColor,
+                                  ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                        ),
+                    ],
                   ],
                 ),
         );

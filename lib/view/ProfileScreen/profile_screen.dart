@@ -75,12 +75,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final profileViewModel = context.read<ProfileScreenViewModel>();
 
     // Always try to load user data (will check if reload is needed internally)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        profileViewModel.loadCurrentUser(
-          accessToken: signInViewModel.accessToken,
-        );
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      await profileViewModel.loadNotificationPreference();
+      if (!mounted) return;
+      await signInViewModel.ensureTokensLoaded();
+      await signInViewModel.ensureAccessTokenFresh();
+      if (!mounted) return;
+      profileViewModel.loadCurrentUser(
+        accessToken: signInViewModel.accessToken,
+      );
     });
   }
 

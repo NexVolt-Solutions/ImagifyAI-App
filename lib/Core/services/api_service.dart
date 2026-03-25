@@ -51,12 +51,51 @@ class ApiService {
   // Token refresh callback - should return new access token or null if refresh failed
   static Future<String?> Function()? _onTokenExpired;
 
+  /// Called after a successful network refresh so [SignInViewModel] stays in sync with storage.
+  static void Function(String newAccessToken)? onAccessTokenRefreshed;
+
+  /// Single in-flight refresh so parallel 401s don't race the refresh endpoint.
+  static Future<String?>? _refreshInFlight;
+
   // Getter to check if callback is set (for debugging)
   static bool get hasTokenRefreshCallback => _onTokenExpired != null;
 
   // Set the token refresh callback
   static void setTokenRefreshCallback(Future<String?> Function() callback) {
     _onTokenExpired = callback;
+  }
+
+  static bool _headersHadBearer(Map<String, String>? headers) {
+    if (headers == null || headers.isEmpty) return false;
+    for (final e in headers.entries) {
+      if (e.key.toLowerCase() == 'authorization' &&
+          e.value.toLowerCase().trim().startsWith('bearer ')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Future<String?> _coordinatedTokenRefresh() async {
+    final existing = _refreshInFlight;
+    if (existing != null) {
+      return await existing;
+    }
+    if (_onTokenExpired == null) return null;
+
+    final future = () async {
+      try {
+        final t = await _onTokenExpired!();
+        if (t != null && t.isNotEmpty) {
+          onAccessTokenRefreshed?.call(t);
+        }
+        return t;
+      } finally {
+        _refreshInFlight = null;
+      }
+    }();
+    _refreshInFlight = future;
+    return await future;
   }
 
   Future<Map<String, dynamic>> get(
@@ -364,6 +403,8 @@ class ApiService {
     }
   }
 
+  /// Multipart upload (e.g. profile image). Backend expects **PATCH**, not PUT
+  /// (PUT on this path returns 405 Method Not Allowed).
   Future<Map<String, dynamic>> putMultipart({
     required String path,
     File? file,
@@ -458,12 +499,13 @@ class ApiService {
     try {
       final response = await requestFn();
 
-      // Check if token expired
+      // Only refresh when this request actually sent a Bearer token (skip e.g. login 401s).
       if (retryOnTokenExpiry &&
           response.statusCode == 401 &&
+          _headersHadBearer(originalHeaders) &&
           _isTokenExpiredError(response)) {
         if (_onTokenExpired != null) {
-          final newToken = await _onTokenExpired!();
+          final newToken = await _coordinatedTokenRefresh();
           if (newToken != null &&
               newToken.isNotEmpty &&
               retryCallback != null) {
@@ -479,21 +521,51 @@ class ApiService {
     }
   }
 
-  /// Check if the error response indicates token expiration
+  /// Check if the error response indicates token expiration (only used with Bearer requests).
   bool _isTokenExpiredError(http.Response response) {
     try {
-      if (response.body.isEmpty) return false;
+      // Many gateways return 401 with an empty body for expired JWTs.
+      if (response.body.isEmpty) return true;
+
       final decoded = jsonDecode(response.body);
-      final errorMessage =
-          (decoded['msg'] ?? decoded['message'] ?? decoded['error'] ?? '')
-              .toString()
-              .toLowerCase();
-      return errorMessage.contains('token has expired') ||
-          errorMessage.contains('token expired') ||
-          errorMessage.contains('expired token') ||
-          errorMessage.contains('invalid token');
+      String errorMessage = '';
+
+      if (decoded is Map<String, dynamic>) {
+        // FastAPI-style `detail` (string or list of objects)
+        final detail = decoded['detail'];
+        if (detail is String) {
+          errorMessage = detail;
+        } else if (detail is List && detail.isNotEmpty) {
+          final first = detail.first;
+          if (first is Map) {
+            errorMessage =
+                first['msg']?.toString() ?? first['message']?.toString() ?? '';
+          }
+        }
+        if (errorMessage.isEmpty) {
+          errorMessage =
+              (decoded['msg'] ?? decoded['message'] ?? decoded['error'] ?? '')
+                  .toString();
+        }
+      } else {
+        errorMessage = decoded.toString();
+      }
+
+      final lower = errorMessage.toLowerCase();
+      if (lower.isEmpty) return true;
+
+      return lower.contains('token has expired') ||
+          lower.contains('token expired') ||
+          lower.contains('expired token') ||
+          lower.contains('invalid token') ||
+          lower.contains('jwt') ||
+          lower.contains('not authenticated') ||
+          lower.contains('could not validate') ||
+          lower.contains('credentials') ||
+          lower.contains('unauthorized') ||
+          lower.contains('signature');
     } catch (_) {
-      return false;
+      return true;
     }
   }
 

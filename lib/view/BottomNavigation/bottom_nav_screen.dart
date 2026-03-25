@@ -92,12 +92,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         body: SafeArea(
           child: Stack(
             children: [
-              bottomNavScreenViewModel
-                  .screens[bottomNavScreenViewModel.currentIndex],
+              bottomNavScreenViewModel.screens[bottomNavScreenViewModel
+                  .currentIndex],
               BottomNavBar(
-              bottomData: bottomNavScreenViewModel.bottomData,
-              currentIndex: bottomNavScreenViewModel.currentIndex,
-              onTap: bottomNavScreenViewModel.updateIndex,
+                bottomData: bottomNavScreenViewModel.bottomData,
+                currentIndex: bottomNavScreenViewModel.currentIndex,
+                onTap: bottomNavScreenViewModel.updateIndex,
               ),
             ],
           ),

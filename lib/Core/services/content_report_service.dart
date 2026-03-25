@@ -51,7 +51,7 @@ class ContentReportService {
               Expanded(
                 child: Text(
                   'Report offensive content',
-                  style: TextStyle(color: textColor, fontSize: 18),
+                  style: TextStyle(color: textColor, fontSize: 16),
                 ),
               ),
             ],
@@ -63,7 +63,7 @@ class ContentReportService {
             '• In Explore Prompt: tap Report below any image\n'
             '• In full-screen view: tap the flag icon in the top right\n\n'
             'You can report from any AI-generated image in the app.',
-            style: TextStyle(color: textColor, height: 1.4),
+            style: TextStyle(color: textColor, height: 1.8, fontSize: 12),
           ),
           actions: [
             TextButton(

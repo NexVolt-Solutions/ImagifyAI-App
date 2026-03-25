@@ -41,9 +41,9 @@ class UserProfileHeader extends StatelessWidget {
     return SliverPersistentHeader(
       pinned: true,
       delegate: _UserProfileHeaderDelegate(
-        height: 65.0,
+        height: 80.0,
         child: ListTile(
-          contentPadding: EdgeInsets.only(left: context.w(20)),
+          contentPadding: EdgeInsets.symmetric(horizontal: context.w(20)),
           leading: _buildLeading(context),
           title: Text(
             'Hello, $displayName 👋',

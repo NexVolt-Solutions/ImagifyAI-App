@@ -396,7 +396,7 @@ class SignUpViewModel extends ChangeNotifier {
         }
       }
 
-      // Save tokens to SharedPreferences
+      // Save tokens (TokenStorageService → secure storage)
       if (accessToken != null && refreshToken != null) {
         await TokenStorageService.saveTokens(accessToken, refreshToken);
       }

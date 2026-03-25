@@ -55,12 +55,13 @@ void _setupTokenRefresh() {
         refreshToken: refreshToken,
       );
 
-      if (response.accessToken != null && response.refreshToken != null) {
-        await TokenStorageService.saveTokens(
-          response.accessToken!,
-          response.refreshToken!,
-        );
-        return response.accessToken;
+      final access = response.accessToken;
+      if (access != null && access.isNotEmpty) {
+        final newRefresh = response.refreshToken ?? refreshToken;
+        if (newRefresh.isNotEmpty) {
+          await TokenStorageService.saveTokens(access, newRefresh);
+          return access;
+        }
       }
 
       return null;

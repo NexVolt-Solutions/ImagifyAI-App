@@ -1,30 +1,95 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:imagifyai/Core/services/secure_storage_helper.dart';
 import 'package:imagifyai/models/user/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TokenStorageService {
-  static const String _accessTokenKey = 'access_token';
-  static const String _refreshTokenKey = 'refresh_token';
-  static const String _userIdKey = 'user_id';
-  static const String _onboardingCompletedKey = 'onboarding_completed';
-  static const String _rememberedEmailKey = 'remembered_email';
-  static const String _userDataKey = 'user_data';
+  static const String _accessTokenKey = 'imagifyai.access_token';
+  static const String _refreshTokenKey = 'imagifyai.refresh_token';
+  static const String _userIdKey = 'imagifyai.user_id';
+  static const String _onboardingCompletedKey = 'imagifyai.onboarding_completed';
+  static const String _rememberedEmailKey = 'imagifyai.remembered_email';
+  static const String _userDataKey = 'imagifyai.user_data';
 
-  /// Save access token to SharedPreferences
-  static Future<bool> saveAccessToken(String token) async {
+  static const String _legacyAccessTokenKey = 'access_token';
+  static const String _legacyRefreshTokenKey = 'refresh_token';
+  static const String _legacyUserIdKey = 'user_id';
+  static const String _legacyOnboardingKey = 'onboarding_completed';
+  static const String _legacyRememberedEmailKey = 'remembered_email';
+  static const String _legacyUserDataKey = 'user_data';
+
+  static Future<void>? _migrationFuture;
+
+  static Future<void> _ensureMigratedFromSharedPreferences() async {
+    _migrationFuture ??= _runSharedPreferencesMigration();
+    await _migrationFuture;
+  }
+
+  static Future<void> _runSharedPreferencesMigration() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return await prefs.setString(_accessTokenKey, token);
+
+      Future<void> migrateString(String legacyKey, String secureKey) async {
+        final current = await SecureStorageHelper.read(secureKey);
+        if (current != null && current.isNotEmpty) {
+          if (prefs.containsKey(legacyKey)) await prefs.remove(legacyKey);
+          return;
+        }
+        final legacy = prefs.getString(legacyKey);
+        if (legacy != null && legacy.isNotEmpty) {
+          await SecureStorageHelper.write(secureKey, legacy);
+        }
+        if (prefs.containsKey(legacyKey)) await prefs.remove(legacyKey);
+      }
+
+      await migrateString(_legacyAccessTokenKey, _accessTokenKey);
+      await migrateString(_legacyRefreshTokenKey, _refreshTokenKey);
+      await migrateString(_legacyUserIdKey, _userIdKey);
+      await migrateString(_legacyRememberedEmailKey, _rememberedEmailKey);
+      await migrateString(_legacyUserDataKey, _userDataKey);
+
+      if (await SecureStorageHelper.read(_onboardingCompletedKey) == null &&
+          prefs.containsKey(_legacyOnboardingKey)) {
+        await SecureStorageHelper.writeBool(
+          _onboardingCompletedKey,
+          prefs.getBool(_legacyOnboardingKey) ?? false,
+        );
+      }
+      if (prefs.containsKey(_legacyOnboardingKey)) {
+        await prefs.remove(_legacyOnboardingKey);
+      }
+    } catch (_) {}
+  }
+
+  static Future<void> _removeLegacySharedPreferenceKeys() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_legacyAccessTokenKey);
+      await prefs.remove(_legacyRefreshTokenKey);
+      await prefs.remove(_legacyUserIdKey);
+      await prefs.remove(_legacyOnboardingKey);
+      await prefs.remove(_legacyRememberedEmailKey);
+      await prefs.remove(_legacyUserDataKey);
+    } catch (_) {}
+  }
+
+  /// Save access token
+  static Future<bool> saveAccessToken(String token) async {
+    try {
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.write(_accessTokenKey, token);
+      return true;
     } catch (e) {
       return false;
     }
   }
 
-  /// Save refresh token to SharedPreferences
+  /// Save refresh token
   static Future<bool> saveRefreshToken(String token) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.setString(_refreshTokenKey, token);
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.write(_refreshTokenKey, token);
+      return true;
     } catch (e) {
       return false;
     }
@@ -33,57 +98,52 @@ class TokenStorageService {
   /// Save both tokens
   static Future<bool> saveTokens(String accessToken, String refreshToken) async {
     try {
-      // Add a small delay to ensure platform channel is ready
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      final accessSaved = await prefs.setString(_accessTokenKey, accessToken);
-      final refreshSaved = await prefs.setString(_refreshTokenKey, refreshToken);
-      return accessSaved && refreshSaved;
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.write(_accessTokenKey, accessToken);
+      await SecureStorageHelper.write(_refreshTokenKey, refreshToken);
+      return true;
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        final accessSaved = await prefs.setString(_accessTokenKey, accessToken);
-        final refreshSaved = await prefs.setString(_refreshTokenKey, refreshToken);
-        return accessSaved && refreshSaved;
+        await _ensureMigratedFromSharedPreferences();
+        await SecureStorageHelper.write(_accessTokenKey, accessToken);
+        await SecureStorageHelper.write(_refreshTokenKey, refreshToken);
+        return true;
       } catch (retryError) {
         return false;
       }
     }
   }
 
-  /// Get access token from SharedPreferences
+  /// Get access token
   static Future<String?> getAccessToken() async {
     try {
-      // Add a small delay to ensure platform channel is ready
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString(_accessTokenKey);
-      return token;
+      await _ensureMigratedFromSharedPreferences();
+      return SecureStorageHelper.read(_accessTokenKey);
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getString(_accessTokenKey);
+        await _ensureMigratedFromSharedPreferences();
+        return SecureStorageHelper.read(_accessTokenKey);
       } catch (retryError) {
         return null;
       }
     }
   }
 
-  /// Get refresh token from SharedPreferences
+  /// Get refresh token
   static Future<String?> getRefreshToken() async {
     try {
-      // Add a small delay to ensure platform channel is ready
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString(_refreshTokenKey);
-      return token;
+      await _ensureMigratedFromSharedPreferences();
+      return SecureStorageHelper.read(_refreshTokenKey);
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getString(_refreshTokenKey);
+        await _ensureMigratedFromSharedPreferences();
+        return SecureStorageHelper.read(_refreshTokenKey);
       } catch (retryError) {
         return null;
       }
@@ -104,60 +164,62 @@ class TokenStorageService {
     }
   }
 
-  /// Save user_id to SharedPreferences
+  /// Save user_id
   static Future<bool> saveUserId(String userId) async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      final saved = await prefs.setString(_userIdKey, userId);
-      return saved;
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.write(_userIdKey, userId);
+      return true;
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return await prefs.setString(_userIdKey, userId);
+        await _ensureMigratedFromSharedPreferences();
+        await SecureStorageHelper.write(_userIdKey, userId);
+        return true;
       } catch (retryError) {
         return false;
       }
     }
   }
 
-  /// Get user_id from SharedPreferences
+  /// Get user_id
   static Future<String?> getUserId() async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_userIdKey);
+      await _ensureMigratedFromSharedPreferences();
+      return SecureStorageHelper.read(_userIdKey);
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getString(_userIdKey);
+        await _ensureMigratedFromSharedPreferences();
+        return SecureStorageHelper.read(_userIdKey);
       } catch (retryError) {
         return null;
       }
     }
   }
 
-  /// Save user data to SharedPreferences
+  /// Save user data
   static Future<bool> saveUserData(User user) async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
+      await _ensureMigratedFromSharedPreferences();
       final userJson = jsonEncode(user.toJson());
-      return await prefs.setString(_userDataKey, userJson);
+      await SecureStorageHelper.write(_userDataKey, userJson);
+      return true;
     } catch (e) {
       return false;
     }
   }
 
-  /// Get user data from SharedPreferences
+  /// Get user data
   static Future<User?> getUserData() async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      final userJsonString = prefs.getString(_userDataKey);
-      
+      await _ensureMigratedFromSharedPreferences();
+      final userJsonString = await SecureStorageHelper.read(_userDataKey);
+
       if (userJsonString == null || userJsonString.isEmpty) {
         return null;
       }
@@ -168,11 +230,16 @@ class TokenStorageService {
     }
   }
 
-  /// Clear user data from SharedPreferences
+  /// Clear user data
   static Future<bool> clearUserData() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.remove(_userDataKey);
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.delete(_userDataKey);
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_legacyUserDataKey);
+      } catch (_) {}
+      return true;
     } catch (e) {
       return false;
     }
@@ -182,12 +249,13 @@ class TokenStorageService {
   /// Note: This does NOT clear remembered email - that's handled separately
   static Future<bool> clearTokens() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final accessRemoved = await prefs.remove(_accessTokenKey);
-      final refreshRemoved = await prefs.remove(_refreshTokenKey);
-      final userIdRemoved = await prefs.remove(_userIdKey);
-      final userDataRemoved = await prefs.remove(_userDataKey);
-      return accessRemoved && refreshRemoved && userIdRemoved && userDataRemoved;
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.delete(_accessTokenKey);
+      await SecureStorageHelper.delete(_refreshTokenKey);
+      await SecureStorageHelper.delete(_userIdKey);
+      await SecureStorageHelper.delete(_userDataKey);
+      await _removeLegacySharedPreferenceKeys();
+      return true;
     } catch (e) {
       return false;
     }
@@ -197,13 +265,15 @@ class TokenStorageService {
   static Future<bool> setOnboardingCompleted(bool completed) async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.setBool(_onboardingCompletedKey, completed);
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.writeBool(_onboardingCompletedKey, completed);
+      return true;
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return await prefs.setBool(_onboardingCompletedKey, completed);
+        await _ensureMigratedFromSharedPreferences();
+        await SecureStorageHelper.writeBool(_onboardingCompletedKey, completed);
+        return true;
       } catch (retryError) {
         return false;
       }
@@ -214,13 +284,15 @@ class TokenStorageService {
   static Future<bool> isOnboardingCompleted() async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool(_onboardingCompletedKey) ?? false;
+      await _ensureMigratedFromSharedPreferences();
+      return await SecureStorageHelper.readBool(_onboardingCompletedKey) ??
+          false;
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getBool(_onboardingCompletedKey) ?? false;
+        await _ensureMigratedFromSharedPreferences();
+        return await SecureStorageHelper.readBool(_onboardingCompletedKey) ??
+            false;
       } catch (retryError) {
         return false;
       }
@@ -231,13 +303,15 @@ class TokenStorageService {
   static Future<bool> saveRememberedEmail(String email) async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.setString(_rememberedEmailKey, email);
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.write(_rememberedEmailKey, email);
+      return true;
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return await prefs.setString(_rememberedEmailKey, email);
+        await _ensureMigratedFromSharedPreferences();
+        await SecureStorageHelper.write(_rememberedEmailKey, email);
+        return true;
       } catch (retryError) {
         return false;
       }
@@ -248,13 +322,13 @@ class TokenStorageService {
   static Future<String?> getRememberedEmail() async {
     try {
       await Future.delayed(const Duration(milliseconds: 100));
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getString(_rememberedEmailKey);
+      await _ensureMigratedFromSharedPreferences();
+      return SecureStorageHelper.read(_rememberedEmailKey);
     } catch (e) {
       try {
         await Future.delayed(const Duration(milliseconds: 500));
-        final prefs = await SharedPreferences.getInstance();
-        return prefs.getString(_rememberedEmailKey);
+        await _ensureMigratedFromSharedPreferences();
+        return SecureStorageHelper.read(_rememberedEmailKey);
       } catch (retryError) {
         return null;
       }
@@ -264,11 +338,15 @@ class TokenStorageService {
   /// Clear remembered email
   static Future<bool> clearRememberedEmail() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      return await prefs.remove(_rememberedEmailKey);
+      await _ensureMigratedFromSharedPreferences();
+      await SecureStorageHelper.delete(_rememberedEmailKey);
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove(_legacyRememberedEmailKey);
+      } catch (_) {}
+      return true;
     } catch (e) {
       return false;
     }
   }
 }
-

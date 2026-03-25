@@ -630,12 +630,12 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
         color: AppColors.bottomBarIconColor,
       ),
       homeGreetingTitle: GoogleFonts.poppins(
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: FontWeight.w500,
         color: AppColors.lightTextPrimary,
       ),
       homeGreetingSubtitle: GoogleFonts.poppins(
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: FontWeight.w500,
         color: AppColors.textFieldIconColor,
       ),
@@ -959,12 +959,12 @@ class AppTextStyles extends ThemeExtension<AppTextStyles> {
         color: AppColors.bottomBarIconColor,
       ),
       homeGreetingTitle: GoogleFonts.poppins(
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: FontWeight.w500,
         color: Colors.white,
       ),
       homeGreetingSubtitle: GoogleFonts.poppins(
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: FontWeight.w500,
         color: AppColors.textFieldIconColor,
       ),

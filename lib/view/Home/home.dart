@@ -68,9 +68,12 @@ class _HomeState extends State<Home> {
                 slivers: [
                   UserProfileHeader(
                     currentUser: homeViewModel.currentUser,
-                    displayName: UserProfileHeader.getDisplayName(homeViewModel.currentUser),
+                    displayName: UserProfileHeader.getDisplayName(
+                      homeViewModel.currentUser,
+                    ),
                     isProfileLoading: homeViewModel.isLoadingUser,
-                    profileImageCacheNonce: homeViewModel.profileImageCacheNonce,
+                    profileImageCacheNonce:
+                        homeViewModel.profileImageCacheNonce,
                   ),
                   SliverToBoxAdapter(child: SizedBox(height: context.h(24))),
                   SliverToBoxAdapter(

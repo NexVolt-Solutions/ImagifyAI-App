@@ -29,6 +29,7 @@ class BottomNavBar extends StatelessWidget {
           vertical: context.h(11),
         ),
         decoration: BoxDecoration(
+          // color: Colors.red,
           color: context.theme.bottomNavigationBarTheme.backgroundColor,
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(context.radius(68)),
@@ -49,32 +50,37 @@ class BottomNavBar extends StatelessWidget {
             final isSelected = currentIndex == index;
             return GestureDetector(
               onTap: () => onTap(index),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  isSelected
-                      ? ShaderMask(
-                          shaderCallback: (bounds) =>
-                              AppColors.gradient.createShader(bounds),
-                          blendMode: BlendMode.srcIn,
-                          child: Image.asset(bottomData[index]['image']),
-                        )
-                      : Image.asset(
-                          bottomData[index]['image'],
-                          color: context
-                              .theme
-                              .bottomNavigationBarTheme
-                              .unselectedItemColor,
-                        ),
-                  SizedBox(height: context.h(4)),
-                  Text(
-                    bottomData[index]['name'],
-                    style: isSelected
-                        ? context.appTextStyles?.bottomNavLabelSelected
-                        : context.appTextStyles?.bottomNavLabelUnselected,
-                  ),
-                ],
+              child: Container(
+                height: context.h(50),
+                width: context.w(80),
+                // color: Colors.blue,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    isSelected
+                        ? ShaderMask(
+                            shaderCallback: (bounds) =>
+                                AppColors.gradient.createShader(bounds),
+                            blendMode: BlendMode.srcIn,
+                            child: Image.asset(bottomData[index]['image']),
+                          )
+                        : Image.asset(
+                            bottomData[index]['image'],
+                            color: context
+                                .theme
+                                .bottomNavigationBarTheme
+                                .unselectedItemColor,
+                          ),
+                    SizedBox(height: context.h(4)),
+                    Text(
+                      bottomData[index]['name'],
+                      style: isSelected
+                          ? context.appTextStyles?.bottomNavLabelSelected
+                          : context.appTextStyles?.bottomNavLabelUnselected,
+                    ),
+                  ],
+                ),
               ),
             );
           }),

@@ -11,7 +11,6 @@ import 'package:imagifyai/Core/services/content_report_service.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/image_generate_prompt_section.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/inspiration_gallery.dart';
-import 'package:imagifyai/view/ImageGenerate/widgets/limit_and_watch_ad_row.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/size_selector_row.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/style_selector_list.dart';
 import 'package:imagifyai/viewModel/image_generate_view_model.dart';
@@ -182,18 +181,23 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                     iconHeight: 24,
                     iconWidth: 24,
                     gradient: AppColors.gradient,
-                    text: 'Create Magic',
-                    icon: AppAssets.magicStarIcon,
+                    icon: AppAssets.startIcon,
+                    text: 'Generate',
                     isLoading: imageGenerateViewModel.isCreating,
                   ),
                   SizedBox(height: context.h(16)),
                   Center(
                     child: GestureDetector(
-                      onTap: () => ContentReportService.showReportInfoDialog(context),
+                      onTap: () =>
+                          ContentReportService.showReportInfoDialog(context),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.flag_outlined, size: 16, color: context.subtitleColor),
+                          Icon(
+                            Icons.flag_outlined,
+                            size: 16,
+                            color: context.subtitleColor,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'Report offensive content',

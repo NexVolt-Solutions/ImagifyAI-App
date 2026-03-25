@@ -15,7 +15,7 @@ class ThemeProvider extends ChangeNotifier {
     _loadThemeMode();
   }
 
-  /// Load saved theme preference from SharedPreferences
+  /// Load saved theme mode (SharedPreferences — non-secret UI state).
   /// If no preference is saved, defaults to dark theme
   Future<void> _loadThemeMode() async {
     try {
@@ -39,7 +39,7 @@ class ThemeProvider extends ChangeNotifier {
     }
   }
 
-  /// Save theme preference to SharedPreferences
+  /// Persist theme mode (SharedPreferences — non-secret UI state).
   Future<void> _saveThemeMode() async {
     try {
       final prefs = await SharedPreferences.getInstance();

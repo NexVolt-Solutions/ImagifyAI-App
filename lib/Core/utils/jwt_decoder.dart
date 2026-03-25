@@ -57,5 +57,15 @@ class JwtDecoder {
     return payload['email']?.toString() ?? 
            payload['sub']?.toString(); // sub might be email
   }
+
+  /// JWT `exp` claim as Unix seconds, or null if missing / not a JWT.
+  static int? getExpiryEpochSeconds(String token) {
+    final payload = decode(token);
+    if (payload == null) return null;
+    final exp = payload['exp'];
+    if (exp is int) return exp;
+    if (exp is num) return exp.toInt();
+    return null;
+  }
 }
 

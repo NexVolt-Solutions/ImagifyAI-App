@@ -46,12 +46,14 @@ class _EditProfileState extends State<EditProfile> {
     } else if (profileViewModel.currentUser == null &&
         !profileViewModel.isLoading) {
       // Load user data if not already loaded
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          profileViewModel.loadCurrentUser(
-            accessToken: signInViewModel.accessToken,
-          );
-        }
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await signInViewModel.ensureTokensLoaded();
+        await signInViewModel.ensureAccessTokenFresh();
+        if (!mounted) return;
+        profileViewModel.loadCurrentUser(
+          accessToken: signInViewModel.accessToken,
+        );
       });
     }
   }
@@ -282,9 +284,11 @@ class _EditProfileState extends State<EditProfile> {
                 SizedBox(width: context.w(12)),
                 Expanded(
                   child: CustomButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: editProfileViewModel.isLoading
+                        ? null
+                        : () => Navigator.pop(context),
                     text: "Cancel",
-                    isLoading: editProfileViewModel.isLoading,
+                    isLoading: false,
                     icon: null,
                     borderColor: context.colorScheme.onSurface,
                   ),

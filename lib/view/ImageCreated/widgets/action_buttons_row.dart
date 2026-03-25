@@ -20,6 +20,7 @@ class ActionButtonsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Expanded(
           child: CustomButton(
@@ -39,16 +40,6 @@ class ActionButtonsRow extends StatelessWidget {
             gradient: AppColors.gradient,
             icon: AppAssets.shareIcon,
             text: 'Share',
-          ),
-        ),
-        SizedBox(width: context.w(8)),
-        Expanded(
-          child: CustomButton(
-            onPressed: onReportTap,
-            iconHeight: context.h(24),
-            gradient: AppColors.gradient,
-            icon: null,
-            text: 'Report',
           ),
         ),
       ],

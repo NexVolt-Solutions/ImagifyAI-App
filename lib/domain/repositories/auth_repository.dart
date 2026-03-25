@@ -226,7 +226,7 @@ class AuthRepository implements IAuthRepository {
   }
 
   // Update Username & Profile Image (multipart/form-data)
-  // According to docs: PUT /users/{user_id}/profile
+  // API: PATCH /users/{user_id}/profile (PUT returns 405)
   @override
   Future<UpdateUserResponse> updateUserProfile({
     String? username,

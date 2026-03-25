@@ -127,6 +127,7 @@ class HomeViewModel extends ChangeNotifier {
 
     // Get access token from SignInViewModel first
     final signInViewModel = context.read<SignInViewModel>();
+    await signInViewModel.ensureTokensLoaded();
     String? accessToken = signInViewModel.accessToken;
 
     if (kDebugMode) {
@@ -178,6 +179,18 @@ class HomeViewModel extends ChangeNotifier {
         print('═══════════════════════════════════════════════════════════');
         print('=== HOME VIEW MODEL: loadCurrentUser END (NO TOKEN) ===');
         print('═══════════════════════════════════════════════════════════');
+      }
+      return;
+    }
+
+    // Proactively refresh before GET /user so we don't hit 401 + error snackbars.
+    await signInViewModel.ensureAccessTokenFresh();
+    accessToken = signInViewModel.accessToken ??
+        await TokenStorageService.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      if (currentUser != null) {
+        currentUser = null;
+        notifyListeners();
       }
       return;
     }
@@ -239,16 +252,9 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
 
-    // Check if the stored userId matches the cached user
-    // If they don't match, clear cache and reload (user changed)
-    // If forceReload is true, always clear cache and reload
-    if (forceReload && currentUser != null) {
-      if (kDebugMode) {
-        print('🔄 Force reload requested, clearing cached user...');
-      }
-      currentUser = null;
-      notifyListeners();
-    } else if (!forceReload && currentUser != null) {
+    // On forceReload, keep showing the previous user until fetch completes
+    // so the header never flashes empty / generic placeholder.
+    if (!forceReload && currentUser != null) {
       if (currentUser!.id == userId) {
         if (kDebugMode) {
           print(

@@ -21,6 +21,7 @@ import 'package:imagifyai/viewModel/sign_up_view_model.dart';
 import 'package:imagifyai/viewModel/splash_screen_view_model.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
+import 'package:imagifyai/Core/services/local_notification_service.dart';
 import 'package:imagifyai/viewModel/theme_provider.dart';
 import 'package:imagifyai/viewModel/verification_view_model.dart';
 import 'package:imagifyai/viewModel/forgot_verification_view_model.dart';
@@ -56,6 +57,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       AnalyticsService.startSession();
       InAppReviewService.recordAppOpenAndMaybeReview();
       InAppReviewService.checkFiveDayAndMaybeReview();
+      LocalNotificationService.rescheduleDailyReturnNudgeIfEligible();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
@@ -77,12 +79,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           refreshToken: refreshToken,
         );
 
-        if (response.accessToken != null && response.refreshToken != null) {
-          await TokenStorageService.saveTokens(
-            response.accessToken!,
-            response.refreshToken!,
-          );
-          return response.accessToken;
+        final access = response.accessToken;
+        if (access != null && access.isNotEmpty) {
+          final newRefresh = response.refreshToken ?? refreshToken;
+          if (newRefresh.isNotEmpty) {
+            await TokenStorageService.saveTokens(access, newRefresh);
+            return access;
+          }
         }
 
         return null;

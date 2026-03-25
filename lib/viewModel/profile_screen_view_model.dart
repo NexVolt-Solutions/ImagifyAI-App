@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/services/content_report_service.dart';
+import 'package:imagifyai/Core/services/local_notification_service.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
@@ -17,7 +18,7 @@ class ProfileScreenViewModel extends ChangeNotifier {
   User? currentUser;
   bool isLoading = false;
   String? errorMessage;
-  bool notificationsEnabled = true;
+  bool notificationsEnabled = false;
 
   /// Increment after profile photo changes so widgets use a new network cache key.
   int _profileImageCacheNonce = 0;
@@ -28,10 +29,24 @@ class ProfileScreenViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setNotificationsEnabled(bool value) {
+  Future<void> loadNotificationPreference() async {
+    final enabled = await LocalNotificationService.areRetentionRemindersEnabled();
+    if (notificationsEnabled != enabled) {
+      notificationsEnabled = enabled;
+      notifyListeners();
+    }
+  }
+
+  Future<void> setNotificationsEnabled(bool value) async {
     if (notificationsEnabled == value) return;
     notificationsEnabled = value;
     notifyListeners();
+    await LocalNotificationService.setRetentionRemindersEnabled(value);
+    if (value) {
+      await LocalNotificationService.rescheduleDailyReturnNudgeIfEligible(
+        ignoreDebounce: true,
+      );
+    }
   }
 
   List<Map<String, dynamic>> profileData = [
@@ -66,9 +81,9 @@ class ProfileScreenViewModel extends ChangeNotifier {
     {
       'leading': AppAssets.bellIcon,
       'title': 'Notifications',
-      'subtitle': 'Enable push notifications',
+      'subtitle': 'Occasional reminders to create wallpaper',
       'trailingType': 'switch',
-      'switchValue': true,
+      'switchValue': false,
     },
     {
       'leading': AppAssets.shieldIcon,
@@ -127,14 +142,10 @@ class ProfileScreenViewModel extends ChangeNotifier {
       return;
     }
 
-    // Check if the stored userId matches the cached user
-    // If they don't match, clear cache and reload (user changed)
-    // If forceReload is true, always clear cache and reload
-    if (forceReload && currentUser != null) {
-      // Force reload requested, clear cache
-      currentUser = null;
-      notifyListeners();
-    } else if (!forceReload && currentUser != null) {
+    // Check if the stored userId matches the cached user.
+    // On forceReload, keep showing the previous user until the new payload arrives
+    // (clearing here caused an empty avatar / placeholder flash).
+    if (!forceReload && currentUser != null) {
       if (currentUser!.id == userId) {
         // User already loaded and matches stored user ID, skip reload
         return;

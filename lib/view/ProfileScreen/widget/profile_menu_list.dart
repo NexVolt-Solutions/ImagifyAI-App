@@ -25,7 +25,9 @@ class ProfileMenuList extends StatelessWidget {
         final isDarkMode = themeProvider?.isDarkMode ?? false;
 
         return ListTile(
-          onTap: () => viewModel.onTapFun(context, index),
+          onTap: item['trailingType'] == 'switch'
+              ? null
+              : () => viewModel.onTapFun(context, index),
           contentPadding: EdgeInsets.zero,
           leading: item['leading'] != null
               ? Image.asset(

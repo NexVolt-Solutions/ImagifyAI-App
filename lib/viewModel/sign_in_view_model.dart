@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/local_notification_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/utils/jwt_decoder.dart';
@@ -18,6 +19,28 @@ class SignInViewModel extends ChangeNotifier {
     : _authRepository = authRepository ?? AuthRepository() {
     _tokensLoadFuture = _loadTokensFromStorage();
     _loadRememberedEmail();
+    ApiService.onAccessTokenRefreshed = _applyAccessTokenFromNetworkRefresh;
+  }
+
+  /// Keeps in-memory token aligned with [ApiService] after silent HTTP refresh.
+  void _applyAccessTokenFromNetworkRefresh(String token) {
+    if (token.isEmpty) return;
+    _accessToken = token;
+    notifyListeners();
+  }
+
+  /// Refresh access token if JWT is missing `exp` or it expires within [expiresWithin].
+  Future<void> ensureAccessTokenFresh({
+    Duration expiresWithin = const Duration(seconds: 90),
+  }) async {
+    final token = _accessToken;
+    if (token == null || token.isEmpty) return;
+    final exp = JwtDecoder.getExpiryEpochSeconds(token);
+    if (exp == null) return;
+    final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    if (exp <= nowSec + expiresWithin.inSeconds) {
+      await refreshTokenSilently();
+    }
   }
 
   final IAuthRepository _authRepository;
@@ -76,11 +99,17 @@ class SignInViewModel extends ChangeNotifier {
         return false;
       }
 
-      _refreshToken = response.refreshToken ?? _refreshToken;
       _accessToken = response.accessToken;
+      _refreshToken = response.refreshToken ?? _refreshToken;
+      if ((_refreshToken ?? '').isEmpty) {
+        _refreshToken = await TokenStorageService.getRefreshToken();
+      }
 
-      // Save updated tokens to SharedPreferences
-      if (_accessToken != null && _refreshToken != null) {
+      // Save updated tokens (TokenStorageService → secure storage)
+      if (_accessToken != null &&
+          _accessToken!.isNotEmpty &&
+          _refreshToken != null &&
+          _refreshToken!.isNotEmpty) {
         await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
 
         // Save userId from refresh response if provided (preferred source)
@@ -207,7 +236,7 @@ class SignInViewModel extends ChangeNotifier {
         await TokenStorageService.saveUserId(userIdToSave);
       }
 
-      // Save tokens to SharedPreferences
+      // Save tokens (TokenStorageService → secure storage)
       if (_accessToken != null && _refreshToken != null) {
         await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
       }
@@ -457,7 +486,7 @@ class SignInViewModel extends ChangeNotifier {
       _refreshToken = response.refreshToken ?? _refreshToken;
       _accessToken = response.accessToken ?? _accessToken;
 
-      // Save updated tokens to SharedPreferences
+      // Save updated tokens (TokenStorageService → secure storage)
       if (_accessToken != null && _refreshToken != null) {
         await TokenStorageService.saveTokens(_accessToken!, _refreshToken!);
       }
@@ -501,6 +530,8 @@ class SignInViewModel extends ChangeNotifier {
 
       await TokenStorageService.clearRememberedEmail();
 
+      await LocalNotificationService.cancelDailyReturnNudge();
+
       try {
         final GoogleSignIn googleSignIn = GoogleSignIn(
           scopes: ['email', 'profile', 'openid'],
@@ -534,7 +565,7 @@ class SignInViewModel extends ChangeNotifier {
     }
   }
 
-  /// Load tokens from SharedPreferences on initialization
+  /// Load tokens from secure storage on initialization
   Future<void> _loadTokensFromStorage() async {
     try {
       // Wait a bit to ensure platform channels are ready (reduced delay for faster loading)
@@ -601,6 +632,7 @@ class SignInViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
+    ApiService.onAccessTokenRefreshed = null;
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
