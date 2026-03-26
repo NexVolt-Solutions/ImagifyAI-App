@@ -15,7 +15,7 @@ class BottomNavScreenViewModel extends ChangeNotifier {
 
   List<Map<String, dynamic>> bottomData = [
     {'name': 'Home', 'image': AppAssets.homeIcon},
-    {'name': 'Create Image', 'image': AppAssets.imageIcon},
+    {'name': 'AI Generate', 'image': AppAssets.imageIcon},
     {'name': 'Profile', 'image': AppAssets.bottomProfileIcon},
   ];
 

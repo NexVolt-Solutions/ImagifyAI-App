@@ -42,6 +42,7 @@ class HomeViewModel extends ChangeNotifier {
   String? errorMessage;
   Wallpaper? createdWallpaper;
   User? currentUser;
+
   /// Bumped when profile image updates so home header refetches the image.
   int _profileImageCacheNonce = 0;
   int get profileImageCacheNonce => _profileImageCacheNonce;
@@ -185,7 +186,8 @@ class HomeViewModel extends ChangeNotifier {
 
     // Proactively refresh before GET /user so we don't hit 401 + error snackbars.
     await signInViewModel.ensureAccessTokenFresh();
-    accessToken = signInViewModel.accessToken ??
+    accessToken =
+        signInViewModel.accessToken ??
         await TokenStorageService.getAccessToken();
     if (accessToken == null || accessToken.isEmpty) {
       if (currentUser != null) {
@@ -668,7 +670,8 @@ class HomeViewModel extends ChangeNotifier {
       final grouped = await _wallpaperRepository.fetchGroupedWallpapers(
         accessToken: accessToken,
         page: 1,
-        limit: 4, // Reduced to 4 per category for faster initial load
+
+        limit: 10,
       );
       groupedWallpapers = grouped;
       errorMessage = null;

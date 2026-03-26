@@ -78,6 +78,10 @@ class BottomNavBar extends StatelessWidget {
                       style: isSelected
                           ? context.appTextStyles?.bottomNavLabelSelected
                           : context.appTextStyles?.bottomNavLabelUnselected,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
