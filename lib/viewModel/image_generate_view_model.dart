@@ -77,7 +77,11 @@ class ImageGenerateViewModel extends ChangeNotifier {
     if (selectedStyleIndex >= 0 && selectedStyleIndex < styles.length) {
       return styles[selectedStyleIndex];
     }
-    return 'default';
+    // Backend does not accept "default"; use a valid style fallback.
+    if (styles.isNotEmpty) {
+      return styles.first;
+    }
+    return 'Colorful';
   }
 
   void setPromptText(String text) {
