@@ -479,7 +479,8 @@ class ImageCreatedViewModel extends ChangeNotifier {
       final shouldShow =
           await InterstitialAdService.shouldShowAfterGenerationBreak(
             generationCount: used,
-            everyN: 3,
+            everyN: 5,
+            cooldown: const Duration(seconds: 30),
           );
       if (shouldShow) {
         await Future<void>.delayed(const Duration(milliseconds: 800));

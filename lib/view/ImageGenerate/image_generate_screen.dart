@@ -152,73 +152,66 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     return SafeArea(
       child: Stack(
         children: [
-          Padding(
+          ListView(
             padding: EdgeInsets.symmetric(horizontal: context.w(20)),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: context.h(20)),
-                  ImageGeneratePromptSection(),
-                  SizedBox(height: context.h(20)),
-                  InspirationGallery(
-                    onScrollToStyle: (name) =>
-                        _scrollToStyleByName(name, context),
-                  ),
-                  SizedBox(height: context.h(20)),
-                  SizeSelectorRow(),
-                  SizedBox(height: context.h(20)),
-                  StyleSelectorList(
-                    scrollController: _styleScrollController,
-                    onScrollToStyle: (index) =>
-                        _scrollToSelectedStyle(index, context),
-                  ),
-                  SizedBox(height: context.h(20)),
-                  CustomButton(
-                    onPressed: () => _onCreateMagicTapped(context),
-                    width: context.w(350),
-                    iconHeight: 24,
-                    iconWidth: 24,
-                    gradient: AppColors.gradient,
-                    icon: AppAssets.startIcon,
-                    text: 'Generate',
-                    isLoading: imageGenerateViewModel.isCreating,
-                  ),
-                  SizedBox(height: context.h(16)),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () =>
-                          ContentReportService.showReportInfoDialog(context),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.flag_outlined,
-                            size: 16,
-                            color: context.subtitleColor,
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            'Report offensive content',
-                            style: TextStyle(
-                              color: context.subtitleColor,
-                              fontSize: 13,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: context.h(16)),
-                  const Center(child: AdBannerWidget()),
-                  SizedBox(height: context.h(16)),
-                ],
+            children: [
+              SizedBox(height: context.h(20)),
+              const ImageGeneratePromptSection(),
+              SizedBox(height: context.h(20)),
+              InspirationGallery(
+                onScrollToStyle: (name) => _scrollToStyleByName(name, context),
               ),
-            ),
+              SizedBox(height: context.h(20)),
+              const SizeSelectorRow(),
+              SizedBox(height: context.h(20)),
+              StyleSelectorList(
+                scrollController: _styleScrollController,
+                onScrollToStyle: (index) =>
+                    _scrollToSelectedStyle(index, context),
+              ),
+              SizedBox(height: context.h(20)),
+              CustomButton(
+                onPressed: () => _onCreateMagicTapped(context),
+                width: context.w(350),
+                iconHeight: 24,
+                iconWidth: 24,
+                gradient: AppColors.gradient,
+                icon: AppAssets.startIcon,
+                text: 'Generate',
+                isLoading: imageGenerateViewModel.isCreating,
+              ),
+              SizedBox(height: context.h(16)),
+              Center(
+                child: GestureDetector(
+                  onTap: () =>
+                      ContentReportService.showReportInfoDialog(context),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.flag_outlined,
+                        size: 16,
+                        color: context.subtitleColor,
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        'Report offensive content',
+                        style: TextStyle(
+                          color: context.subtitleColor,
+                          fontSize: 13,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: context.h(16)),
+              AdBannerWidget(key: const ValueKey('image_generate_banner')),
+              SizedBox(height: context.h(106)),
+            ],
           ),
+
           // Loading Overlay
           if (imageGenerateViewModel.isCreating)
             Consumer<ImageGenerateViewModel>(

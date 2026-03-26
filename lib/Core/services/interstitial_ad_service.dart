@@ -93,8 +93,8 @@ class InterstitialAdService {
 
   static Future<bool> shouldShowAfterGenerationBreak({
     required int generationCount,
-    int everyN = 3,
-    Duration cooldown = const Duration(seconds: 45),
+    int everyN = 5,
+    Duration cooldown = const Duration(seconds: 30),
   }) async {
     if (generationCount <= 0 || everyN <= 0) return false;
     if (generationCount % everyN != 0) return false;

@@ -140,8 +140,15 @@ class _HomeState extends State<Home> {
 
                   // Bottom Padding
                   SliverToBoxAdapter(child: SizedBox(height: context.h(16))),
-                  const SliverToBoxAdapter(
-                    child: Center(child: AdBannerWidget()),
+                  SliverToBoxAdapter(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: AdBannerWidget(
+                          key: const ValueKey('home_banner'),
+                        ),
+                      ),
+                    ),
                   ),
                   SliverToBoxAdapter(child: SizedBox(height: context.h(100))),
                 ],

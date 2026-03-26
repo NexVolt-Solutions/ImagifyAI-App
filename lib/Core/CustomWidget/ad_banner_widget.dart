@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:imagifyai/Core/Constants/env_constants.dart';
 
-/// Simple reusable AdMob banner for high-traffic screens.
-/// In debug it always uses Google test banner ID.
 class AdBannerWidget extends StatefulWidget {
   const AdBannerWidget({super.key});
 
@@ -75,18 +73,26 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
   }
 
   @override
+  void reassemble() {
+    // Hot-reload safety: avoid keeping a platform-view ad attached to an
+    // old element tree, which can trigger "AdWidget is already in the tree".
+    _bannerAd?.dispose();
+    _bannerAd = null;
+    _isLoaded = false;
+    _isLoading = false;
+    super.reassemble();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _loadBanner();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (!_isLoaded || _bannerAd == null) return const SizedBox.shrink();
     return SizedBox(
-      width: double.infinity,
+      width: MediaQuery.sizeOf(context).width.toDouble(),
       height: _bannerAd!.size.height.toDouble(),
-      child: Center(
-        child: SizedBox(
-          width: _bannerAd!.size.width.toDouble(),
-          height: _bannerAd!.size.height.toDouble(),
-          child: AdWidget(ad: _bannerAd!),
-        ),
-      ),
+      child: Center(child: AdWidget(ad: _bannerAd!)),
     );
   }
 }
