@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/ad_banner_widget.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
@@ -211,7 +212,9 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: context.h(120)),
+                  SizedBox(height: context.h(16)),
+                  const Center(child: AdBannerWidget()),
+                  SizedBox(height: context.h(16)),
                 ],
               ),
             ),

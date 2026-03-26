@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/ad_banner_widget.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_list_view.dart';
 import 'package:imagifyai/Core/CustomWidget/home_align.dart';
@@ -138,6 +139,10 @@ class _HomeState extends State<Home> {
                   ],
 
                   // Bottom Padding
+                  SliverToBoxAdapter(child: SizedBox(height: context.h(16))),
+                  const SliverToBoxAdapter(
+                    child: Center(child: AdBannerWidget()),
+                  ),
                   SliverToBoxAdapter(child: SizedBox(height: context.h(100))),
                 ],
               ),

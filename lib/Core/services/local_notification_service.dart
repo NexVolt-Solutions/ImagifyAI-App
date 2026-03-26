@@ -178,10 +178,9 @@ class LocalNotificationService {
     }
   }
 
-  /// User preference (Profile → Notifications). New installs default to **off** (opt-in).
+  /// User preference (Profile → Notifications). New installs default to **on**.
   ///
-  /// One-time migration: if the preference was never set but we already scheduled a
-  /// return nudge before this opt-in change, keep reminders **on** so behavior is stable.
+  /// One-time migration: if a legacy schedule existed, keep reminders **on**.
   static Future<bool> areRetentionRemindersEnabled() async {
     await _migrateNotificationKeysFromSharedPreferences();
     final enabledRaw =
@@ -193,20 +192,20 @@ class LocalNotificationService {
         await SecureStorageHelper.readBool(_keyRetentionRemindersLegacyMigrated) ??
             false;
     if (!legacyDone) {
-      final hadLegacyReturnSchedule =
-          (await SecureStorageHelper.readInt(_keyDailyReturnLastScheduleMs)) !=
-              null;
+      final defaultOn = true;
       await SecureStorageHelper.writeBool(
         _keyRetentionRemindersLegacyMigrated,
         true,
       );
       await SecureStorageHelper.writeBool(
         _keyRetentionRemindersEnabled,
-        hadLegacyReturnSchedule,
+        defaultOn,
       );
-      return hadLegacyReturnSchedule;
+      return defaultOn;
     }
-    return false;
+    // Preference missing after migration: default to ON.
+    await SecureStorageHelper.writeBool(_keyRetentionRemindersEnabled, true);
+    return true;
   }
 
   /// Persists opt-in/out and cancels any pending return nudge when disabled.

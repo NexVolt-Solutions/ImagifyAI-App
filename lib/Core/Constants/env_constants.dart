@@ -22,4 +22,8 @@ class EnvConstants {
   static String get admobInterstitialAdUnitId =>
       dotenv.env['ADMOB_INTERSTITIAL_AD_UNIT_ID'] ??
       'ca-app-pub-8279839772210876/7688095622';
+
+  static String get admobBannerAdUnitId =>
+      dotenv.env['ADMOB_BANNER_AD_UNIT_ID'] ??
+      'ca-app-pub-8279839772210876/6515639825';
 }
