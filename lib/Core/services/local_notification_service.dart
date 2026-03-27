@@ -6,8 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 
-/// Gentle reminders for review or Pro features. Schedules at most one review
-/// reminder (e.g. 3 days after first open) if the user hasn't been prompted yet.
+/// Local reminders: (1) optional review nudge once ~3 days after first open,
+/// (2) repeating daily return ping at a fixed local time (see [_dailyReminderHour])
+/// for signed-in users who keep retention reminders on.
 class LocalNotificationService {
   LocalNotificationService._();
 
@@ -21,8 +22,14 @@ class LocalNotificationService {
       'prefs_retention_reminders_legacy_migrated_v1';
   static const int _reviewReminderId = 1;
   static const int _dailyReturnId = 2;
+  /// Local wall-clock time for the repeating daily return nudge (device timezone).
+  static const int _dailyReminderHour = 10;
+  static const int _dailyReminderMinute = 0;
   static const String _channelId = 'imagifyai_reminders';
   static const String _channelName = 'Reminders';
+  /// Separate channel so daily return pings can use default importance (review uses low).
+  static const String _dailyChannelId = 'imagifyai_daily_return';
+  static const String _dailyChannelName = 'Daily reminders';
 
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
@@ -92,6 +99,20 @@ class LocalNotificationService {
   }
 
   /// Request permission to show notifications (iOS, Android 13+).
+  /// Android 12+: exact daily time needs SCHEDULE_EXACT_ALARM + user opt-in on some OS versions.
+  static Future<void> _ensureAndroidExactAlarmIfNeeded() async {
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    if (android == null) return;
+    try {
+      final can = await android.canScheduleExactNotifications();
+      if (can == true) return;
+      await android.requestExactAlarmsPermission();
+    } catch (_) {}
+  }
+
   static Future<bool> requestPermission() async {
     try {
       final android = _plugin
@@ -230,16 +251,14 @@ class LocalNotificationService {
     } catch (_) {}
   }
 
-  /// Reschedules a single local notification ~[hoursFromNow] hours from now
-  /// (typical use: bring users back after a day away). Only runs for signed-in
-  /// users with an access token; calls [cancelDailyReturnNudge] otherwise.
-  ///
-  /// Debounced so rapid resume/inactive cycles do not churn schedules.
+  /// Repeating **daily** local notification at [_dailyReminderHour]:[_dailyReminderMinute]
+  /// (device timezone). Same notification id is re-registered on each eligible call
+  /// so time zone changes are picked up after resume. Requires signed-in session.
   static Future<void> rescheduleDailyReturnNudgeIfEligible({
-    int hoursFromNow = 24,
-    String title = 'ImagifyAI',
-    String body = 'Create a fresh wallpaper in seconds — open the app to start.',
-    Duration rescheduleDebounce = const Duration(minutes: 45),
+    String title = 'Imagify AI',
+    String body =
+        'Your free generations renew each day — tap to create a new wallpaper.',
+    Duration rescheduleDebounce = const Duration(minutes: 5),
     bool ignoreDebounce = false,
   }) async {
     if (!_initialized) return;
@@ -268,15 +287,28 @@ class LocalNotificationService {
       final granted = await requestPermission();
       if (!granted) return;
 
+      await _ensureAndroidExactAlarmIfNeeded();
+
       await _plugin.cancel(_dailyReturnId);
 
-      final when = tz.TZDateTime.now(tz.local).add(Duration(hours: hoursFromNow));
+      final now = tz.TZDateTime.now(tz.local);
+      var next = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        _dailyReminderHour,
+        _dailyReminderMinute,
+      );
+      if (!next.isAfter(now)) {
+        next = next.add(const Duration(days: 1));
+      }
 
       const details = NotificationDetails(
         android: AndroidNotificationDetails(
-          _channelId,
-          _channelName,
-          channelDescription: 'Gentle reminders for review and tips',
+          _dailyChannelId,
+          _dailyChannelName,
+          channelDescription: 'Daily return reminder at a fixed local time',
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),
@@ -287,11 +319,12 @@ class LocalNotificationService {
         _dailyReturnId,
         title,
         body,
-        when,
+        next,
         details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
       );
     } catch (_) {}
   }
@@ -318,6 +351,14 @@ class LocalNotificationService {
           _channelName,
           description: 'Gentle reminders for review and Pro features',
           importance: Importance.low,
+        ),
+      );
+      await android.createNotificationChannel(
+        const AndroidNotificationChannel(
+          _dailyChannelId,
+          _dailyChannelName,
+          description: 'Daily return reminder',
+          importance: Importance.defaultImportance,
         ),
       );
     }

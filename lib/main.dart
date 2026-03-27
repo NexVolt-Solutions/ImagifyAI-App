@@ -22,6 +22,9 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   AnalyticsService.delegate = FirebaseAnalyticsDelegate();
   await LocalNotificationService.initialize();
+  await LocalNotificationService.rescheduleDailyReturnNudgeIfEligible(
+    ignoreDebounce: true,
+  );
   await MobileAds.instance.initialize();
 
   // Only in debug: use test device IDs so test ads show; never in release (Play Store).
