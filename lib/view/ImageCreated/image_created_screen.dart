@@ -72,6 +72,10 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
             _pollingTimer = null;
             _elapsedTimeController?.close();
             _elapsedTimeController = null;
+
+            // Ensure interstitial can also show in "already ready" flow.
+            // This is required because polling won't call checkWallpaperStatus().
+            viewModel.maybeShowInterstitialWhenAlreadyReady(context);
           }
         }
       }
@@ -234,7 +238,9 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           _restartPollingIfNeeded(imageCreatedViewModel);
-          if (imageUrl.isNotEmpty && imageUrl != 'null' && imageUrl != _lastImageUrl) {
+          if (imageUrl.isNotEmpty &&
+              imageUrl != 'null' &&
+              imageUrl != _lastImageUrl) {
             _lastImageUrl = imageUrl;
             imageCreatedViewModel.clearImageLoadError();
           }
@@ -257,7 +263,9 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
         return Scaffold(
           backgroundColor: context.backgroundColor,
           appBar: ImageCreatedAppBar(
-            onReportTap: (wp != null && (wp.imageUrl.isNotEmpty && wp.imageUrl != 'null'))
+            onReportTap:
+                (wp != null &&
+                    (wp.imageUrl.isNotEmpty && wp.imageUrl != 'null'))
                 ? () {
                     final w = wp;
                     ContentReportService.showReportDialog(
@@ -383,7 +391,11 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                                 ContentReportService.showReportDialog(
                                   context,
                                   contentId: w.id,
-                                  imageUrl: w.imageUrl.isNotEmpty && w.imageUrl != 'null' ? w.imageUrl : null,
+                                  imageUrl:
+                                      w.imageUrl.isNotEmpty &&
+                                          w.imageUrl != 'null'
+                                      ? w.imageUrl
+                                      : null,
                                   prompt: w.prompt,
                                   sourceLabel: 'Image Created',
                                 );

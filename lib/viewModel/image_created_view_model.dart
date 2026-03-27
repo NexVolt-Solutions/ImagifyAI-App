@@ -30,6 +30,8 @@ class ImageCreatedViewModel extends ChangeNotifier {
   final IWallpaperRepository _wallpaperRepository;
 
   Wallpaper? wallpaper;
+  String? _lastInterstitialShownWallpaperId;
+  bool _interstitialShowInFlight = false;
   bool isLoading = false;
   bool isDownloading = false;
   bool isPolling = false;
@@ -58,6 +60,53 @@ class ImageCreatedViewModel extends ChangeNotifier {
     imageRetryCount++;
     imageRetryTimestamp = DateTime.now().millisecondsSinceEpoch;
     notifyListeners();
+  }
+
+  Future<void> _maybeShowInterstitialAfterGeneration({
+    required BuildContext context,
+    required String wallpaperId,
+  }) async {
+    // Prevent multiple interstitials for the same finished generation.
+    if (_lastInterstitialShownWallpaperId == wallpaperId) return;
+    if (_interstitialShowInFlight) return;
+
+    final used = await GenerationLimitService.getGenerationsUsedToday();
+    final shouldShow =
+        await InterstitialAdService.shouldShowAfterGenerationBreak(
+          generationCount: used,
+          everyN: 1,
+          cooldown: const Duration(seconds: 30),
+        );
+
+    if (!shouldShow) return;
+
+    await Future<void>.delayed(const Duration(milliseconds: 800));
+    if (!context.mounted) return;
+
+    _interstitialShowInFlight = true;
+    try {
+      final shown = await InterstitialAdService.showInterstitialAd();
+      if (shown) {
+        _lastInterstitialShownWallpaperId = wallpaperId;
+      }
+    } finally {
+      _interstitialShowInFlight = false;
+    }
+  }
+
+  /// Call when this screen knows the image is already ready.
+  /// (If we don't poll, we still want interstitial impressions.)
+  Future<void> maybeShowInterstitialWhenAlreadyReady(
+    BuildContext context,
+  ) async {
+    final wp = wallpaper;
+    if (wp == null) return;
+    final imageUrl = wp.imageUrl;
+    if (imageUrl.isEmpty || imageUrl == 'null') return;
+    await _maybeShowInterstitialAfterGeneration(
+      context: context,
+      wallpaperId: wp.id,
+    );
   }
 
   DateTime? _pollingStartTime;
@@ -196,6 +245,13 @@ class ImageCreatedViewModel extends ChangeNotifier {
           }
 
           notifyListeners();
+
+          // Show interstitial automatically when the generation completes.
+          // This ensures we get impressions even if user doesn't immediately download.
+          await _maybeShowInterstitialAfterGeneration(
+            context: context,
+            wallpaperId: wallpaper!.id,
+          );
         } else {
           // Still generating, keep polling
           final elapsedTime = _pollingStartTime != null
@@ -475,19 +531,10 @@ class ImageCreatedViewModel extends ChangeNotifier {
         isError: false,
       );
 
-      final used = await GenerationLimitService.getGenerationsUsedToday();
-      final shouldShow =
-          await InterstitialAdService.shouldShowAfterGenerationBreak(
-            generationCount: used,
-            everyN: 5,
-            cooldown: const Duration(seconds: 30),
-          );
-      if (shouldShow) {
-        await Future<void>.delayed(const Duration(milliseconds: 800));
-        if (context.mounted) {
-          await InterstitialAdService.showInterstitialAd();
-        }
-      }
+      await _maybeShowInterstitialAfterGeneration(
+        context: context,
+        wallpaperId: wallpaper!.id,
+      );
     } on ApiException catch (e) {
       errorMessage = e.message;
       _showMessage(context, e.message);
