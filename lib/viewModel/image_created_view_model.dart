@@ -31,6 +31,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
   Wallpaper? wallpaper;
   String? _lastInterstitialShownWallpaperId;
+  String? _lastGenerationRecordedWallpaperId;
   bool _interstitialShowInFlight = false;
   bool isLoading = false;
   bool isDownloading = false;
@@ -62,6 +63,11 @@ class ImageCreatedViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Suggested for a new app: visible growth + Play-friendly pacing.
+  /// After launch stabilizes: try 4 @ 60s for a bit more fill; avoid <60s gaps.
+  static const int _interstitialEveryNGenerations = 5;
+  static const Duration _interstitialMinGap = Duration(seconds: 60);
+
   Future<void> _maybeShowInterstitialAfterGeneration({
     required BuildContext context,
     required String wallpaperId,
@@ -74,13 +80,14 @@ class ImageCreatedViewModel extends ChangeNotifier {
     final shouldShow =
         await InterstitialAdService.shouldShowAfterGenerationBreak(
           generationCount: used,
-          everyN: 1,
-          cooldown: const Duration(seconds: 30),
+          everyN: _interstitialEveryNGenerations,
+          cooldown: _interstitialMinGap,
         );
 
     if (!shouldShow) return;
 
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    // Short pause after success UI so the interstitial does not feel instant-jarring.
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
     if (!context.mounted) return;
 
     _interstitialShowInFlight = true;
@@ -224,6 +231,14 @@ class ImageCreatedViewModel extends ChangeNotifier {
             imageUrl: updatedWallpaper.imageUrl, // Use the new image URL
             createdAt: updatedWallpaper.createdAt,
           );
+
+          // IMPORTANT: generation count must be updated when the async image
+          // finishes. Otherwise interstitial pacing (which uses generationCount)
+          // will stay at 0 and interstitials will never show.
+          if (_lastGenerationRecordedWallpaperId != updatedWallpaper.id) {
+            _lastGenerationRecordedWallpaperId = updatedWallpaper.id;
+            await GenerationLimitService.recordGeneration();
+          }
 
           isPolling = false;
           _stopProgressAnimation();
@@ -394,6 +409,7 @@ class ImageCreatedViewModel extends ChangeNotifier {
       );
 
       await GenerationLimitService.recordGeneration();
+      _lastGenerationRecordedWallpaperId = recreatedWallpaper.id;
 
       // Reset polling state and start checking for the new image
       isPolling = true;
@@ -529,11 +545,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
         context,
         'Saved to your device! Enjoy your new wallpaper',
         isError: false,
-      );
-
-      await _maybeShowInterstitialAfterGeneration(
-        context: context,
-        wallpaperId: wallpaper!.id,
       );
     } on ApiException catch (e) {
       errorMessage = e.message;

@@ -65,6 +65,21 @@ void _setupTokenRefresh() {
       }
 
       return null;
+    } on ApiException catch (e) {
+      // Hard fallback: if refresh token is invalid/expired, clear local auth state
+      // immediately so the app can cleanly redirect user to sign-in on next auth check.
+      final message = e.message.toLowerCase();
+      final isInvalidRefresh =
+          e.statusCode == 401 ||
+          e.statusCode == 403 ||
+          message.contains('invalid refresh token') ||
+          message.contains('refresh token') && message.contains('invalid') ||
+          message.contains('refresh token') && message.contains('expired');
+      if (isInvalidRefresh) {
+        await TokenStorageService.clearTokens();
+        await TokenStorageService.clearUserData();
+      }
+      return null;
     } catch (e) {
       return null;
     }

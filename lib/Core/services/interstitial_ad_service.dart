@@ -4,7 +4,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:imagifyai/Core/Constants/env_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// AdMob Interstitial ad shown after natural breaks (e.g. after download).
+/// AdMob Interstitial after natural breaks (e.g. image ready).
+/// Call sites should pass [everyN] and [cooldown] so pacing stays user-friendly.
 /// Ad unit ID from .env (ADMOB_INTERSTITIAL_AD_UNIT_ID). In debug, uses Google test ID so ads always load.
 class InterstitialAdService {
   static const String _lastShownMsKey = 'ads_interstitial_last_shown_ms';
@@ -16,6 +17,16 @@ class InterstitialAdService {
   static bool _isLoading = false;
   static bool _retryDone = false;
   static Completer<void>? _loadCompleter;
+
+  static Future<void> _markInterstitialShownNow() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(
+        _lastShownMsKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+    } catch (_) {}
+  }
 
   static Future<void> _ensureLoaded({Duration timeout = const Duration(seconds: 8)}) async {
     if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) return;
@@ -59,23 +70,49 @@ class InterstitialAdService {
             _interstitialAd = ad;
             _isLoading = false;
             _retryDone = false;
+            if (kDebugMode) {
+              // ignore: avoid_print
+              print('✅ Interstitial loaded');
+            }
             _loadCompleter?.complete();
             _loadCompleter = null;
             ad.fullScreenContentCallback = FullScreenContentCallback(
+              onAdShowedFullScreenContent: (ad) {
+                _markInterstitialShownNow();
+                if (kDebugMode) {
+                  // ignore: avoid_print
+                  print('✅ Interstitial shown');
+                }
+              },
               onAdDismissedFullScreenContent: (ad) {
                 ad.dispose();
                 _interstitialAd = null;
+                if (kDebugMode) {
+                  // ignore: avoid_print
+                  print('🔄 Interstitial dismissed, preloading next');
+                }
                 loadInterstitialAd(); // Preload next
               },
               onAdFailedToShowFullScreenContent: (ad, error) {
                 ad.dispose();
                 _interstitialAd = null;
                 _isLoading = false;
+                if (kDebugMode) {
+                  // ignore: avoid_print
+                  print(
+                    '❌ Interstitial failed to show: '
+                    '${error.code} ${error.message}',
+                  );
+                }
               },
             );
           },
           onAdFailedToLoad: (error) {
             _isLoading = false;
+            if (kDebugMode) {
+              // ignore: avoid_print
+              print('❌ Interstitial failed to load: ${error.code} ${error.message}');
+            }
             _loadCompleter?.completeError(error);
             _loadCompleter = null;
             if (!_retryDone &&
@@ -110,13 +147,6 @@ class InterstitialAdService {
     final ad = _interstitialAd!;
     _interstitialAd = null;
     await ad.show();
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(
-        _lastShownMsKey,
-        DateTime.now().millisecondsSinceEpoch,
-      );
-    } catch (_) {}
     return true;
   }
 
