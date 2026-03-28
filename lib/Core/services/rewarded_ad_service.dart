@@ -21,10 +21,6 @@ class RewardedAdService {
   static Future<void> loadRewardedAd() async {
     if (_rewardedAd != null || _isLoading) return;
     _isLoading = true;
-    if (kDebugMode) {
-      // ignore: avoid_print
-      print('RewardedAdService: loading with adUnitId=${rewardedAdUnitId.substring(0, 30)}...');
-    }
     try {
       await RewardedAd.load(
         adUnitId: rewardedAdUnitId,
@@ -49,9 +45,7 @@ class RewardedAdService {
           },
           onAdFailedToLoad: (error) {
             _isLoading = false;
-            if (!_retryDone &&
-                (error.code == 0 || error.code == 3) &&
-                kDebugMode) {
+            if (!_retryDone && (error.code == 0 || error.code == 3)) {
               _retryDone = true;
               Future<void>.delayed(const Duration(seconds: 3), () {
                 loadRewardedAd();

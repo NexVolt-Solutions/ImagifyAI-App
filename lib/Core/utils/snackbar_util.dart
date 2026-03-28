@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
@@ -10,11 +9,6 @@ class SnackbarUtil {
     bool isError = true,
     Duration duration = const Duration(seconds: 3),
   }) {
-    if (kDebugMode) {
-      debugPrint(
-        '[TOP SNACKBAR] isError: $isError | duration: ${duration.inSeconds}s | message: $message',
-      );
-    }
     final overlay = Overlay.of(context);
     late OverlayEntry overlayEntry;
 
@@ -107,40 +101,45 @@ class _TopSnackBarState extends State<_TopSnackBar>
             opacity: _fadeAnimation,
             child: Material(
               color: Colors.transparent,
-              child: Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: widget.isError
-                      ? AppColors.errorColor
-                      : AppColors.greenColor,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.message,
-                        style: TextStyle(
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? context.colorScheme.onSurface
-                              : context.colorScheme.onSurface,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+              child: InkWell(
+                onTap: _dismiss,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: widget.isError
+                        ? AppColors.errorColor
+                        : AppColors.greenColor,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.message,
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? context.colorScheme.onSurface
+                                : context.colorScheme.onSurface,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/api_constants.dart';
-import 'package:imagifyai/Core/Constants/env_constants.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
@@ -132,10 +130,6 @@ class ContentReportService {
             ? prompt.trim()
             : 'N/A',
       };
-      if (kDebugMode) {
-        debugPrint('[REPORT] POST ${EnvConstants.apiBaseUrl}$path');
-        debugPrint('[REPORT] body: $body');
-      }
       await ApiService().post(
         path,
         headers: headers,
@@ -153,11 +147,7 @@ class ContentReportService {
           isError: false,
         );
       }
-    } catch (e, st) {
-      if (kDebugMode) {
-        debugPrint('[REPORT] API failed: $e');
-        debugPrint('[REPORT] stack: $st');
-      }
+    } catch (e) {
       // Fallback: open email client for report (ensures compliance even without backend)
       await _reportViaEmail(
         contentId: contentId,

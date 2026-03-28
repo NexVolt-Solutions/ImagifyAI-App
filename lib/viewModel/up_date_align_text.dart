@@ -3,11 +3,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class UpdateAlignText extends StatelessWidget {
-  final text;
-  final color;
-  final fontSize;
+  final String text;
+  final Color color;
+  final double fontSize;
 
-  const UpdateAlignText({super.key, this.text, this.color, this.fontSize});
+  const UpdateAlignText({
+    super.key,
+    required this.text,
+    required this.color,
+    required this.fontSize,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +24,7 @@ class UpdateAlignText extends StatelessWidget {
           text,
           style: GoogleFonts.poppins(
             color: color,
-            fontSize: 10.sp,
+            fontSize: fontSize.sp,
             fontWeight: FontWeight.w400,
           ),
         ),

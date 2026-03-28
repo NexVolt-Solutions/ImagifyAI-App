@@ -64,7 +64,7 @@ class UserProfileHeader extends StatelessWidget {
         height: context.h(50),
         width: context.h(50),
         decoration: BoxDecoration(
-          color: context.subtitleColor.withOpacity(0.3),
+          color: context.subtitleColor.withValues(alpha: 0.3),
           shape: BoxShape.circle,
         ),
         child: const Center(child: AppLoadingIndicator.small()),
@@ -91,7 +91,7 @@ class UserProfileHeader extends StatelessWidget {
               height: context.h(50),
               width: context.h(50),
               decoration: BoxDecoration(
-                color: context.subtitleColor.withOpacity(0.3),
+                color: context.subtitleColor.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
               child: const Center(child: AppLoadingIndicator.small()),
@@ -115,13 +115,13 @@ class UserProfileHeader extends StatelessWidget {
       height: context.h(50),
       width: context.h(50),
       decoration: BoxDecoration(
-        color: context.subtitleColor.withOpacity(0.3),
+        color: context.subtitleColor.withValues(alpha: 0.3),
         shape: BoxShape.circle,
       ),
       child: Icon(
         Icons.person,
         size: context.h(30),
-        color: context.textColor.withOpacity(0.7),
+        color: context.textColor.withValues(alpha: 0.7),
       ),
     );
   }

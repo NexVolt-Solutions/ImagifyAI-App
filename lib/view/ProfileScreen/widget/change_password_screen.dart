@@ -4,7 +4,7 @@ import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/align_text.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
-import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_text_field.dart';
 import 'package:imagifyai/Core/CustomWidget/password_text.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/edit_profile_view_model.dart';
@@ -172,14 +172,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Expanded(
                       child: CustomButton(
                         onPressed: () async {
-                          if (accessToken == null || accessToken.isEmpty)
+                          if (accessToken == null || accessToken.isEmpty) {
                             return;
+                          }
                           final success = await editProfileViewModel
                               .updatePassword(
                                 context: context,
                                 accessToken: accessToken,
                               );
-                          if (mounted && success) Navigator.pop(context);
+                          if (!context.mounted) return;
+                          if (success) {
+                            Navigator.pop(context);
+                          }
                         },
                         text: 'Update',
                         isLoading: editProfileViewModel.isLoading,

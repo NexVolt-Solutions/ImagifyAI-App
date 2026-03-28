@@ -56,7 +56,8 @@ class _ForgotVerificationScreenState extends State<ForgotVerificationScreen> {
 
     return Consumer<ForgotVerificationViewModel>(
       builder: (context, vm, _) {
-        final greyBorderColor = colorScheme.onSurface.withOpacity(0.42);
+        final greyBorderColor =
+            colorScheme.onSurface.withValues(alpha: 0.42);
         final focusedBorderColor = colorScheme.primary;
         final filledBorderColor = Colors.white;
         final errorBorderColor = colorScheme.error;

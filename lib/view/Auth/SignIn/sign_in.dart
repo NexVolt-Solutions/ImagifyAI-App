@@ -5,7 +5,7 @@ import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
-import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_text_field.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_text_rich.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';

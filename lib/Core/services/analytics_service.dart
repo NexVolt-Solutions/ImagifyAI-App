@@ -34,9 +34,7 @@ abstract class AppAnalyticsDelegate {
 class AnalyticsService {
   AnalyticsService._();
 
-  static AppAnalyticsDelegate? _delegate;
-  static AppAnalyticsDelegate? get delegate => _delegate;
-  static set delegate(AppAnalyticsDelegate? d) => _delegate = d;
+  static AppAnalyticsDelegate? delegate;
 
   static DateTime? _sessionStart;
   static int _sessionImageCount = 0;
@@ -98,6 +96,6 @@ class AnalyticsService {
   static bool get isSessionActive => _sessionStart != null;
 
   static void _log(String name, Map<String, Object?>? params) {
-    _delegate?.logEvent(name, params);
+    delegate?.logEvent(name, params);
   }
 }

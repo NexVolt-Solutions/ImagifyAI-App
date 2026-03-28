@@ -59,7 +59,7 @@ class _LoadingOverlayState extends State<LoadingOverlay>
   Widget build(BuildContext context) {
     final progressPercent = (widget.progress * 100).toInt().clamp(0, 100);
     return Container(
-      color: context.backgroundColor.withOpacity(0.9),
+      color: context.backgroundColor.withValues(alpha: 0.9),
       child: Center(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: context.w(40)),
@@ -79,7 +79,7 @@ class _LoadingOverlayState extends State<LoadingOverlay>
                         value: 1.0,
                         strokeWidth: context.w(20),
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          context.textColor.withOpacity(0.3),
+                          context.textColor.withValues(alpha: 0.3),
                         ),
                         backgroundColor: Colors.transparent,
                       ),
@@ -148,9 +148,13 @@ class _LoadingOverlayState extends State<LoadingOverlay>
           height: context.h(12),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: isActive ? context.primaryColor : context.textColor.withOpacity(0.3),
+            color: isActive
+                ? context.primaryColor
+                : context.textColor.withValues(alpha: 0.3),
             border: Border.all(
-              color: isActive ? context.primaryColor : context.textColor.withOpacity(0.5),
+              color: isActive
+                  ? context.primaryColor
+                  : context.textColor.withValues(alpha: 0.5),
               width: 2,
             ),
           ),
@@ -159,7 +163,9 @@ class _LoadingOverlayState extends State<LoadingOverlay>
         Text(
           label,
           style: (context.appTextStyles?.imageGenerateStageLabel)?.copyWith(
-            color: isActive ? context.primaryColor : context.textColor.withOpacity(0.5),
+            color: isActive
+                ? context.primaryColor
+                : context.textColor.withValues(alpha: 0.5),
             fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -172,7 +178,9 @@ class _LoadingOverlayState extends State<LoadingOverlay>
       width: context.w(20),
       height: context.h(2),
       decoration: BoxDecoration(
-        color: isActive ? context.primaryColor : context.textColor.withOpacity(0.3),
+        color: isActive
+            ? context.primaryColor
+            : context.textColor.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(1),
       ),
     );

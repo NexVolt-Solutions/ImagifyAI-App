@@ -17,7 +17,7 @@ class HomeEmptyWallpapers extends StatelessWidget {
           Icon(
             Icons.image_outlined,
             size: context.h(60),
-            color: context.subtitleColor.withOpacity(0.5),
+            color: context.subtitleColor.withValues(alpha: 0.5),
           ),
           SizedBox(height: context.h(12)),
           Text(

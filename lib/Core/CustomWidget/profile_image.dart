@@ -54,7 +54,7 @@ class ProfileImage extends StatelessWidget {
           child: Icon(
             Icons.person,
             size: height != null ? height! * 0.6 : 24,
-            color: context.colorScheme.onSurface.withOpacity(0.7),
+            color: context.colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       );
@@ -81,7 +81,7 @@ class ProfileImage extends StatelessWidget {
                   child: Icon(
                     Icons.person,
                     size: height != null ? height! * 0.6 : 24,
-                    color: context.colorScheme.onSurface.withOpacity(0.7),
+                    color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 );
               },

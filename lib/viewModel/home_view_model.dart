@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
@@ -110,19 +109,7 @@ class HomeViewModel extends ChangeNotifier {
     BuildContext context, {
     bool forceReload = false,
   }) async {
-    if (kDebugMode) {
-      print('═══════════════════════════════════════════════════════════');
-      print('=== HOME VIEW MODEL: loadCurrentUser CALLED ===');
-      print('═══════════════════════════════════════════════════════════');
-      print('forceReload: $forceReload');
-      print('isLoadingUser: $isLoadingUser');
-      print('currentUser: ${currentUser != null ? "exists" : "null"}');
-    }
-
     if (isLoadingUser && !forceReload) {
-      if (kDebugMode) {
-        print('⚠️  Already loading user, skipping...');
-      }
       return;
     }
 
@@ -131,42 +118,12 @@ class HomeViewModel extends ChangeNotifier {
     await signInViewModel.ensureTokensLoaded();
     String? accessToken = signInViewModel.accessToken;
 
-    if (kDebugMode) {
-      print('--- Token Check ---');
-      print(
-        'Access token from SignInViewModel: ${accessToken != null && accessToken.isNotEmpty ? "Present" : "Missing"}',
-      );
-      if (accessToken != null) {
-        print('Access token length: ${accessToken.length}');
-        print(
-          'Access token preview: ${accessToken.substring(0, accessToken.length > 30 ? 30 : accessToken.length)}...',
-        );
-      }
-    }
-
     // If SignInViewModel doesn't have token yet, try loading directly from storage
     // This handles the race condition where HomeViewModel loads before SignInViewModel finishes loading tokens
     if (accessToken == null || accessToken.isEmpty) {
-      if (kDebugMode) {
-        print(
-          '⚠️  SignInViewModel token not available, trying to load from storage...',
-        );
-      }
       try {
         accessToken = await TokenStorageService.getAccessToken();
-        if (accessToken != null && accessToken.isNotEmpty) {
-          // Update SignInViewModel with the token we just loaded
-          // Note: We can't directly set private fields, but this ensures consistency
-          if (kDebugMode) {
-            print('✅ Token loaded from storage directly');
-            print('Token length: ${accessToken.length}');
-          }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Error loading token from storage: $e');
-        }
-      }
+      } catch (_) {}
     }
 
     if (accessToken == null || accessToken.isEmpty) {
@@ -174,12 +131,6 @@ class HomeViewModel extends ChangeNotifier {
       if (currentUser != null) {
         currentUser = null;
         notifyListeners();
-      }
-      if (kDebugMode) {
-        print('❌ No access token available, skipping user load');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== HOME VIEW MODEL: loadCurrentUser END (NO TOKEN) ===');
-        print('═══════════════════════════════════════════════════════════');
       }
       return;
     }
@@ -205,38 +156,13 @@ class HomeViewModel extends ChangeNotifier {
 
     // If userId is not in storage, try to extract it from JWT token
     if (userId == null || userId.isEmpty) {
-      if (kDebugMode) {
-        print(
-          '⚠️  User ID not found in storage, attempting to extract from JWT...',
-        );
-      }
-
       try {
-        // Try to extract userId from JWT token
         userId = JwtDecoder.getUserId(validAccessToken);
 
         if (userId != null && userId.isNotEmpty) {
-          // Save the extracted userId to storage for future use
           await TokenStorageService.saveUserId(userId);
-          if (kDebugMode) {
-            print('✅ User ID extracted from JWT and saved: $userId');
-          }
-        } else {
-          if (kDebugMode) {
-            print('❌ User ID not found in JWT token either');
-            // Try to decode and log JWT payload for debugging
-            final decoded = JwtDecoder.decode(validAccessToken);
-            if (decoded != null) {
-              print('JWT Payload keys: ${decoded.keys.toList()}');
-              print('JWT Payload: $decoded');
-            }
-          }
         }
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Error extracting userId from JWT: $e');
-        }
-      }
+      } catch (_) {}
     }
 
     if (userId == null || userId.isEmpty) {
@@ -245,12 +171,6 @@ class HomeViewModel extends ChangeNotifier {
         currentUser = null;
         notifyListeners();
       }
-      if (kDebugMode) {
-        print('❌ No user ID available, skipping user load');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== HOME VIEW MODEL: loadCurrentUser END (NO USER ID) ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
       return;
     }
 
@@ -258,29 +178,12 @@ class HomeViewModel extends ChangeNotifier {
     // so the header never flashes empty / generic placeholder.
     if (!forceReload && currentUser != null) {
       if (currentUser!.id == userId) {
-        if (kDebugMode) {
-          print(
-            '✅ User already loaded and matches stored user ID, skipping...',
-          );
-          print('Cached User ID: ${currentUser!.id}');
-          print('Stored User ID: $userId');
-        }
         return;
       } else {
-        if (kDebugMode) {
-          print('⚠️  User ID changed! Clearing cached user and reloading...');
-          print('Cached User ID: ${currentUser!.id}');
-          print('Stored User ID: $userId');
-        }
         // Clear cached user since it's a different user
         currentUser = null;
         notifyListeners();
       }
-    }
-
-    if (kDebugMode) {
-      print('✅ Access token available, proceeding to load user...');
-      print('User ID from storage: $userId');
     }
 
     isLoadingUser = true;
@@ -288,22 +191,12 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (kDebugMode) {
-        print('--- Calling AuthRepository.getCurrentUser ---');
-      }
       currentUser = await _authRepository.getCurrentUser(
         accessToken: validAccessToken,
         userId: userId,
         forceRefresh: forceReload,
       );
       errorMessage = null; // Clear any previous errors on success
-
-      if (kDebugMode) {
-        print('✅ User loaded successfully!');
-        print('User ID: ${currentUser?.id}');
-        print('Username: ${currentUser?.username}');
-        print('Email: ${currentUser?.email}');
-      }
     } on ApiException catch (e) {
       // Handle token expiration - automatically refresh and retry
       // Only refresh on actual expiration errors, not "missing user_id" or other validation errors
@@ -314,10 +207,6 @@ class HomeViewModel extends ChangeNotifier {
               !messageLower.contains('missing'));
 
       if (isTokenExpired) {
-        if (kDebugMode) {
-          print('🔄 Token expired, attempting to refresh...');
-        }
-
         // Get SignInViewModel to refresh token
         final signInViewModel = context.read<SignInViewModel>();
 
@@ -325,10 +214,6 @@ class HomeViewModel extends ChangeNotifier {
         final refreshed = await signInViewModel.refreshTokenSilently();
 
         if (refreshed && signInViewModel.accessToken != null) {
-          if (kDebugMode) {
-            print('✅ Token refreshed, retrying getCurrentUser...');
-          }
-
           // Retry the request with new token
           try {
             // Ensure we have the latest token from SignInViewModel
@@ -338,9 +223,6 @@ class HomeViewModel extends ChangeNotifier {
               final tokenFromStorage =
                   await TokenStorageService.getAccessToken();
               if (tokenFromStorage != null && tokenFromStorage.isNotEmpty) {
-                if (kDebugMode) {
-                  print('⚠️  Using token from storage for retry');
-                }
                 currentUser = await _authRepository.getCurrentUser(
                   accessToken: tokenFromStorage,
                   userId: userId,
@@ -357,75 +239,35 @@ class HomeViewModel extends ChangeNotifier {
               );
             }
             errorMessage = null; // Clear any previous errors on success
-
-            if (kDebugMode) {
-              print('✅ User loaded successfully after token refresh!');
-              print('User ID: ${currentUser?.id}');
-              print('Username: ${currentUser?.username}');
-              print('Email: ${currentUser?.email}');
-            }
           } on ApiException catch (retryError) {
             // If retry also fails with 401, don't retry again (avoid infinite loop)
             if (retryError.statusCode == 401) {
-              if (kDebugMode) {
-                print('❌ Retry failed with 401: ${retryError.message}');
-                print(
-                  '⚠️  This might indicate a backend issue with the refreshed token',
-                );
-              }
               errorMessage = 'Session expired. Please login again.';
             } else {
-              if (kDebugMode) {
-                print(
-                  '❌ Failed to load user after token refresh: ${retryError.message}',
-                );
-              }
               errorMessage =
                   'Couldn\'t load your profile. Let\'s try refreshing!';
             }
             currentUser = null;
           } catch (retryError) {
-            if (kDebugMode) {
-              print('❌ Unexpected error during retry: $retryError');
-            }
             errorMessage =
                 'Couldn\'t load your profile. Let\'s try refreshing!';
             currentUser = null;
           }
         } else {
-          if (kDebugMode) {
-            print('❌ Failed to refresh token');
-          }
           errorMessage = 'Session expired. Please login again.';
           currentUser = null;
         }
       } else {
         errorMessage = e.message;
-        // Don't show error snackbar here, just log it
-        if (kDebugMode) {
-          print('❌ ApiException in loadCurrentUser: ${e.message}');
-          if (e.statusCode == 403) {
-            print('⚠️  Status Code: 403 Forbidden');
-          }
-        }
         // Set currentUser to null so UI doesn't try to display invalid data
         currentUser = null;
       }
     } catch (e) {
       errorMessage = 'Couldn\'t load your profile. Let\'s try refreshing!';
-      if (kDebugMode) {
-        print('❌ Unexpected error in loadCurrentUser: $e');
-        print('Error type: ${e.runtimeType}');
-      }
       currentUser = null;
     } finally {
       isLoadingUser = false;
       notifyListeners();
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== HOME VIEW MODEL: loadCurrentUser END ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
     }
   }
 
@@ -545,20 +387,12 @@ class HomeViewModel extends ChangeNotifier {
 
   /// Refresh home screen data (user and grouped wallpapers)
   Future<void> refreshHomeData(BuildContext context) async {
-    if (kDebugMode) {
-      print('🔄 Refreshing home data...');
-    }
-
     // Load all data in parallel for faster refresh
     await Future.wait([
       loadCurrentUser(context, forceReload: true),
       loadStyles(context),
       loadGroupedWallpapers(context),
     ]);
-
-    if (kDebugMode) {
-      print('✅ Home data refreshed');
-    }
   }
 
   /// Load styles from the API
@@ -573,17 +407,10 @@ class HomeViewModel extends ChangeNotifier {
     if (accessToken == null || accessToken.isEmpty) {
       try {
         accessToken = await TokenStorageService.getAccessToken();
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Failed to load token from storage: $e');
-        }
-      }
+      } catch (_) {}
     }
 
     if (accessToken == null || accessToken.isEmpty) {
-      if (kDebugMode) {
-        print('⚠️  No access token available for loading styles');
-      }
       return;
     }
 
@@ -592,34 +419,13 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      if (kDebugMode) {
-        print('═══════════════════════════════════════════════════════════');
-        print('=== LOAD STYLES (HOME): START ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
-
       _stylesMap = await _wallpaperRepository.fetchStyles(
         accessToken: accessToken,
       );
-
-      if (kDebugMode) {
-        print('✅ Styles loaded successfully');
-        print('Total styles: ${_stylesMap.length}');
-        print('Style names: $styles');
-        print('═══════════════════════════════════════════════════════════');
-        print('=== LOAD STYLES (HOME): SUCCESS ===');
-        print('═══════════════════════════════════════════════════════════');
-      }
     } on ApiException catch (e) {
       stylesError = e.message;
-      if (kDebugMode) {
-        print('❌ Error loading styles: ${e.message}');
-      }
-    } catch (e) {
+    } catch (_) {
       stylesError = 'Failed to load styles';
-      if (kDebugMode) {
-        print('❌ Unexpected error loading styles: $e');
-      }
     } finally {
       isLoadingStyles = false;
       notifyListeners();
@@ -636,29 +442,12 @@ class HomeViewModel extends ChangeNotifier {
 
     // If not available in SignInViewModel, try loading from storage
     if (accessToken == null || accessToken.isEmpty) {
-      if (kDebugMode) {
-        print(
-          '⚠️  SignInViewModel token not available, trying to load from storage...',
-        );
-      }
       try {
         accessToken = await TokenStorageService.getAccessToken();
-        if (accessToken != null && accessToken.isNotEmpty) {
-          if (kDebugMode) {
-            print('✅ Token loaded from storage for grouped wallpapers');
-          }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Failed to load token from storage: $e');
-        }
-      }
+      } catch (_) {}
     }
 
     if (accessToken == null || accessToken.isEmpty) {
-      if (kDebugMode) {
-        print('⚠️  No access token available for loading grouped wallpapers');
-      }
       return;
     }
 
@@ -675,21 +464,9 @@ class HomeViewModel extends ChangeNotifier {
       );
       groupedWallpapers = grouped;
       errorMessage = null;
-
-      if (kDebugMode) {
-        print('✅ Grouped wallpapers loaded successfully');
-        print('Categories: ${groupedWallpapers.keys.toList()}');
-      }
     } on ApiException catch (e) {
       errorMessage = e.message;
-      if (kDebugMode) {
-        print('❌ Error loading grouped wallpapers: ${e.message}');
-      }
-      // Don't show error to user, just log it
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Unexpected error loading grouped wallpapers: $e');
-      }
+    } catch (_) {
       errorMessage = 'Failed to load wallpapers';
     } finally {
       isLoadingGroupedWallpapers = false;

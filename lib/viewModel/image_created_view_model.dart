@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
@@ -140,17 +140,9 @@ class ImageCreatedViewModel extends ChangeNotifier {
       _pollingStartTime = null;
       _pollingAttempts = 0;
 
-      if (kDebugMode) {
-        print('✅ Wallpaper already has image URL, skipping polling');
-        print('Image URL: ${data.imageUrl}');
-      }
     } else if (data != null) {
       // Image not ready yet, will start polling
       isPolling = true;
-      if (kDebugMode) {
-        print('⏳ Wallpaper image not ready yet, will start polling');
-        print('Wallpaper ID: ${data.id}');
-      }
     }
 
     notifyListeners();
@@ -184,9 +176,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
       _stopProgressAnimation();
       errorMessage =
           'Your masterpiece is taking a bit longer than usual. Feel free to try again!';
-      if (kDebugMode) {
-        print('⏱️ Polling timeout after $_pollingAttempts attempts');
-      }
       _showMessage(context, errorMessage!);
       notifyListeners();
       return;
@@ -247,18 +236,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
           _pollingStartTime = null;
           _pollingAttempts = 0;
 
-          final elapsedTime = _pollingStartTime != null
-              ? DateTime.now().difference(_pollingStartTime!).inSeconds
-              : 0;
-
-          if (kDebugMode) {
-            print('✅ Image is ready! URL: ${updatedWallpaper.imageUrl}');
-            print(
-              '⏱️ Total generation time: ${elapsedTime}s ($_pollingAttempts polling attempts)',
-            );
-            print('📝 Preserved prompt: $preservedPrompt');
-          }
-
           notifyListeners();
 
           // Show interstitial automatically when the generation completes.
@@ -269,17 +246,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
           );
         } else {
           // Still generating, keep polling
-          final elapsedTime = _pollingStartTime != null
-              ? DateTime.now().difference(_pollingStartTime!).inSeconds
-              : 0;
-
-          if (kDebugMode && _pollingAttempts % 12 == 0) {
-            // Log every minute (12 attempts * 5 seconds)
-            print(
-              '⏳ Still generating... Elapsed: ${elapsedTime}s, Attempts: $_pollingAttempts',
-            );
-          }
-
           isPolling = true;
           notifyListeners();
         }
@@ -288,11 +254,8 @@ class ImageCreatedViewModel extends ChangeNotifier {
         isPolling = true;
         notifyListeners();
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error checking wallpaper status: $e');
-      }
-      // Don't stop polling on error, just log it
+    } catch (_) {
+      // Don't stop polling on transient errors
       isPolling = true;
       notifyListeners();
     }
@@ -366,13 +329,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
       final sizeToUse = wallpaper!.size;
       final styleToUse = wallpaper!.style;
 
-      if (kDebugMode) {
-        print('🔄 Recreating wallpaper with:');
-        print('   Prompt: $promptToUse');
-        print('   Size: $sizeToUse');
-        print('   Style: $styleToUse');
-      }
-
       final recreatedWallpaper = await _wallpaperRepository.recreateWallpaper(
         wallpaperId: oldWallpaperId,
         accessToken: accessToken,
@@ -380,19 +336,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
         size: sizeToUse,
         style: styleToUse,
       );
-
-      // Check if API returned a different prompt than what we sent
-      if (kDebugMode && recreatedWallpaper.prompt != promptToUse) {
-        print('⚠️ WARNING: API returned different prompt!');
-        print('   Sent prompt: "$promptToUse"');
-        print('   API returned: "${recreatedWallpaper.prompt}"');
-        print(
-          '   This indicates the backend is not using the prompt from the request body.',
-        );
-        print(
-          '   The generated image will be based on the old prompt, not the edited one.',
-        );
-      }
 
       // Update the wallpaper with the edited prompt if it was provided
       // (API might not return the updated prompt, so we override it)
@@ -420,27 +363,11 @@ class ImageCreatedViewModel extends ChangeNotifier {
       // Start progress animation
       _startProgressAnimation();
 
-      if (kDebugMode) {
-        print('✅ Wallpaper recreated with new ID: ${wallpaper!.id}');
-        print('New prompt: ${wallpaper!.prompt}');
-        print('New image URL: ${wallpaper!.imageUrl}');
-      }
-
       _showMessage(
         context,
         'New version is being created! This may take a moment...',
         isError: false,
       );
-
-      // Start checking status immediately
-      if (wallpaper!.imageUrl.isEmpty || wallpaper!.imageUrl == 'null') {
-        // Image is still generating, will be polled by the screen
-        if (kDebugMode) {
-          print(
-            '⏳ New wallpaper image is still generating, polling will start...',
-          );
-        }
-      }
 
       notifyListeners();
     } on ApiException catch (e) {
@@ -707,7 +634,7 @@ class _DownloadShareDialog extends StatelessWidget {
                               context.radius(12),
                             ),
                             border: Border.all(
-                              color: context.primaryColor.withOpacity(0.3),
+                              color: context.primaryColor.withValues(alpha: 0.3),
                               width: 1,
                             ),
                           ),
@@ -791,7 +718,7 @@ class _DownloadShareDialog extends StatelessWidget {
                             height: context.h(60),
                             width: context.w(60),
                             decoration: BoxDecoration(
-                              color: context.primaryColor.withOpacity(0.2),
+                              color: context.primaryColor.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
@@ -823,7 +750,7 @@ class _DownloadShareDialog extends StatelessWidget {
                             height: context.h(60),
                             width: context.w(60),
                             decoration: BoxDecoration(
-                              color: context.primaryColor.withOpacity(0.2),
+                              color: context.primaryColor.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(

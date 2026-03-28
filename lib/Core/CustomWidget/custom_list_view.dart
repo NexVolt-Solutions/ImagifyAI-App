@@ -73,7 +73,7 @@ class CustomListView extends StatelessWidget {
                                   child: Icon(
                                     Icons.image_not_supported,
                                     color: context.colorScheme.onSurface
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                                     size: 40,
                                   ),
                                 );
@@ -94,9 +94,8 @@ class CustomListView extends StatelessWidget {
                             color: context.colorScheme.surface,
                             child: Icon(
                               Icons.image_not_supported,
-                              color: context.colorScheme.onSurface.withOpacity(
-                                0.5,
-                              ),
+                              color: context.colorScheme.onSurface
+                                  .withValues(alpha: 0.5),
                               size: 40,
                             ),
                           ),
@@ -123,7 +122,8 @@ class CustomListView extends StatelessWidget {
                         color: context.colorScheme.surface,
                         child: Icon(
                           Icons.image_not_supported,
-                          color: context.colorScheme.onSurface.withOpacity(0.5),
+                          color: context.colorScheme.onSurface
+                              .withValues(alpha: 0.5),
                           size: 40,
                         ),
                       ),

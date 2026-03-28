@@ -76,10 +76,11 @@ class CustomTextField extends StatelessWidget {
     final isEnabled = enabled ?? true;
 
     final enabledColor =
-        enabledBorderColor ?? colorScheme.onSurface.withOpacity(0.42);
+        enabledBorderColor ??
+        colorScheme.onSurface.withValues(alpha: 0.42);
     final focusedColor = focusedBorderColor ?? colorScheme.primary;
     final errorColor = colorScheme.error;
-    final disabledColor = colorScheme.onSurface.withOpacity(0.24);
+    final disabledColor = colorScheme.onSurface.withValues(alpha: 0.24);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

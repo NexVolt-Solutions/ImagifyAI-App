@@ -13,7 +13,6 @@ import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
 import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart';
 
 class SignUpViewModel extends ChangeNotifier {
   final IAuthRepository _authRepository;
@@ -234,18 +233,10 @@ class SignUpViewModel extends ChangeNotifier {
             'Registration failed. Please check your connection and try again.';
       }
 
-      if (kDebugMode) {
-        print('Final error message: $errorMessage');
-      }
       _showMessage(context, errorMessage!);
     } finally {
       isLoading = false;
       notifyListeners();
-      if (kDebugMode) {
-        print('=== REGISTRATION END ===');
-        print('isLoading: false');
-        print('errorMessage: $errorMessage');
-      }
     }
   }
 
@@ -269,16 +260,7 @@ class SignUpViewModel extends ChangeNotifier {
       try {
         await googleSignIn.signOut();
         await googleSignIn.disconnect();
-        if (kDebugMode) {
-          print(
-            '✅ Google Sign-In cache cleared to force account picker (signup)',
-          );
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('⚠️ Ignoring Google signOut/disconnect error (signup): $e');
-        }
-      }
+      } catch (_) {}
 
       googleUser = await googleSignIn.signIn();
 
@@ -291,47 +273,7 @@ class SignUpViewModel extends ChangeNotifier {
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
 
-      if (kDebugMode) {
-        print('=== GOOGLE AUTH DETAILS (SIGNUP) ===');
-        print('ID Token: ${googleAuth.idToken != null ? "Present" : "NULL"}');
-        print(
-          'Access Token: ${googleAuth.accessToken != null ? "Present" : "NULL"}',
-        );
-        print('Email: ${googleUser.email}');
-        print('Display Name: ${googleUser.displayName}');
-        print(
-          'Server Client ID configured: ${ApiConstants.googleWebClientId.isNotEmpty}',
-        );
-
-        if (googleAuth.idToken != null) {
-          try {
-            final decodedToken = JwtDecoder.decode(googleAuth.idToken!);
-            if (decodedToken != null) {
-              print('=== GOOGLE ID TOKEN PAYLOAD (SIGNUP) ===');
-              print('Token audience (aud): ${decodedToken['aud']}');
-              print('Token issuer (iss): ${decodedToken['iss']}');
-              print('Token subject (sub): ${decodedToken['sub']}');
-              print('Token email: ${decodedToken['email']}');
-              print('Token email_verified: ${decodedToken['email_verified']}');
-              print('Token name: ${decodedToken['name']}');
-              print('Token picture: ${decodedToken['picture']}');
-              print('⚠️  Backend must verify this token using Web Client ID:');
-              print('   ${ApiConstants.googleWebClientId}');
-            }
-          } catch (e) {
-            print('⚠️  Could not decode ID token for debugging: $e');
-          }
-        }
-      }
-
       if (googleAuth.idToken == null) {
-        if (kDebugMode) {
-          print('❌ ID Token is NULL. Common causes:');
-          print('   1. Web Client ID (serverClientId) not configured');
-          print('   2. OAuth consent screen not properly configured');
-          print('   3. App is in testing mode and user not added as test user');
-        }
-
         String errorMessage = 'Failed to get ID token from Google.\n\n';
         if (ApiConstants.googleWebClientId.isEmpty) {
           errorMessage +=
@@ -370,30 +312,13 @@ class SignUpViewModel extends ChangeNotifier {
                 decoded['userId']?.toString() ??
                 decoded['id']?.toString();
           }
-        } catch (e) {
-          if (kDebugMode) {
-            print('❌ Failed to decode JWT: $e');
-          }
-        }
+        } catch (_) {}
       }
 
       // Save user_id if found
       final userIdToSave = userIdFromResponse ?? userIdFromJwt;
       if (userIdToSave != null && userIdToSave.isNotEmpty) {
         await TokenStorageService.saveUserId(userIdToSave);
-      }
-
-      if (kDebugMode) {
-        print('=== GOOGLE SIGN-UP SUCCESSFUL ===');
-        print(
-          'Access token received: ${accessToken != null && accessToken.isNotEmpty}',
-        );
-        print(
-          'Refresh token received: ${refreshToken != null && refreshToken.isNotEmpty}',
-        );
-        if (userIdToSave != null && userIdToSave.isNotEmpty) {
-          print('✅ User ID saved to storage: $userIdToSave');
-        }
       }
 
       // Save tokens (TokenStorageService → secure storage)
@@ -412,25 +337,11 @@ class SignUpViewModel extends ChangeNotifier {
           accessToken != null &&
           accessToken.isNotEmpty) {
         try {
-          if (kDebugMode) {
-            print('=== FETCHING USER DATA AFTER GOOGLE SIGN-UP ===');
-          }
-          // User data is automatically saved to cache in getCurrentUser
           await _authRepository.getCurrentUser(
             accessToken: accessToken,
             userId: userIdToSave,
           );
-          if (kDebugMode) {
-            print('✅ User data fetched and cached after Google sign-up');
-          }
-        } catch (e) {
-          if (kDebugMode) {
-            print('⚠️ Failed to fetch user data after Google sign-up: $e');
-            print(
-              '   User can still use the app, data will be fetched when needed',
-            );
-          }
-        }
+        } catch (_) {}
       }
 
       if (!context.mounted) return;
@@ -445,12 +356,6 @@ class SignUpViewModel extends ChangeNotifier {
           errorMessageLower.contains('standard login')) {
         // Get email from googleUser if available, otherwise try to extract from error
         String? userEmail = googleUser?.email;
-
-        if (kDebugMode) {
-          print('=== EMAIL REGISTERED WITH PASSWORD (SIGNUP) ===');
-          print('Email: ${userEmail ?? "Unknown"}');
-          print('Navigating to sign in screen...');
-        }
 
         // Save email for sign-in screen (pre-fill) if available
         if (userEmail != null && userEmail.isNotEmpty) {
@@ -498,18 +403,9 @@ class SignUpViewModel extends ChangeNotifier {
       }
 
       errorMessage = userMessage;
-      if (kDebugMode) {
-        print('❌ Google Sign-Up PlatformException:');
-        print('   Code: ${e.code}');
-        print('   Message: ${e.message}');
-      }
       if (context.mounted) _showMessage(context, userMessage);
-    } catch (e) {
+    } catch (_) {
       errorMessage = 'Failed to sign up with Google. Please try again.';
-      if (kDebugMode) {
-        print('❌ Google Sign-Up Error: $e');
-        print('   Error type: ${e.runtimeType}');
-      }
       if (context.mounted) _showMessage(context, errorMessage!);
     } finally {
       isGoogleLoading = false;

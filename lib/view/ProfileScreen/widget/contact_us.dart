@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
-import 'package:imagifyai/Core/CustomWidget/custom_textField.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_text_field.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class ContactUs extends StatelessWidget {
@@ -179,7 +179,7 @@ class ContactUs extends StatelessWidget {
                                     color: isSelected
                                         ? context.primaryColor
                                         : context.colorScheme.onSurface
-                                              .withOpacity(0.5),
+                                              .withValues(alpha: 0.5),
                                     width: 2,
                                   ),
                                 ),

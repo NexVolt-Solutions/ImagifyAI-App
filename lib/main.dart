@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -26,17 +25,6 @@ void main() async {
     ignoreDebounce: true,
   );
   await MobileAds.instance.initialize();
-
-  // Only in debug: use test device IDs so test ads show; never in release (Play Store).
-  if (kDebugMode) {
-    await MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(
-        testDeviceIds: [
-          '26FF934A589AEA5FF1D9F910862DC114', // Add more from log if needed.
-        ],
-      ),
-    );
-  }
 
   RewardedAdService.loadRewardedAd();
   InterstitialAdService.loadInterstitialAd();

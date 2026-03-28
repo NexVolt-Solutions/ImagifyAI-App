@@ -26,7 +26,7 @@ class GenerateWallpaperCard extends StatelessWidget {
           dashPattern: const [10, 10],
           strokeWidth: context.w(1),
           radius: Radius.circular(context.radius(12)),
-          color: context.colorScheme.onSurface.withOpacity(0.6),
+          color: context.colorScheme.onSurface.withValues(alpha: 0.6),
         ),
         child: ListView(
           shrinkWrap: true,

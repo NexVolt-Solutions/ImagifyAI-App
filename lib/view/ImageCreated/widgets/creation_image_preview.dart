@@ -44,7 +44,7 @@ class CreationImagePreview extends StatelessWidget {
         child: Container(
           padding: context.padAll(15),
           decoration: BoxDecoration(
-            color: context.backgroundColor.withOpacity(0.7),
+            color: context.backgroundColor.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(context.radius(8)),
           ),
           child: Column(

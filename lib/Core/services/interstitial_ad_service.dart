@@ -55,12 +55,6 @@ class InterstitialAdService {
     }
     _isLoading = true;
     _loadCompleter ??= Completer<void>();
-    if (kDebugMode) {
-      // ignore: avoid_print
-      print(
-        'InterstitialAdService: loading with adUnitId=${interstitialAdUnitId.substring(0, 30)}...',
-      );
-    }
     try {
       await InterstitialAd.load(
         adUnitId: interstitialAdUnitId,
@@ -70,54 +64,29 @@ class InterstitialAdService {
             _interstitialAd = ad;
             _isLoading = false;
             _retryDone = false;
-            if (kDebugMode) {
-              // ignore: avoid_print
-              print('✅ Interstitial loaded');
-            }
             _loadCompleter?.complete();
             _loadCompleter = null;
             ad.fullScreenContentCallback = FullScreenContentCallback(
               onAdShowedFullScreenContent: (ad) {
                 _markInterstitialShownNow();
-                if (kDebugMode) {
-                  // ignore: avoid_print
-                  print('✅ Interstitial shown');
-                }
               },
               onAdDismissedFullScreenContent: (ad) {
                 ad.dispose();
                 _interstitialAd = null;
-                if (kDebugMode) {
-                  // ignore: avoid_print
-                  print('🔄 Interstitial dismissed, preloading next');
-                }
                 loadInterstitialAd(); // Preload next
               },
               onAdFailedToShowFullScreenContent: (ad, error) {
                 ad.dispose();
                 _interstitialAd = null;
                 _isLoading = false;
-                if (kDebugMode) {
-                  // ignore: avoid_print
-                  print(
-                    '❌ Interstitial failed to show: '
-                    '${error.code} ${error.message}',
-                  );
-                }
               },
             );
           },
           onAdFailedToLoad: (error) {
             _isLoading = false;
-            if (kDebugMode) {
-              // ignore: avoid_print
-              print('❌ Interstitial failed to load: ${error.code} ${error.message}');
-            }
             _loadCompleter?.completeError(error);
             _loadCompleter = null;
-            if (!_retryDone &&
-                (error.code == 0 || error.code == 3) &&
-                true) {
+            if (!_retryDone && (error.code == 0 || error.code == 3)) {
               _retryDone = true;
               Future<void>.delayed(const Duration(seconds: 3), () {
                 loadInterstitialAd();

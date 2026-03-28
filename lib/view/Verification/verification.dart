@@ -59,7 +59,8 @@ class _VerificationState extends State<Verification> {
     return Consumer<VerificationViewModel>(
       builder: (context, vm, _) {
         // Grey for empty/default fields
-        final greyBorderColor = colorScheme.onSurface.withOpacity(0.42);
+        final greyBorderColor =
+            colorScheme.onSurface.withValues(alpha: 0.42);
         // Primary only when user is interacting (focused field)
         final focusedBorderColor = colorScheme.primary;
         // White for fields that already have a digit (1, 2, etc.)
@@ -170,12 +171,15 @@ class _VerificationState extends State<Verification> {
               key: _formKey,
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: context.h(20)),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.w(_VerificationLayout.screenPaddingH),
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      SizedBox(height: context.h(_VerificationLayout.titleTop)),
                       Center(child: Image.asset(AppAssets.forgotIcon)),
                       SizedBox(
                         height: context.h(_VerificationLayout.sectionSpacing),

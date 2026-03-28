@@ -50,10 +50,9 @@ class BottomNavBar extends StatelessWidget {
             final isSelected = currentIndex == index;
             return GestureDetector(
               onTap: () => onTap(index),
-              child: Container(
+              child: SizedBox(
                 height: context.h(50),
                 width: context.w(80),
-                // color: Colors.blue,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
