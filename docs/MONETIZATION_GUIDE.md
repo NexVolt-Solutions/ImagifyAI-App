@@ -6,7 +6,7 @@ Your app is already on the Play Store. Here are practical ways to start earning,
 
 ## 1. **Google AdMob (Ads)** — Implemented
 
-The app already uses **Rewarded** and **Interstitial** ads. All AdMob IDs are in **`.env`** and **`android/secrets.properties`** (see [ENV_SETUP.md](ENV_SETUP.md)).
+The app already uses **Rewarded** and **Interstitial** ads. Ad unit IDs are in **`assets/env/default.env`**; the AdMob app ID for Android is in **`android/secrets.properties`** (see [ENV_SETUP.md](ENV_SETUP.md)).
 
 ### Current implementation
 | Type | Where | When |
@@ -17,10 +17,10 @@ The app already uses **Rewarded** and **Interstitial** ads. All AdMob IDs are in
 ### What you need (already done)
 - **AdMob account** and app linked.
 - **App ID** in `android/secrets.properties` (or `key.properties`) as `ADMOB_APP_ID`; injected into AndroidManifest at build time.
-- **Ad unit IDs** in `.env`: `ADMOB_REWARDED_AD_UNIT_ID`, `ADMOB_INTERSTITIAL_AD_UNIT_ID`.
+- **Ad unit IDs** in `assets/env/default.env`: `ADMOB_REWARDED_AD_UNIT_ID`, `ADMOB_INTERSTITIAL_AD_UNIT_ID`.
 
 ### Adding more ad types (optional)
-- **Banner**: Create a Banner ad unit in AdMob, add its ID to `.env`, and show a banner widget at the bottom of a screen (e.g. Home or Generate).
+- **Banner**: Create a Banner ad unit in AdMob, add its ID to `assets/env/default.env`, and show a banner widget at the bottom of a screen (e.g. Home or Generate).
 
 **Earnings**: Roughly **$0.50–5+ per 1000 ad impressions** (varies by country and ad type).
 
@@ -94,7 +94,7 @@ This way you earn from both ads and subscriptions.
 ## Quick start checklist
 
 - [x] Create AdMob account and add your Android app.
-- [x] Add Rewarded + Interstitial in the app with `google_mobile_ads`; IDs in `.env`.
+- [x] Add Rewarded + Interstitial in the app with `google_mobile_ads`; IDs in `assets/env/default.env`.
 - [ ] In Play Console: set up In-app products or Subscriptions and link merchant account (for Pro/IAP).
 - [ ] Add `in_app_purchase` and a simple paywall (e.g. "Pro" or "credits") if desired.
 - [ ] Improve store listing (title, description, screenshots, keywords).

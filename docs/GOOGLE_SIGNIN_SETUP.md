@@ -6,7 +6,7 @@
 
 1. **Firebase Console** → project **imagifyai** (ID: `imagifyai-f8cad`) → **Authentication** → **Sign-in method** → enable **Google** (and add support email if prompted).
 2. **Web Client ID:** In [Google Cloud Console](https://console.cloud.google.com/) select project **imagifyai-f8cad** → **APIs & Services** → **Credentials** → **"Web client (auto created by Google Service)"** → copy the **Client ID** (e.g. `687032857486-xxxx.apps.googleusercontent.com`).
-3. **Update the app:** Set the Web client ID in your **`.env`** file as `GOOGLE_WEB_CLIENT_ID=your-client-id.apps.googleusercontent.com` (see [ENV_SETUP.md](ENV_SETUP.md)). The app reads it from there.
+3. **Update the app:** Set the Web client ID in **`assets/env/default.env`** as `GOOGLE_WEB_CLIENT_ID=your-client-id.apps.googleusercontent.com` (see [ENV_SETUP.md](ENV_SETUP.md)). The app reads it from there.
 4. **SHA-1 (Android):** In **Firebase Console** → **Project settings** → **Your apps** → Android app `com.imagifyai.app` → **Add fingerprint** and add your **debug** and **release** SHA-1.
 
 After that, Google Sign-In uses the Firebase project; no separate Cloud Console OAuth setup is required.
@@ -50,7 +50,7 @@ Copy the **SHA-1** for that key.
 ## 4. Checklist
 
 - [ ] **Firebase:** Authentication → Google sign-in method enabled.
-- [ ] **Web client ID** in `.env` as `GOOGLE_WEB_CLIENT_ID` is the **Web client (auto created by Google Service)** from the **same project as Firebase** (Cloud Console → Credentials).
+- [ ] **Web client ID** in `assets/env/default.env` as `GOOGLE_WEB_CLIENT_ID` is the **Web client (auto created by Google Service)** from the **same project as Firebase** (Cloud Console → Credentials).
 - [ ] **Debug** SHA-1 added in Firebase Project settings → Android app.
 - [ ] **Release** SHA-1 added in Firebase Project settings → Android app (for Play Store).
 
@@ -64,7 +64,7 @@ After changing credentials, wait a few minutes and try sign-in again. No code ch
 |------|----------------|
 | Firebase project | Same project as your app (e.g. `imagifyai-453d3`). |
 | Google sign-in | Firebase Console → **Authentication** → **Sign-in method** → **Google** enabled. |
-| Web client ID | Cloud Console (same project) → **Credentials** → "Web client (auto created by Google Service)" → copy to `.env` as `GOOGLE_WEB_CLIENT_ID`. |
+| Web client ID | Cloud Console (same project) → **Credentials** → "Web client (auto created by Google Service)" → copy to `assets/env/default.env` as `GOOGLE_WEB_CLIENT_ID`. |
 | SHA-1 | Firebase Console → **Project settings** → Android app → **Fingerprints** (debug + release). |
 
 ---

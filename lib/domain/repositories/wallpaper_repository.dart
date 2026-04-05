@@ -239,7 +239,7 @@ class WallpaperRepository implements IWallpaperRepository {
   Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
     required String accessToken,
     int page = 1,
-    int limit = 4, // Reduced to 4 per category for faster initial load
+    int limit = 10,
   }) async {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);
@@ -247,10 +247,7 @@ class WallpaperRepository implements IWallpaperRepository {
 
     final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
 
-    // Add query parameter to exclude user-specific wallpapers
-    // The backend should return general wallpapers for all users
     final queryParams = <String, String>{
-      'public': 'true', // Request public/general wallpapers only
       'page': page.toString(),
       'limit': limit.toString(),
     };
