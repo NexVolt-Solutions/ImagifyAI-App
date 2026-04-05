@@ -56,7 +56,6 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
   }
 
   void _scrollToSelectedStyle(int styleIndex, BuildContext context) {
-    // Wait for the next frame to ensure the ListView is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_styleScrollController.hasClients && styleIndex >= 0) {
         final baseItemWidth =
@@ -216,7 +215,9 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: context.h(120)),
+                    SizedBox(height: context.h(16)),
+                    AdBannerWidget(key: const ValueKey('image_generate_banner')),
+                    SizedBox(height: context.h(106)),
                   ],
                 ),
               ),
