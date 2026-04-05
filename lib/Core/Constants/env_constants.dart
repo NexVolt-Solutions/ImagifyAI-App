@@ -1,7 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Environment-based constants. Load .env in main() before using.
-/// Values come from .env file (see .env.example for template).
+/// Values come from assets/env/default.env (see .env.example for a copy-paste template).
 class EnvConstants {
   EnvConstants._();
 

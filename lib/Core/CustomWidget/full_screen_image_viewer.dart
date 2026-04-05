@@ -6,6 +6,7 @@ import 'package:gal/gal.dart';
 import 'package:http/http.dart' as http;
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/services/content_report_service.dart';
+import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 import 'package:path_provider/path_provider.dart';
@@ -15,11 +16,24 @@ class FullScreenImageViewer extends StatefulWidget {
   final String? heroTag;
   final Wallpaper? wallpaper;
 
+  /// URL already decoded in the list row (thumbnail preferred). Shown under the
+  /// full image so opening preview does not flash a loader when only the full
+  /// URL still needs to load.
+  final String? previewBackdropUrl;
+
+  /// Must match the list thumbnail [Image.network] cache sizes when possible so
+  /// the backdrop hits [ImageCache] instantly for same-URL opens.
+  final int? previewBackdropCacheWidth;
+  final int? previewBackdropCacheHeight;
+
   const FullScreenImageViewer({
     super.key,
     required this.imageUrl,
     this.heroTag,
     this.wallpaper,
+    this.previewBackdropUrl,
+    this.previewBackdropCacheWidth,
+    this.previewBackdropCacheHeight,
   });
 
   static void show(
@@ -27,6 +41,9 @@ class FullScreenImageViewer extends StatefulWidget {
     String imageUrl, {
     String? heroTag,
     Wallpaper? wallpaper,
+    String? previewBackdropUrl,
+    int? previewBackdropCacheWidth,
+    int? previewBackdropCacheHeight,
   }) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -34,6 +51,9 @@ class FullScreenImageViewer extends StatefulWidget {
           imageUrl: imageUrl,
           heroTag: heroTag,
           wallpaper: wallpaper,
+          previewBackdropUrl: previewBackdropUrl,
+          previewBackdropCacheWidth: previewBackdropCacheWidth,
+          previewBackdropCacheHeight: previewBackdropCacheHeight,
         ),
         fullscreenDialog: true,
       ),
@@ -45,6 +65,11 @@ class FullScreenImageViewer extends StatefulWidget {
 }
 
 class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
+  static const _kImageHeaders = <String, String>{
+    'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+    'User-Agent': 'ImagifyAI/1.0 (Flutter)',
+  };
+
   bool _isDownloading = false;
 
   Future<void> _downloadImage() async {
@@ -95,21 +120,61 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
     await Gal.putImage(file.path);
   }
 
+  String _trimUrl(String? u) {
+    final s = u?.trim() ?? '';
+    if (s.isEmpty || s == 'null') return '';
+    return s;
+  }
+
+  /// URL for the underlay: list row preview (explicit), else thumbnail, else same as [main].
+  String _resolveBackdropUrl(String main) {
+    final explicit = _trimUrl(widget.previewBackdropUrl);
+    if (explicit.isNotEmpty) return explicit;
+    final w = widget.wallpaper;
+    if (w != null) {
+      final t = _trimUrl(w.thumbnailUrl);
+      if (t.isNotEmpty) return t;
+    }
+    return main;
+  }
+
+  Widget _imageBody(BuildContext context) {
+    final main = _trimUrl(widget.imageUrl);
+    if (main.isEmpty) {
+      return Container(
+        color: Colors.grey[900],
+        child: const Icon(Icons.person, size: 100, color: Colors.white70),
+      );
+    }
+
+    final backdropUrl = _resolveBackdropUrl(main);
+
+    return Image.network(
+      backdropUrl,
+      fit: BoxFit.contain,
+      alignment: Alignment.center,
+      headers: _kImageHeaders,
+
+      gaplessPlayback: true,
+      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: context.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
+          icon: Icon(Icons.close, color: context.iconColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           if (widget.wallpaper != null)
             IconButton(
-              icon: const Icon(Icons.flag_outlined, color: Colors.white),
+              icon: Icon(Icons.flag_outlined, color: context.iconColor),
               tooltip: 'Report content',
               onPressed: () {
                 final w = widget.wallpaper!;
@@ -124,53 +189,28 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
                 );
               },
             ),
-          FloatingActionButton(
+          IconButton(
             onPressed: _isDownloading ? null : _downloadImage,
-            backgroundColor: Colors.black.withValues(alpha: 0.65),
-            child: _isDownloading
-                ? const AppLoadingIndicator.medium(color: Colors.white)
-                : Icon(Icons.download_outlined, color: Colors.white),
+            icon: _isDownloading
+                ? AppLoadingIndicator.medium(color: context.iconColor)
+                : Icon(Icons.download_outlined, color: context.iconColor),
           ),
         ],
       ),
 
-      body: Center(
-        child: InteractiveViewer(
-          minScale: 0.5,
-          maxScale: 4.0,
-          child: Hero(
-            tag: widget.heroTag ?? widget.imageUrl,
-            child: widget.imageUrl.isEmpty
-                ? Container(
-                    color: Colors.grey[900],
-                    child: const Icon(
-                      Icons.person,
-                      size: 100,
-                      color: Colors.white70,
-                    ),
-                  )
-                : Image.network(
-                    widget.imageUrl,
-                    fit: BoxFit.contain,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: AppLoadingIndicator.medium(color: Colors.white),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[900],
-                        child: const Icon(
-                          Icons.error_outline,
-                          size: 100,
-                          color: Colors.white70,
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return InteractiveViewer(
+            minScale: 0.5,
+            maxScale: 4.0,
+            alignment: Alignment.center,
+            child: SizedBox(
+              width: constraints.maxWidth,
+              height: constraints.maxHeight * 0.9,
+              child: _imageBody(context),
+            ),
+          );
+        },
       ),
     );
   }

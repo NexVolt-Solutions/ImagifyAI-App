@@ -5,6 +5,8 @@ import 'package:imagifyai/Core/CustomWidget/logo_app_bar.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/view/BottomNavigation/widgets/bottom_nav_bar.dart';
 import 'package:imagifyai/viewModel/bottom_nav_screen_view_model.dart';
+import 'package:imagifyai/viewModel/home_view_model.dart';
+import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:provider/provider.dart';
 
 class BottomNavScreen extends StatefulWidget {
@@ -99,7 +101,26 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               BottomNavBar(
                 bottomData: bottomNavScreenViewModel.bottomData,
                 currentIndex: bottomNavScreenViewModel.currentIndex,
-                onTap: bottomNavScreenViewModel.updateIndex,
+                onTap: (index) {
+                  final previousIndex = bottomNavScreenViewModel.currentIndex;
+                  bottomNavScreenViewModel.updateIndex(index);
+                  if (!context.mounted) return;
+                  if (index == 0 && previousIndex != 0) {
+                    context.read<HomeViewModel>().loadGroupedWallpapers(
+                      context,
+                      force: true,
+                    );
+                  }
+                  if (index == 1 && previousIndex != 1) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!context.mounted) return;
+                      context.read<ImageGenerateViewModel>().loadStyles(
+                        context,
+                        forceRetry: true,
+                      );
+                    });
+                  }
+                },
               ),
             ],
           ),

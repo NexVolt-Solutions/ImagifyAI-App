@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
@@ -9,6 +10,7 @@ import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/viewModel/home_view_model.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -166,15 +168,22 @@ class ImageGenerateViewModel extends ChangeNotifier {
 
   bool isGettingSuggestion = false;
 
-  Future<void> loadStyles(BuildContext context) async {
-    final hasFreshStyles =
-        _stylesMap.isNotEmpty &&
-        _stylesLastFetchedAt != null &&
-        DateTime.now().difference(_stylesLastFetchedAt!) < _stylesCacheTtl;
-    if (isLoadingStyles || hasFreshStyles) return;
+  /// Loads style names/prompts for the picker. Matches [HomeViewModel.loadStyles]
+  /// token resolution so Generate does not fail when [SignInViewModel] is not
+  /// hydrated yet. Use [forceRetry] after a failure or when re-opening the tab.
+  Future<void> loadStyles(
+    BuildContext context, {
+    bool forceRetry = false,
+  }) async {
+    if (isLoadingStyles) return;
+    if (_stylesMap.isNotEmpty) return;
+    if (stylesError != null && !forceRetry) return;
 
     final signInViewModel = context.read<SignInViewModel>();
     await signInViewModel.ensureTokensLoaded();
+    await signInViewModel.ensureAccessTokenFresh();
+    if (!context.mounted) return;
+
     String? accessToken = signInViewModel.accessToken;
 
     if (accessToken == null || accessToken.isEmpty) {
@@ -187,8 +196,8 @@ class ImageGenerateViewModel extends ChangeNotifier {
       return;
     }
 
-    isLoadingStyles = true;
     stylesError = null;
+    isLoadingStyles = true;
     notifyListeners();
 
     try {
@@ -317,6 +326,12 @@ class ImageGenerateViewModel extends ChangeNotifier {
         await GenerationLimitService.recordGeneration();
         if (!context.mounted) return;
         InAppReviewService.recordCompletedGenerationAndMaybeReview(context);
+        if (context.mounted) {
+          context.read<HomeViewModel>().loadGroupedWallpapers(
+            context,
+            force: true,
+          );
+        }
         Navigator.pushNamed(
           context,
           RoutesName.ImageCreatedScreen,
@@ -364,6 +379,12 @@ class ImageGenerateViewModel extends ChangeNotifier {
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,
               );
+              if (context.mounted) {
+                context.read<HomeViewModel>().loadGroupedWallpapers(
+                  context,
+                  force: true,
+                );
+              }
               Navigator.pushNamed(
                 context,
                 RoutesName.ImageCreatedScreen,
@@ -513,6 +534,10 @@ class ImageGenerateViewModel extends ChangeNotifier {
               if (!context.mounted) return;
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,
+              );
+              context.read<HomeViewModel>().loadGroupedWallpapers(
+                context,
+                force: true,
               );
               Navigator.pushNamed(
                 context,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
-import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/full_screen_image_viewer.dart';
+import 'package:imagifyai/Core/CustomWidget/wallpaper_network_thumbnail.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 
@@ -29,21 +29,32 @@ class CustomListView extends StatelessWidget {
             // If wallpapers are provided, display them
             if (wallpapers != null && wallpapers!.isNotEmpty) {
               final wallpaper = wallpapers![index];
-              final imageUrl = wallpaper.imageUrl.isNotEmpty
+              final viewerImageUrl = wallpaper.imageUrl.isNotEmpty
                   ? wallpaper.imageUrl
                   : (wallpaper.thumbnailUrl.isNotEmpty
                         ? wallpaper.thumbnailUrl
                         : null);
+              final hasPreview =
+                  wallpaper.thumbnailUrl.isNotEmpty ||
+                  wallpaper.imageUrl.isNotEmpty;
+              final dpr = MediaQuery.devicePixelRatioOf(context);
+              final cacheWidth = (context.w(100) * dpr).round().clamp(64, 4096);
+              final cacheHeight = (context.h(131) * dpr).round().clamp(
+                64,
+                4096,
+              );
 
               return GestureDetector(
                 onTap: () {
-                  if (imageUrl != null && imageUrl.isNotEmpty) {
+                  if (viewerImageUrl != null && viewerImageUrl.isNotEmpty) {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => FullScreenImageViewer(
-                          imageUrl: imageUrl,
+                          imageUrl: viewerImageUrl,
                           heroTag: 'wallpaper_${wallpaper.id}_$index',
                           wallpaper: wallpaper,
+                          previewBackdropCacheWidth: cacheWidth,
+                          previewBackdropCacheHeight: cacheHeight,
                         ),
                         fullscreenDialog: true,
                       ),
@@ -61,41 +72,22 @@ class CustomListView extends StatelessWidget {
                   clipBehavior: Clip.hardEdge,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(context.radius(8)),
-                    child: imageUrl != null && imageUrl.isNotEmpty
+                    child: hasPreview
                         ? Hero(
                             tag: 'wallpaper_${wallpaper.id}_$index',
-                            child: Image.network(
-                              imageUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: context.colorScheme.surface,
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    color: context.colorScheme.onSurface
-                                        .withValues(alpha: 0.5),
-                                    size: 40,
-                                  ),
-                                );
-                              },
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Container(
-                                      color: context.colorScheme.surface,
-                                      child: Center(
-                                        child: AppLoadingIndicator.medium(),
-                                      ),
-                                    );
-                                  },
+                            child: WallpaperNetworkThumbnail(
+                              wallpaper: wallpaper,
+                              cacheWidth: cacheWidth,
+                              cacheHeight: cacheHeight,
                             ),
                           )
                         : Container(
                             color: context.colorScheme.surface,
                             child: Icon(
                               Icons.image_not_supported,
-                              color: context.colorScheme.onSurface
-                                  .withValues(alpha: 0.5),
+                              color: context.colorScheme.onSurface.withValues(
+                                alpha: 0.5,
+                              ),
                               size: 40,
                             ),
                           ),
@@ -122,8 +114,9 @@ class CustomListView extends StatelessWidget {
                         color: context.colorScheme.surface,
                         child: Icon(
                           Icons.image_not_supported,
-                          color: context.colorScheme.onSurface
-                              .withValues(alpha: 0.5),
+                          color: context.colorScheme.onSurface.withValues(
+                            alpha: 0.5,
+                          ),
                           size: 40,
                         ),
                       ),
