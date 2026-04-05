@@ -13,6 +13,7 @@ import 'package:imagifyai/view/ImageGenerate/widgets/image_generate_prompt_secti
 import 'package:imagifyai/view/ImageGenerate/widgets/inspiration_gallery.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/size_selector_row.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/style_selector_list.dart';
+import 'package:imagifyai/Core/CustomWidget/ad_banner_widget.dart';
 import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -89,10 +90,11 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     }
   }
 
-  Future<void> _onCreateMagicTapped() async {
+  Future<void> _onCreateMagicTapped(BuildContext context) async {
     final can = await GenerationLimitService.canGenerate();
     if (!mounted) return;
     if (can) {
+      if (!context.mounted) return;
       context.read<ImageGenerateViewModel>().createWallpaper(context);
       return;
     }
