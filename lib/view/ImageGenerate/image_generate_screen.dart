@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
-import 'package:imagifyai/Core/CustomWidget/ad_banner_widget.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
@@ -91,7 +90,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     }
   }
 
-  Future<void> _onCreateMagicTapped(BuildContext context) async {
+  Future<void> _onCreateMagicTapped() async {
     final can = await GenerationLimitService.canGenerate();
     if (!mounted) return;
     if (can) {
@@ -122,6 +121,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
               final shown = await RewardedAdService.showRewardedAd(
                 onReward: () {
                   if (dialogContext.mounted) Navigator.pop(dialogContext);
+                  if (!mounted) return;
                   context.read<ImageGenerateViewModel>().createWallpaper(
                     context,
                   );
@@ -171,7 +171,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
               ),
               SizedBox(height: context.h(20)),
               CustomButton(
-                onPressed: () => _onCreateMagicTapped(context),
+                onPressed: _onCreateMagicTapped,
                 width: context.w(350),
                 iconHeight: 24,
                 iconWidth: 24,
@@ -207,8 +207,7 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                 ),
               ),
               SizedBox(height: context.h(16)),
-              AdBannerWidget(key: const ValueKey('image_generate_banner')),
-              SizedBox(height: context.h(106)),
+              SizedBox(height: context.h(80)),
             ],
           ),
 

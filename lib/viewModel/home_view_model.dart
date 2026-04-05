@@ -69,6 +69,10 @@ class HomeViewModel extends ChangeNotifier {
   List<String> get styles => _stylesMap.keys.toList();
   bool isLoadingStyles = false;
   String? stylesError;
+  DateTime? _stylesLastFetchedAt;
+  static const Duration _stylesCacheTtl = Duration(minutes: 10);
+  DateTime? _groupedWallpapersLastFetchedAt;
+  static const Duration _groupedWallpapersCacheTtl = Duration(seconds: 60);
 
   // Get selected size value
   String get selectedSize {
@@ -391,13 +395,17 @@ class HomeViewModel extends ChangeNotifier {
     await Future.wait([
       loadCurrentUser(context, forceReload: true),
       loadStyles(context),
-      loadGroupedWallpapers(context),
+      loadGroupedWallpapers(context, forceRefresh: true),
     ]);
   }
 
   /// Load styles from the API
   Future<void> loadStyles(BuildContext context) async {
-    if (isLoadingStyles || _stylesMap.isNotEmpty) return;
+    final hasFreshStyles =
+        _stylesMap.isNotEmpty &&
+        _stylesLastFetchedAt != null &&
+        DateTime.now().difference(_stylesLastFetchedAt!) < _stylesCacheTtl;
+    if (isLoadingStyles || hasFreshStyles) return;
 
     // Get access token from SignInViewModel
     final signInViewModel = context.read<SignInViewModel>();
@@ -422,6 +430,8 @@ class HomeViewModel extends ChangeNotifier {
       _stylesMap = await _wallpaperRepository.fetchStyles(
         accessToken: accessToken,
       );
+      _stylesLastFetchedAt = DateTime.now();
+      stylesError = null;
     } on ApiException catch (e) {
       stylesError = e.message;
     } catch (_) {
@@ -433,8 +443,18 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   /// Load grouped wallpapers from the API
-  Future<void> loadGroupedWallpapers(BuildContext context) async {
+  Future<void> loadGroupedWallpapers(
+    BuildContext context, {
+    bool forceRefresh = false,
+  }) async {
     if (isLoadingGroupedWallpapers) return;
+    final hasFreshGroupedCache =
+        !forceRefresh &&
+        groupedWallpapers.isNotEmpty &&
+        _groupedWallpapersLastFetchedAt != null &&
+        DateTime.now().difference(_groupedWallpapersLastFetchedAt!) <
+            _groupedWallpapersCacheTtl;
+    if (hasFreshGroupedCache) return;
 
     // Try to get access token from SignInViewModel first
     final signInViewModel = context.read<SignInViewModel>();
@@ -463,6 +483,7 @@ class HomeViewModel extends ChangeNotifier {
         limit: 10,
       );
       groupedWallpapers = grouped;
+      _groupedWallpapersLastFetchedAt = DateTime.now();
       errorMessage = null;
     } on ApiException catch (e) {
       errorMessage = e.message;

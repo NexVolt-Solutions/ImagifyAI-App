@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:imagifyai/Core/Constants/api_constants.dart';
 
@@ -18,6 +19,8 @@ class ApiService {
   ApiService({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
+  static const Duration _requestTimeout = Duration(seconds: 10);
+  static const int _maxGetRetries = 1;
 
   // Token refresh callback - should return new access token or null if refresh failed
   static Future<String?> Function()? _onTokenExpired;
@@ -78,10 +81,12 @@ class ApiService {
     return _executeWithTokenRefresh(
       () async {
         final uri = _buildUri(path, query);
-        final response = await _client.get(
-          uri,
-          headers: _withDefaultHeaders(headers),
-        );
+        final response = await _runGetWithRetry(() {
+          return _client.get(
+            uri,
+            headers: _withDefaultHeaders(headers),
+          );
+        });
         return response;
       },
       retryOnTokenExpiry: retryOnTokenExpiry,
@@ -90,9 +95,11 @@ class ApiService {
         final updatedHeaders = Map<String, String>.from(headers ?? {});
         updatedHeaders['Authorization'] = 'Bearer $newToken';
         final uri = _buildUri(path, query);
-        return await _client.get(
-          uri,
-          headers: _withDefaultHeaders(updatedHeaders),
+        return await _runWithTimeout(
+          () => _client.get(
+            uri,
+            headers: _withDefaultHeaders(updatedHeaders),
+          ),
         );
       },
     );
@@ -105,10 +112,12 @@ class ApiService {
     Map<String, String>? query,
   }) async {
     final uri = _buildUri(path, query);
-    final response = await _client.get(
-      uri,
-      headers: _withDefaultHeaders(headers),
-    );
+    final response = await _runGetWithRetry(() {
+      return _client.get(
+        uri,
+        headers: _withDefaultHeaders(headers),
+      );
+    });
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return response.bodyBytes;
@@ -142,10 +151,12 @@ class ApiService {
       () async {
         final uri = _buildUri(path, query);
         final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
-        final response = await _client.post(
-          uri,
-          headers: mergedHeaders,
-          body: body != null ? jsonEncode(body) : null,
+        final response = await _runWithTimeout(
+          () => _client.post(
+            uri,
+            headers: mergedHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          ),
         );
         return response;
       },
@@ -156,10 +167,12 @@ class ApiService {
         updatedHeaders['Authorization'] = 'Bearer $newToken';
         final uri = _buildUri(path, query);
         final mergedHeaders = _withDefaultHeaders(updatedHeaders, isJson: true);
-        return await _client.post(
-          uri,
-          headers: mergedHeaders,
-          body: body != null ? jsonEncode(body) : null,
+        return await _runWithTimeout(
+          () => _client.post(
+            uri,
+            headers: mergedHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          ),
         );
       },
     );
@@ -176,10 +189,12 @@ class ApiService {
       () async {
         final uri = _buildUri(path, query);
         final mergedHeaders = _withDefaultHeaders(headers, isJson: true);
-        final response = await _client.put(
-          uri,
-          headers: mergedHeaders,
-          body: body != null ? jsonEncode(body) : null,
+        final response = await _runWithTimeout(
+          () => _client.put(
+            uri,
+            headers: mergedHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          ),
         );
         return response;
       },
@@ -190,10 +205,12 @@ class ApiService {
         updatedHeaders['Authorization'] = 'Bearer $newToken';
         final uri = _buildUri(path, query);
         final mergedHeaders = _withDefaultHeaders(updatedHeaders, isJson: true);
-        return await _client.put(
-          uri,
-          headers: mergedHeaders,
-          body: body != null ? jsonEncode(body) : null,
+        return await _runWithTimeout(
+          () => _client.put(
+            uri,
+            headers: mergedHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          ),
         );
       },
     );
@@ -215,7 +232,7 @@ class ApiService {
         if (body != null) {
           request.body = jsonEncode(body);
         }
-        final streamedResponse = await _client.send(request);
+        final streamedResponse = await _runWithTimeout(() => _client.send(request));
         final response = await http.Response.fromStream(streamedResponse);
         return response;
       },
@@ -231,7 +248,7 @@ class ApiService {
         if (body != null) {
           request.body = jsonEncode(body);
         }
-        final streamedResponse = await _client.send(request);
+        final streamedResponse = await _runWithTimeout(() => _client.send(request));
         final response = await http.Response.fromStream(streamedResponse);
         return response;
       },
@@ -252,10 +269,12 @@ class ApiService {
           headers,
           isJson: body != null,
         );
-        final response = await _client.delete(
-          uri,
-          headers: mergedHeaders,
-          body: body != null ? jsonEncode(body) : null,
+        final response = await _runWithTimeout(
+          () => _client.delete(
+            uri,
+            headers: mergedHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          ),
         );
         return response;
       },
@@ -269,10 +288,12 @@ class ApiService {
           updatedHeaders,
           isJson: body != null,
         );
-        return await _client.delete(
-          uri,
-          headers: mergedHeaders,
-          body: body != null ? jsonEncode(body) : null,
+        return await _runWithTimeout(
+          () => _client.delete(
+            uri,
+            headers: mergedHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          ),
         );
       },
     );
@@ -321,7 +342,7 @@ class ApiService {
     try {
       return _executeWithTokenRefresh(
         () async {
-          final streamedResponse = await _client.send(request);
+          final streamedResponse = await _runWithTimeout(() => _client.send(request));
           return await http.Response.fromStream(streamedResponse);
         },
         retryOnTokenExpiry: true,
@@ -354,7 +375,9 @@ class ApiService {
             );
           }
 
-          final streamedResponse = await _client.send(retryRequest);
+          final streamedResponse = await _runWithTimeout(
+            () => _client.send(retryRequest),
+          );
           return await http.Response.fromStream(streamedResponse);
         },
       );
@@ -408,7 +431,7 @@ class ApiService {
     try {
       return _executeWithTokenRefresh(
         () async {
-          final streamedResponse = await _client.send(request);
+          final streamedResponse = await _runWithTimeout(() => _client.send(request));
           return await http.Response.fromStream(streamedResponse);
         },
         retryOnTokenExpiry: true,
@@ -440,7 +463,9 @@ class ApiService {
             );
           }
 
-          final streamedResponse = await _client.send(retryRequest);
+          final streamedResponse = await _runWithTimeout(
+            () => _client.send(retryRequest),
+          );
           return await http.Response.fromStream(streamedResponse);
         },
       );
@@ -476,8 +501,37 @@ class ApiService {
       }
 
       return _handleResponse(response);
+    } on TimeoutException {
+      throw ApiException('Request timed out. Please try again.');
+    } on SocketException {
+      throw ApiException('No internet connection. Please check your network.');
+    } on http.ClientException {
+      throw ApiException('Network error. Please try again.');
     } on ApiException {
       rethrow;
+    }
+  }
+
+  Future<T> _runWithTimeout<T>(Future<T> Function() action) {
+    return action().timeout(_requestTimeout);
+  }
+
+  Future<http.Response> _runGetWithRetry(
+    Future<http.Response> Function() action,
+  ) async {
+    int attempt = 0;
+    while (true) {
+      try {
+        return await _runWithTimeout(action);
+      } on TimeoutException {
+        if (attempt >= _maxGetRetries) rethrow;
+      } on SocketException {
+        if (attempt >= _maxGetRetries) rethrow;
+      } on http.ClientException {
+        if (attempt >= _maxGetRetries) rethrow;
+      }
+      attempt++;
+      await Future<void>.delayed(const Duration(milliseconds: 800));
     }
   }
 

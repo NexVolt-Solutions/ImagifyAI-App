@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class GenerationLimitService {
   static const String _keyGenerationsUsedToday = 'generations_used_today';
   static const String _keyLastLimitDate = 'generation_limit_date';
+  static const String _keyTotalGenerationsAllTime = 'generations_total_all_time';
 
   /// Free generations per day before requiring an ad or limit.
   static const int dailyLimit = 10;
@@ -43,6 +44,16 @@ class GenerationLimitService {
     return _getGenerationsUsedToday();
   }
 
+  /// Total successful generations across all sessions/days.
+  static Future<int> getTotalGenerationsAllTime() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getInt(_keyTotalGenerationsAllTime) ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   static Future<int> _getGenerationsUsedToday() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -64,6 +75,8 @@ class GenerationLimitService {
       } else {
         await RewardedAdService.consumeOneFreeGeneration();
       }
+      final total = prefs.getInt(_keyTotalGenerationsAllTime) ?? 0;
+      await prefs.setInt(_keyTotalGenerationsAllTime, total + 1);
     } catch (_) {}
   }
 }
