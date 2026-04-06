@@ -50,7 +50,7 @@ abstract class IWallpaperRepository {
   Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
     required String accessToken,
     int page = 1,
-    int limit = 4,
+    int limit = 10,
   });
 
   Future<Map<String, String>> fetchStyles({required String accessToken});

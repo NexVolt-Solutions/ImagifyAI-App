@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/home_align.dart';
 import 'package:imagifyai/Core/CustomWidget/prompt_continer.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
@@ -80,9 +81,20 @@ class StyleSelectorList extends StatelessWidget {
               return SizedBox(
                 height: context.h(100),
                 child: Center(
-                  child: Text(
-                    'Failed to load styles',
-                    style: context.appTextStyles?.homeCardDescription,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Failed to load styles',
+                        style: context.appTextStyles?.homeCardDescription,
+                      ),
+                      CustomButton(
+                        text: 'Retry',
+                        onPressed: () {
+                          vm.loadStyles(context);
+                          onScrollToStyle(vm.selectedStyleIndex);
+                        },
+                      ),
+                    ],
                   ),
                 ),
               );

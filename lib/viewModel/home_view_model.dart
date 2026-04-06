@@ -52,6 +52,7 @@ class HomeViewModel extends ChangeNotifier {
   }
 
   Map<String, List<Wallpaper>> groupedWallpapers = {};
+  int _groupedWallpapersLoadSeq = 0;
 
   int selectedIndex = 0;
   int selectedSizeIndex = 0; // Default to first size (1:1)
@@ -69,6 +70,10 @@ class HomeViewModel extends ChangeNotifier {
   List<String> get styles => _stylesMap.keys.toList();
   bool isLoadingStyles = false;
   String? stylesError;
+  DateTime? _stylesLastFetchedAt;
+  static const Duration _stylesCacheTtl = Duration(minutes: 10);
+  DateTime? _groupedWallpapersLastFetchedAt;
+  static const Duration _groupedWallpapersCacheTtl = Duration(seconds: 60);
 
   // Get selected size value
   String get selectedSize {
@@ -353,6 +358,7 @@ class HomeViewModel extends ChangeNotifier {
       );
       _showMessage(context, 'Wallpaper created successfully', isError: false);
       InAppReviewService.recordCompletedGenerationAndMaybeReview(context);
+      loadGroupedWallpapers(context, force: true);
       Navigator.pushNamed(
         context,
         RoutesName.ImageCreatedScreen,
@@ -385,19 +391,36 @@ class HomeViewModel extends ChangeNotifier {
     bottomNavViewModel.updateIndex(1);
   }
 
+  /// Ensures storage-backed tokens are loaded and the access token is refreshed
+  /// if near expiry. Call this before parallel style/wallpaper requests so they
+  /// do not race [loadCurrentUser]'s refresh and hit 401 with a stale JWT
+  /// (empty Home after hot restart).
+  Future<void> prepareAuthTokens(BuildContext context) async {
+    final signInViewModel = context.read<SignInViewModel>();
+    await signInViewModel.ensureTokensLoaded();
+    await signInViewModel.ensureAccessTokenFresh();
+  }
+
   /// Refresh home screen data (user and grouped wallpapers)
   Future<void> refreshHomeData(BuildContext context) async {
+    await prepareAuthTokens(context);
+    if (!context.mounted) return;
+
     // Load all data in parallel for faster refresh
     await Future.wait([
       loadCurrentUser(context, forceReload: true),
       loadStyles(context),
-      loadGroupedWallpapers(context),
+      loadGroupedWallpapers(context, force: true),
     ]);
   }
 
   /// Load styles from the API
   Future<void> loadStyles(BuildContext context) async {
-    if (isLoadingStyles || _stylesMap.isNotEmpty) return;
+    final hasFreshStyles =
+        _stylesMap.isNotEmpty &&
+        _stylesLastFetchedAt != null &&
+        DateTime.now().difference(_stylesLastFetchedAt!) < _stylesCacheTtl;
+    if (isLoadingStyles || hasFreshStyles) return;
 
     // Get access token from SignInViewModel
     final signInViewModel = context.read<SignInViewModel>();
@@ -422,6 +445,8 @@ class HomeViewModel extends ChangeNotifier {
       _stylesMap = await _wallpaperRepository.fetchStyles(
         accessToken: accessToken,
       );
+      _stylesLastFetchedAt = DateTime.now();
+      stylesError = null;
     } on ApiException catch (e) {
       stylesError = e.message;
     } catch (_) {
@@ -432,9 +457,13 @@ class HomeViewModel extends ChangeNotifier {
     }
   }
 
-  /// Load grouped wallpapers from the API
-  Future<void> loadGroupedWallpapers(BuildContext context) async {
-    if (isLoadingGroupedWallpapers) return;
+  /// Load grouped wallpapers from the API (`GET .../wallpapers/grouped?page=&limit=`).
+  /// Pass [force] after creating a wallpaper or switching back to Home so the list is not stale.
+  Future<void> loadGroupedWallpapers(
+    BuildContext context, {
+    bool force = false,
+  }) async {
+    if (isLoadingGroupedWallpapers && !force) return;
 
     // Try to get access token from SignInViewModel first
     final signInViewModel = context.read<SignInViewModel>();
@@ -451,6 +480,7 @@ class HomeViewModel extends ChangeNotifier {
       return;
     }
 
+    final loadSeq = ++_groupedWallpapersLoadSeq;
     isLoadingGroupedWallpapers = true;
     errorMessage = null;
     notifyListeners();
@@ -459,18 +489,26 @@ class HomeViewModel extends ChangeNotifier {
       final grouped = await _wallpaperRepository.fetchGroupedWallpapers(
         accessToken: accessToken,
         page: 1,
-
         limit: 10,
       );
+      if (!context.mounted || loadSeq != _groupedWallpapersLoadSeq) return;
       groupedWallpapers = grouped;
+      _groupedWallpapersLastFetchedAt = DateTime.now();
       errorMessage = null;
     } on ApiException catch (e) {
-      errorMessage = e.message;
-    } catch (_) {
-      errorMessage = 'Failed to load wallpapers';
+      if (context.mounted && loadSeq == _groupedWallpapersLoadSeq) {
+        errorMessage = e.message;
+      }
+      // Don't show error to user, just log it
+    } catch (e) {
+      if (context.mounted && loadSeq == _groupedWallpapersLoadSeq) {
+        errorMessage = 'Failed to load wallpapers';
+      }
     } finally {
-      isLoadingGroupedWallpapers = false;
-      notifyListeners();
+      if (loadSeq == _groupedWallpapersLoadSeq) {
+        isLoadingGroupedWallpapers = false;
+        notifyListeners();
+      }
     }
   }
 

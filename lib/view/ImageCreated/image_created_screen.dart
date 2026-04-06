@@ -30,6 +30,7 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
   bool _initialized = false;
   Timer? _pollingTimer;
   StreamController<int>? _elapsedTimeController;
+  int _dynamicPollingSeconds = 5;
   String? _lastWallpaperId;
   String?
   _lastImageUrl; // Track last image URL to reset retry count on URL change
@@ -104,27 +105,39 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
       }
     });
 
-    // Poll every 5 seconds to check if image is ready (reduced frequency)
-    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
+    void scheduleNextPoll() {
+      _pollingTimer?.cancel();
+      _pollingTimer = Timer(Duration(seconds: _dynamicPollingSeconds), () {
+        if (!mounted) return;
 
-      final currentWallpaper = viewModel.wallpaper;
-      if (currentWallpaper != null &&
-          (currentWallpaper.imageUrl.isEmpty ||
-              currentWallpaper.imageUrl == 'null')) {
-        viewModel.checkWallpaperStatus(context);
-      } else {
-        // Image is ready, stop polling
-        timer.cancel();
-        _pollingTimer = null;
-        elapsedTimer?.cancel();
-        _elapsedTimeController?.close();
-        _elapsedTimeController = null;
-      }
-    });
+        final currentWallpaper = viewModel.wallpaper;
+        if (currentWallpaper != null &&
+            (currentWallpaper.imageUrl.isEmpty ||
+                currentWallpaper.imageUrl == 'null')) {
+          viewModel.checkWallpaperStatus(context);
+
+          // Adaptive polling: 5s (first minute), 8s (next minute), then 10s.
+          final elapsed = viewModel.elapsedPollingTime;
+          if (elapsed >= 120) {
+            _dynamicPollingSeconds = 10;
+          } else if (elapsed >= 60) {
+            _dynamicPollingSeconds = 8;
+          } else {
+            _dynamicPollingSeconds = 5;
+          }
+          scheduleNextPoll();
+        } else {
+          // Image is ready, stop polling
+          _pollingTimer = null;
+          elapsedTimer?.cancel();
+          _elapsedTimeController?.close();
+          _elapsedTimeController = null;
+        }
+      });
+    }
+
+    _dynamicPollingSeconds = 5;
+    scheduleNextPoll();
   }
 
   void _restartPollingIfNeeded(ImageCreatedViewModel viewModel) {

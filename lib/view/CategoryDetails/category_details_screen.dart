@@ -233,6 +233,21 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                       );
                     }
 
+                    final dpr = MediaQuery.devicePixelRatioOf(context);
+                    final sw = MediaQuery.sizeOf(context).width;
+                    final gridPad = context.h(20) * 2;
+                    final crossGap = context.w(12);
+                    final cellLogicalW = (sw - gridPad - crossGap) / 2;
+                    final cellLogicalH = cellLogicalW / 0.75;
+                    final gridCacheW = (cellLogicalW * dpr).round().clamp(
+                      64,
+                      4096,
+                    );
+                    final gridCacheH = (cellLogicalH * dpr).round().clamp(
+                      64,
+                      4096,
+                    );
+
                     return GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
@@ -241,6 +256,8 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                               imageUrl: imageUrl,
                               heroTag: 'category_${wallpaper.id}_$index',
                               wallpaper: wallpaper,
+                              previewBackdropCacheWidth: gridCacheW,
+                              previewBackdropCacheHeight: gridCacheH,
                             ),
                             fullscreenDialog: true,
                           ),
@@ -263,6 +280,9 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                           child: Image.network(
                             imageUrl,
                             fit: BoxFit.cover,
+                            cacheWidth: gridCacheW,
+                            cacheHeight: gridCacheH,
+                            filterQuality: FilterQuality.low,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
                                 color: context.surfaceColor,

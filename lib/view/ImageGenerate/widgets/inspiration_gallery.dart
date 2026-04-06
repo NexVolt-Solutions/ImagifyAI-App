@@ -14,6 +14,7 @@ class _InspirationPrompts {
     (prompt: 'Starry sky above', style: '3D Render'),
     (prompt: 'A cozy forest', style: 'Fantasy'),
     (prompt: 'Cute cartoon character', style: 'Cartoon'),
+    (prompt: 'Anime character portrait', style: 'Anime'),
   ];
 }
 

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/ad_banner_widget.dart';
@@ -38,14 +39,20 @@ class _HomeState extends State<Home> {
         // Ask for storage/photos permission once (so save-to-gallery works)
         await HomePermissionService.requestIfFirstTime();
         if (!mounted) return;
-        // Record first open (for 5-day review trigger)
-        await InAppReviewService.recordFirstOpenIfNeeded();
-        // Gentle review reminder in 3 days if not yet asked
-        await LocalNotificationService.scheduleReviewReminderIfEligible(
-          daysFromNow: 3,
-          hasRequestedReview: InAppReviewService.hasRequestedReview,
+        // Do not block feed load: review + notification use storage / platform
+        // channels and can add hundreds of ms before the first API call.
+        unawaited(InAppReviewService.recordFirstOpenIfNeeded());
+        unawaited(
+          LocalNotificationService.scheduleReviewReminderIfEligible(
+            daysFromNow: 3,
+            hasRequestedReview: InAppReviewService.hasRequestedReview,
+          ),
         );
-        // Load all data in parallel for faster loading
+        // Refresh token once before parallel calls so wallpaper/style requests
+        // do not use an expired JWT while loadCurrentUser refreshes (fixes empty
+        // Home / failed styles after hot restart).
+        if (!mounted) return;
+        await homeViewModel.prepareAuthTokens(context);
         if (!mounted) return;
         homeViewModel.loadCurrentUser(context);
         homeViewModel.loadStyles(context);
@@ -84,7 +91,8 @@ class _HomeState extends State<Home> {
                       isLoading: homeViewModel.isLoading,
                     ),
                   ),
-                  if (homeViewModel.isLoadingGroupedWallpapers) ...[
+                  if (homeViewModel.isLoadingGroupedWallpapers &&
+                      homeViewModel.groupedWallpapers.isEmpty) ...[
                     SliverToBoxAdapter(child: SizedBox(height: context.h(40))),
                     SliverToBoxAdapter(
                       child: Center(child: AppLoadingIndicator.large()),

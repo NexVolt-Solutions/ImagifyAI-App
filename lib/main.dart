@@ -6,7 +6,6 @@ import 'package:imagifyai/Core/services/analytics_service.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/firebase_analytics_delegate.dart';
 import 'package:imagifyai/Core/services/local_notification_service.dart';
-import 'package:imagifyai/Core/services/interstitial_ad_service.dart';
 import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/firebase_options.dart';
@@ -16,7 +15,7 @@ import 'package:imagifyai/view/my_app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await dotenv.load(fileName: '.env');
+    await dotenv.load(fileName: 'assets/env/default.env');
   } catch (_) {}
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   AnalyticsService.delegate = FirebaseAnalyticsDelegate();
@@ -27,7 +26,6 @@ void main() async {
   await MobileAds.instance.initialize();
 
   RewardedAdService.loadRewardedAd();
-  InterstitialAdService.loadInterstitialAd();
   _setupTokenRefresh();
   runApp(const MyApp());
 }

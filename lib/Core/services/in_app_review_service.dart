@@ -22,12 +22,10 @@ class InAppReviewService {
   static const int appOpenMilestone = 7;
 
   /// App name shown in the soft feedback dialog.
-  static const String appDisplayName = 'imagifyai';
+  static const String appDisplayName = 'Imagify AI';
 
   static final InAppReview _inAppReview = InAppReview.instance;
 
-  /// Shows "Do you like [app]?" dialog. Returns true if Yes, false if No, null if dismissed.
-  /// Call before requesting Play Store review; only request when true → reduces 1-star reviews.
   static Future<bool?> showSoftFeedbackDialog(BuildContext context) async {
     if (!context.mounted) return null;
     return showDialog<bool>(

@@ -63,11 +63,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Suggested for a new app: visible growth + Play-friendly pacing.
-  /// After launch stabilizes: try 4 @ 60s for a bit more fill; avoid <60s gaps.
-  static const int _interstitialEveryNGenerations = 5;
-  static const Duration _interstitialMinGap = Duration(seconds: 60);
-
   Future<void> _maybeShowInterstitialAfterGeneration({
     required BuildContext context,
     required String wallpaperId,
@@ -80,8 +75,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
     final shouldShow =
         await InterstitialAdService.shouldShowAfterGenerationBreak(
           generationCount: used,
-          everyN: _interstitialEveryNGenerations,
-          cooldown: _interstitialMinGap,
         );
 
     if (!shouldShow) return;

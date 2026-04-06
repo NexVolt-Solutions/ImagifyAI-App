@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # imagifyai
 
 A new Flutter project.
@@ -15,7 +14,3 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
-=======
-# imagifyai
-UI doce done
->>>>>>> baf8bbd03c1ed5a5c9010de5853fa420c176d715

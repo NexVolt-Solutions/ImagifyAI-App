@@ -21,6 +21,7 @@ import 'package:imagifyai/viewModel/sign_up_view_model.dart';
 import 'package:imagifyai/viewModel/splash_screen_view_model.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
+import 'package:imagifyai/Core/services/interstitial_ad_service.dart';
 import 'package:imagifyai/Core/services/local_notification_service.dart';
 import 'package:imagifyai/viewModel/theme_provider.dart';
 import 'package:imagifyai/viewModel/verification_view_model.dart';
@@ -61,6 +62,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
+      InterstitialAdService.markSessionCompleted();
       AnalyticsService.endSession();
     }
   }

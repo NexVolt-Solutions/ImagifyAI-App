@@ -416,8 +416,32 @@ class _LibraryState extends State<Library> {
                     )
                   else if (items.isEmpty)
                     SliverToBoxAdapter(
-                      child: _LibraryEmptyState(
-                        onCreateTap: () => Navigator.pop(context),
+                      child: Builder(
+                        builder: (context) {
+                          // SliverFillRemaining + Center forces intrinsic height on children.
+                          // CustomButton uses LayoutBuilder, which breaks that path — use an
+                          // explicit min height from the screen instead.
+                          final h = MediaQuery.sizeOf(context).height;
+                          final pad = MediaQuery.paddingOf(context);
+                          const appBarH = 150.0;
+                          const titleBlockH = 72.0;
+                          final minHeight =
+                              (h - pad.top - pad.bottom - appBarH - titleBlockH)
+                                  .clamp(260.0, h);
+                          return ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: minHeight),
+                            child: Center(
+                              child: _LibraryEmptyState(
+                                onCreateTap: () {
+                                  context
+                                      .read<BottomNavScreenViewModel>()
+                                      .updateIndex(1);
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     )
                   else
@@ -430,42 +454,40 @@ class _LibraryState extends State<Library> {
                           mainAxisSpacing: context.h(10),
                           mainAxisExtent: context.h(200),
                         ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final item = items[index];
-                            final imageUrl =
-                                (item.thumbnailUrl.isNotEmpty
-                                        ? item.thumbnailUrl
-                                        : item.imageUrl)
-                                    .trim();
-                            return _LibraryGridTile(
-                              item: item,
-                              imageUrl: imageUrl,
-                              onUsePrompt: () {
-                                context
-                                    .read<ImageGenerateViewModel>()
-                                    .setPromptFromLibrary(
-                                      item.prompt,
-                                      styleName: item.style.isNotEmpty
-                                          ? item.style
-                                          : null,
-                                    );
-                                context
-                                    .read<BottomNavScreenViewModel>()
-                                    .updateIndex(1);
-                                Navigator.pop(context);
-                              },
-                              onReport: () => ContentReportService.showReportDialog(
-                                context,
-                                contentId: item.id,
-                                imageUrl: imageUrl,
-                                prompt: item.prompt,
-                                sourceLabel: 'Explore Prompt',
-                              ),
-                            );
-                          },
-                          childCount: items.length,
-                        ),
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final item = items[index];
+                          final imageUrl =
+                              (item.thumbnailUrl.isNotEmpty
+                                      ? item.thumbnailUrl
+                                      : item.imageUrl)
+                                  .trim();
+                          return _LibraryGridTile(
+                            item: item,
+                            imageUrl: imageUrl,
+                            onUsePrompt: () {
+                              context
+                                  .read<ImageGenerateViewModel>()
+                                  .setPromptFromLibrary(
+                                    item.prompt,
+                                    styleName: item.style.isNotEmpty
+                                        ? item.style
+                                        : null,
+                                  );
+                              context
+                                  .read<BottomNavScreenViewModel>()
+                                  .updateIndex(1);
+                              Navigator.pop(context);
+                            },
+                            onReport: () =>
+                                ContentReportService.showReportDialog(
+                                  context,
+                                  contentId: item.id,
+                                  imageUrl: imageUrl,
+                                  prompt: item.prompt,
+                                  sourceLabel: 'Explore Prompt',
+                                ),
+                          );
+                        }, childCount: items.length),
                       ),
                     ),
                   if (libraryViewModel.isLoadingMore)
@@ -529,9 +551,7 @@ class _LibraryGridTile extends StatelessWidget {
                         if (loadingProgress == null) return child;
                         return Container(
                           color: context.surfaceColor,
-                          child: Center(
-                            child: AppLoadingIndicator.medium(),
-                          ),
+                          child: Center(child: AppLoadingIndicator.medium()),
                         );
                       },
                     )
@@ -575,8 +595,10 @@ class _LibraryGridTile extends StatelessWidget {
               SizedBox(width: context.w(4)),
               Text(
                 'Report',
-                style: (context.appTextStyles?.profileListItemSubtitle ?? TextStyle())
-                    .copyWith(color: context.subtitleColor, fontSize: 12),
+                style:
+                    (context.appTextStyles?.profileListItemSubtitle ??
+                            TextStyle())
+                        .copyWith(color: context.subtitleColor, fontSize: 12),
               ),
             ],
           ),

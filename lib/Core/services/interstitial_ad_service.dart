@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:imagifyai/Core/Constants/env_constants.dart';
+import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// AdMob Interstitial after natural breaks (e.g. image ready).
@@ -9,6 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Ad unit ID from .env (ADMOB_INTERSTITIAL_AD_UNIT_ID). In debug, uses Google test ID so ads always load.
 class InterstitialAdService {
   static const String _lastShownMsKey = 'ads_interstitial_last_shown_ms';
+  static const String _firstSessionCompletedKey =
+      'ads_interstitial_first_session_completed';
+  static bool get _enabled => EnvConstants.adsEnableInterstitial;
   static String get interstitialAdUnitId => kDebugMode
       ? 'ca-app-pub-3940256099942544/1033173712' // Google test interstitial
       : EnvConstants.admobInterstitialAdUnitId;
@@ -28,7 +32,16 @@ class InterstitialAdService {
     } catch (_) {}
   }
 
+  /// Call when app leaves foreground so first-session gating can be lifted.
+  static Future<void> markSessionCompleted() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_firstSessionCompletedKey, true);
+    } catch (_) {}
+  }
+
   static Future<void> _ensureLoaded({Duration timeout = const Duration(seconds: 8)}) async {
+    if (!_enabled) return;
     if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) return;
     if (_interstitialAd != null) return;
 
@@ -49,6 +62,7 @@ class InterstitialAdService {
 
   /// Load an interstitial so it's ready to show. Retries once on failure (code 0 or 3).
   static Future<void> loadInterstitialAd() async {
+    if (!_enabled) return;
     if (_interstitialAd != null || _isLoading) return;
     if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) {
       return;
@@ -105,6 +119,7 @@ class InterstitialAdService {
   /// Show the interstitial. Call after a natural break (e.g. after user downloads an image).
   /// Returns true if ad was shown, false if not ready or ID not set.
   static Future<bool> showInterstitialAd() async {
+    if (!_enabled) return false;
     if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) {
       return false;
     }
@@ -121,16 +136,38 @@ class InterstitialAdService {
 
   static Future<bool> shouldShowAfterGenerationBreak({
     required int generationCount,
-    int everyN = 5,
-    Duration cooldown = const Duration(seconds: 30),
+    int? everyN,
+    Duration? cooldown,
   }) async {
-    if (generationCount <= 0 || everyN <= 0) return false;
-    if (generationCount % everyN != 0) return false;
+    if (!_enabled) return false;
+    final effectiveEveryN =
+        everyN ?? EnvConstants.adsInterstitialEveryNGenerations;
+    final effectiveCooldown = cooldown ??
+        Duration(seconds: EnvConstants.adsInterstitialCooldownSeconds);
+
+    if (generationCount <= 0 || effectiveEveryN <= 0) return false;
+    if (generationCount % effectiveEveryN != 0) return false;
+
+    // Growth-first: never show interstitial in user's first app session.
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final firstSessionCompleted =
+          prefs.getBool(_firstSessionCompletedKey) ?? false;
+      if (!firstSessionCompleted) {
+        return false;
+      }
+    } catch (_) {}
+
+    // Growth-first: no interstitial during first 2 successful generations.
+    final totalGenerations =
+        await GenerationLimitService.getTotalGenerationsAllTime();
+    if (totalGenerations < 2) return false;
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastMs = prefs.getInt(_lastShownMsKey) ?? 0;
       final nowMs = DateTime.now().millisecondsSinceEpoch;
-      return nowMs - lastMs >= cooldown.inMilliseconds;
+      return nowMs - lastMs >= effectiveCooldown.inMilliseconds;
     } catch (_) {
       return true;
     }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
@@ -8,6 +9,7 @@ import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/viewModel/home_view_model.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
@@ -65,6 +67,12 @@ class ImageGenerateViewModel extends ChangeNotifier {
   List<String> get styles => _stylesMap.keys.toList();
   bool isLoadingStyles = false;
   String? stylesError;
+  DateTime? _stylesLastFetchedAt;
+  static const Duration _stylesCacheTtl = Duration(minutes: 10);
+
+  // If a user picks a prompt/style before styles finish loading,
+  // store it here so we can auto-select it right after `loadStyles()` completes.
+  String? _pendingStyleNameForPrompt;
 
   String get selectedSize {
     if (selectedIndex >= 0 && selectedIndex < sizes.length) {
@@ -76,6 +84,11 @@ class ImageGenerateViewModel extends ChangeNotifier {
   String get selectedStyle {
     if (selectedStyleIndex >= 0 && selectedStyleIndex < styles.length) {
       return styles[selectedStyleIndex];
+    }
+    // If the UI set a style name but styles haven't arrived yet, use it.
+    if (_pendingStyleNameForPrompt != null &&
+        _pendingStyleNameForPrompt!.isNotEmpty) {
+      return _pendingStyleNameForPrompt!;
     }
     // Backend does not accept "default"; use a valid style fallback.
     if (styles.isNotEmpty) {
@@ -96,9 +109,11 @@ class ImageGenerateViewModel extends ChangeNotifier {
   ) {
     promptController.text = promptText;
     selectedIndex = 0;
+    _pendingStyleNameForPrompt = styleName;
     final styleIndex = styles.indexOf(styleName);
-    selectedStyleIndex = styleIndex >= 0 ? styleIndex : -1;
+    selectedStyleIndex = styleIndex >= 0 ? styleIndex : -1; // may resolve later
     selectedPromptIndex = promptIndex;
+    stylesError = null;
     notifyListeners();
   }
 
@@ -131,6 +146,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
     selectedStyleIndex = -1;
     selectedPromptIndex = -1;
     errorMessage = null;
+    _pendingStyleNameForPrompt = null;
     notifyListeners();
   }
 
@@ -146,35 +162,58 @@ class ImageGenerateViewModel extends ChangeNotifier {
 
   void setSelectedStyle(int index, [BuildContext? context]) {
     selectedStyleIndex = index == selectedStyleIndex ? -1 : index;
-    if (selectedStyleIndex >= 0 && selectedStyleIndex < styles.length) {
-      InAppReviewService.recordStyleTriedAndMaybeReview(
-        styles[selectedStyleIndex],
-        context,
-      );
-    }
     notifyListeners();
   }
 
   bool isGettingSuggestion = false;
 
-  Future<void> loadStyles(BuildContext context) async {
-    if (isLoadingStyles || _stylesMap.isNotEmpty) return;
+  /// Loads style names/prompts for the picker. Matches [HomeViewModel.loadStyles]
+  /// token resolution so Generate does not fail when [SignInViewModel] is not
+  /// hydrated yet. Use [forceRetry] after a failure or when re-opening the tab.
+  Future<void> loadStyles(
+    BuildContext context, {
+    bool forceRetry = false,
+  }) async {
+    if (isLoadingStyles) return;
+    if (_stylesMap.isNotEmpty) return;
+    if (stylesError != null && !forceRetry) return;
 
     final signInViewModel = context.read<SignInViewModel>();
-    final accessToken = signInViewModel.accessToken;
+    await signInViewModel.ensureTokensLoaded();
+    await signInViewModel.ensureAccessTokenFresh();
+    if (!context.mounted) return;
+
+    String? accessToken = signInViewModel.accessToken;
+
+    if (accessToken == null || accessToken.isEmpty) {
+      try {
+        accessToken = await TokenStorageService.getAccessToken();
+      } catch (_) {}
+    }
 
     if (accessToken == null || accessToken.isEmpty) {
       return;
     }
 
-    isLoadingStyles = true;
     stylesError = null;
+    isLoadingStyles = true;
     notifyListeners();
 
     try {
       _stylesMap = await _wallpaperRepository.fetchStyles(
         accessToken: accessToken,
       );
+      _stylesLastFetchedAt = DateTime.now();
+      stylesError = null;
+      // Apply any pending style selection (e.g. user tapped Anime chip early).
+      if (_pendingStyleNameForPrompt != null &&
+          _pendingStyleNameForPrompt!.isNotEmpty) {
+        final idx = _stylesMap.keys.toList().indexOf(
+          _pendingStyleNameForPrompt!,
+        );
+        selectedStyleIndex = idx >= 0 ? idx : -1;
+        _pendingStyleNameForPrompt = null;
+      }
     } on ApiException catch (e) {
       stylesError = e.message;
     } catch (e) {
@@ -210,6 +249,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
         prompt: currentPrompt,
         accessToken: accessToken,
       );
+      if (!context.mounted) return;
 
       if (response.suggestion != null && response.suggestion!.isNotEmpty) {
         promptController.text = response.suggestion!;
@@ -223,9 +263,11 @@ class ImageGenerateViewModel extends ChangeNotifier {
         _showMessage(context, 'No suggestion available');
       }
     } on ApiException catch (e) {
+      if (!context.mounted) return;
       errorMessage = e.message;
       _showMessage(context, e.message);
     } catch (e) {
+      if (!context.mounted) return;
       errorMessage =
           'Oops! Couldn\'t generate a suggestion. Give it another try!';
       _showMessage(context, errorMessage!);
@@ -271,6 +313,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
         style: style,
         accessToken: accessToken,
       );
+      if (!context.mounted) return;
       if (createdWallpaper != null &&
           createdWallpaper!.imageUrl.isNotEmpty &&
           createdWallpaper!.imageUrl != 'null') {
@@ -280,7 +323,14 @@ class ImageGenerateViewModel extends ChangeNotifier {
 
         _showMessage(context, 'Wallpaper created successfully', isError: false);
         await GenerationLimitService.recordGeneration();
+        if (!context.mounted) return;
         InAppReviewService.recordCompletedGenerationAndMaybeReview(context);
+        if (context.mounted) {
+          context.read<HomeViewModel>().loadGroupedWallpapers(
+            context,
+            force: true,
+          );
+        }
         Navigator.pushNamed(
           context,
           RoutesName.ImageCreatedScreen,
@@ -300,6 +350,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
     } on ApiException catch (e) {
       if (e.statusCode == 401 && e.message.toLowerCase().contains('token')) {
         final refreshed = await signInViewModel.refreshTokenSilently();
+        if (!context.mounted) return;
 
         if (refreshed && signInViewModel.accessToken != null) {
           try {
@@ -309,6 +360,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
               style: style,
               accessToken: signInViewModel.accessToken!,
             );
+            if (!context.mounted) return;
             if (createdWallpaper != null &&
                 createdWallpaper!.imageUrl.isNotEmpty &&
                 createdWallpaper!.imageUrl != 'null') {
@@ -322,9 +374,16 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 isError: false,
               );
               await GenerationLimitService.recordGeneration();
+              if (!context.mounted) return;
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,
               );
+              if (context.mounted) {
+                context.read<HomeViewModel>().loadGroupedWallpapers(
+                  context,
+                  force: true,
+                );
+              }
               Navigator.pushNamed(
                 context,
                 RoutesName.ImageCreatedScreen,
@@ -370,12 +429,14 @@ class ImageGenerateViewModel extends ChangeNotifier {
       errorMessage = e.message;
       _stopProgressAnimation();
       _stopPolling();
+      if (!context.mounted) return;
       _showMessage(context, e.message);
     } catch (e) {
       errorMessage =
           'Hmm, something unexpected happened. Let\'s try that again!';
       _stopProgressAnimation();
       _stopPolling();
+      if (!context.mounted) return;
       _showMessage(context, errorMessage!);
     } finally {
       if (!_isPolling) {
@@ -469,8 +530,13 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 isError: false,
               );
               await GenerationLimitService.recordGeneration();
+              if (!context.mounted) return;
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,
+              );
+              context.read<HomeViewModel>().loadGroupedWallpapers(
+                context,
+                force: true,
               );
               Navigator.pushNamed(
                 context,

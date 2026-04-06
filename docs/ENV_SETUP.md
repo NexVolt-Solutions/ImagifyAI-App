@@ -4,13 +4,13 @@ All API keys, AdMob IDs, and the Google Web Client ID are loaded from environmen
 
 ---
 
-## 1. Flutter / Dart (`.env`)
+## 1. Flutter / Dart (`assets/env/default.env`)
 
-1. **Copy the example file:**
-   ```bash
-   cp .env.example .env
-   ```
-2. **Edit `.env`** and set your values:
+The app bundles **`assets/env/default.env`** so **debug/release builds work on a fresh clone** without extra steps. Defaults match `EnvConstants` fallbacks.
+
+1. **To customize** (API URL, Google client ID, ad unit IDs), edit **`assets/env/default.env`** before `flutter run` / `flutter build`. Do not commit production secrets in that file; use CI to inject the file for release builds if needed.
+
+2. **Reference template:** `.env.example` lists the same variables for copy-paste.
 
    | Variable | Description |
    |----------|-------------|
@@ -20,7 +20,7 @@ All API keys, AdMob IDs, and the Google Web Client ID are loaded from environmen
    | `ADMOB_REWARDED_AD_UNIT_ID` | AdMob Rewarded ad unit ID |
    | `ADMOB_INTERSTITIAL_AD_UNIT_ID` | AdMob Interstitial ad unit ID |
 
-3. **Do not commit `.env`** — it is listed in `.gitignore`.
+3. A root **`.env`** file is optional and **not** used by the app (it is still in `.gitignore` if you use it for other tooling).
 
 ---
 
@@ -54,10 +54,10 @@ If neither file defines `ADMOB_APP_ID`, the build uses a default (see `android/a
 
 | Secret | Where to set |
 |--------|----------------|
-| API base URL | `.env` → `API_BASE_URL` |
-| Google Web Client ID | `.env` → `GOOGLE_WEB_CLIENT_ID` |
+| API base URL | `assets/env/default.env` → `API_BASE_URL` |
+| Google Web Client ID | `assets/env/default.env` → `GOOGLE_WEB_CLIENT_ID` |
 | AdMob App ID | `android/secrets.properties` or `key.properties` → `ADMOB_APP_ID` |
-| AdMob Rewarded ad unit ID | `.env` → `ADMOB_REWARDED_AD_UNIT_ID` |
-| AdMob Interstitial ad unit ID | `.env` → `ADMOB_INTERSTITIAL_AD_UNIT_ID` |
+| AdMob Rewarded ad unit ID | `assets/env/default.env` → `ADMOB_REWARDED_AD_UNIT_ID` |
+| AdMob Interstitial ad unit ID | `assets/env/default.env` → `ADMOB_INTERSTITIAL_AD_UNIT_ID` |
 
 Code that needs these values reads them via `EnvConstants` (Dart) or Gradle manifest placeholders (Android).
