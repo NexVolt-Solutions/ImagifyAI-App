@@ -1,4 +1,4 @@
-package com.imagifyai.imagifyai
+package com.example.imagifyai
 
 import io.flutter.embedding.android.FlutterActivity
 
