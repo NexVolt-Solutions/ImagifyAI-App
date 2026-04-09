@@ -62,7 +62,7 @@ android {
             val keyPassword = keystoreProperties["keyPassword"] as? String
             val storeFileProp = keystoreProperties["storeFile"] as? String
             val storePassword = keystoreProperties["storePassword"] as? String
-
+            
             if (keyAlias != null && keyPassword != null && storeFileProp != null && storePassword != null) {
                 create("release") {
                     this.keyAlias = keyAlias
