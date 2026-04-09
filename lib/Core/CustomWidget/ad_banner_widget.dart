@@ -31,6 +31,7 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
   }
 
   Future<void> _loadBanner() async {
+    if (kIsWeb) return;
     // Guard: if banner unit is not configured in release, skip rendering.
     if (_adUnitId.isEmpty || _adUnitId.contains('xxxx') || _isLoading) return;
     _isLoading = true;

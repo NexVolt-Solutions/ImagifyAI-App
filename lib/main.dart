@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -23,9 +24,10 @@ void main() async {
   await LocalNotificationService.rescheduleDailyReturnNudgeIfEligible(
     ignoreDebounce: true,
   );
-  await MobileAds.instance.initialize();
-
-  RewardedAdService.loadRewardedAd();
+  if (!kIsWeb) {
+    await MobileAds.instance.initialize();
+    RewardedAdService.loadRewardedAd();
+  }
   _setupTokenRefresh();
   runApp(const MyApp());
 }
@@ -55,8 +57,6 @@ void _setupTokenRefresh() {
 
       return null;
     } on ApiException catch (e) {
-      // Hard fallback: if refresh token is invalid/expired, clear local auth state
-      // immediately so the app can cleanly redirect user to sign-in on next auth check.
       final message = e.message.toLowerCase();
       final isInvalidRefresh =
           e.statusCode == 401 ||

@@ -9,6 +9,7 @@ import 'package:imagifyai/models/auth/register_response.dart';
 import 'package:imagifyai/models/auth/refresh_response.dart';
 import 'package:imagifyai/models/auth/verify_response.dart';
 import 'package:imagifyai/models/user/user.dart';
+import 'package:imagifyai/models/user/usage_response.dart';
 import 'package:imagifyai/models/user/update_user_response.dart';
 import 'package:imagifyai/models/user/update_profile_picture_response.dart';
 import 'package:imagifyai/models/user/update_password_response.dart';
@@ -179,6 +180,20 @@ class AuthRepository implements IAuthRepository {
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  Future<UsageResponse> getDailyUsage({required String accessToken}) async {
+    if (accessToken.isEmpty) {
+      throw ApiException('Access token is required', statusCode: 401);
+    }
+
+    final headers = <String, String>{'Authorization': 'Bearer $accessToken'};
+    final json = await _apiService.get(
+      ApiConstants.wallpaperUsage,
+      headers: headers,
+    );
+    return UsageResponse.fromJson(json);
   }
 
   @override

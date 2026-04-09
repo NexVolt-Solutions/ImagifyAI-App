@@ -199,6 +199,25 @@ class CustomTextField extends StatelessWidget {
       return "Enter a valid name";
     }
 
+    if (validatorType == "contact_name") {
+      final t = value.trim();
+      if (t.length > 50) {
+        return "Must be under 50 characters";
+      }
+      return null;
+    }
+
+    if (validatorType == "contact_message") {
+      final t = value.trim();
+      if (t.length < 10) {
+        return "Message must be at least 10 characters";
+      }
+      if (t.length > 2000) {
+        return "Message must be under 2000 characters";
+      }
+      return null;
+    }
+
     if (validatorType == "phone" &&
         !RegExp(r'^[0-9]{10,13}$').hasMatch(value)) {
       return "Enter a valid phone number";

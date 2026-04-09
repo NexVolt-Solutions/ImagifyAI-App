@@ -4,11 +4,11 @@ import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
-import 'package:imagifyai/Core/services/generation_limit_service.dart';
-import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/services/content_report_service.dart';
-import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/view/ImageGenerate/widgets/daily_limit_dialog.dart';
+import 'package:imagifyai/view/ImageGenerate/widgets/daily_usage_bar.dart';
+import 'package:imagifyai/view/ImageGenerate/widgets/rewarded_wallpaper_quota_flow.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/image_generate_prompt_section.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/inspiration_gallery.dart';
 import 'package:imagifyai/view/ImageGenerate/widgets/size_selector_row.dart';
@@ -44,7 +44,9 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
     if (!_hasLoadedStyles) {
       _hasLoadedStyles = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<ImageGenerateViewModel>().loadStyles(context);
+        final vm = context.read<ImageGenerateViewModel>();
+        vm.loadStyles(context);
+        vm.loadDailyUsage(context);
       });
     }
   }
@@ -91,60 +93,64 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
   }
 
   Future<void> _onCreateMagicTapped(BuildContext context) async {
-    final can = await GenerationLimitService.canGenerate();
-    if (!mounted) return;
-    if (can) {
+    final vm = context.read<ImageGenerateViewModel>();
+    final u = vm.dailyUsage;
+
+    if (u != null && u.isHardLimitReached) {
       if (!context.mounted) return;
-      context.read<ImageGenerateViewModel>().createWallpaper(context);
+      DailyLimitDialog.show(context, usage: u);
       return;
     }
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(
-          'Daily limit reached',
-          style: context.appTextStyles?.imageGenerateSectionTitle,
-        ),
-        content: Text(
-          'You\'ve used your free generations for today. Watch a short ad for 1 more?',
-          style: context.appTextStyles?.imageGeneratePromptText,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: context.primaryColor),
-            ),
+
+    if (u != null && u.remaining > 0) {
+      vm.createWallpaper(context);
+      return;
+    }
+
+    if (u != null && u.needsRewardedAdToContinue) {
+      if (!context.mounted) return;
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            'Watch a short ad',
+            style: context.appTextStyles?.imageGenerateSectionTitle,
           ),
-          TextButton(
-            onPressed: () async {
-              final shown = await RewardedAdService.showRewardedAd(
-                onReward: () {
-                  if (dialogContext.mounted) Navigator.pop(dialogContext);
-                  if (!mounted) return;
-                  context.read<ImageGenerateViewModel>().createWallpaper(
-                    context,
-                  );
-                },
-              );
-              if (!dialogContext.mounted) return;
-              if (!shown) {
-                SnackbarUtil.showTopSnackBar(
-                  dialogContext,
-                  'Ad not ready. Try again in a moment.',
-                  isError: true,
+          content: Text(
+            'Unlock your next free generations. Progress syncs automatically after the ad.',
+            style: context.appTextStyles?.imageGeneratePromptText,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: context.primaryColor),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await RewardedWallpaperQuotaFlow.runWatchAdUnlockSequence(
+                  context: context,
+                  dialogToDismissOnReward: dialogContext,
+                  onUnlocked: () async {
+                    if (!mounted) return;
+                    vm.createWallpaper(context);
+                  },
                 );
-              }
-            },
-            child: Text(
-              'Watch ad',
-              style: TextStyle(color: context.primaryColor),
+              },
+              child: Text(
+                'Watch ad',
+                style: TextStyle(color: context.primaryColor),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+      return;
+    }
+
+    vm.createWallpaper(context);
   }
 
   @override
@@ -181,14 +187,26 @@ class _ImageGenerateScreenState extends State<ImageGenerateScreen> {
                           _scrollToSelectedStyle(index, context),
                     ),
                     SizedBox(height: context.h(20)),
+                    const DailyUsageBar(),
                     CustomButton(
-                      onPressed: () => _onCreateMagicTapped(context),
+                      onPressed: imageGenerateViewModel.isCreating ||
+                              (imageGenerateViewModel.dailyUsage?.isHardLimitReached ==
+                                  true)
+                          ? null
+                          : () => _onCreateMagicTapped(context),
                       width: context.w(350),
                       iconHeight: 24,
                       iconWidth: 24,
                       gradient: AppColors.gradient,
                       icon: AppAssets.startIcon,
-                      text: 'Generate',
+                      text: imageGenerateViewModel.dailyUsage?.isHardLimitReached ==
+                              true
+                          ? 'Daily Limit Reached'
+                          : imageGenerateViewModel.dailyUsage
+                                      ?.needsRewardedAdToContinue ==
+                                  true
+                              ? 'Watch ad to continue'
+                              : 'Generate',
                       isLoading: imageGenerateViewModel.isCreating,
                     ),
                     SizedBox(height: context.h(16)),

@@ -40,6 +40,11 @@ class ApiConstants {
   static const String reportWallpaper =
       '/wallpapers'; // Will be /wallpapers/{wallpaper_id}/report
 
+  /// Authenticated wallpaper quota + rewarded state (server source of truth).
+  static String get wallpaperUsage => '${wallpapers}usage';
+
+  static const String contact = '/contact/';
+
   /// Web Client ID for Google Sign-In (serverClientId). From Firebase project imagifyai-f8cad
   static String get googleWebClientId => EnvConstants.googleWebClientId;
 }

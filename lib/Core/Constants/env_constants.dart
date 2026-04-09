@@ -33,11 +33,17 @@ class EnvConstants {
       (dotenv.env['ADS_ENABLE_INTERSTITIAL'] ?? 'false').toLowerCase() ==
       'true';
 
-  /// Interstitial pacing controls (remote-friendly via .env / Remote Config sync).
-  static int get adsInterstitialEveryNGenerations =>
-      int.tryParse(dotenv.env['ADS_INTERSTITIAL_EVERY_N'] ?? '') ?? 5;
+  /// First interstitial after N successes in the **rolling 24h window** ([GenerationLimitService.rollingWindow]; default 5).
+  static int get adsInterstitialFirstAfterPerDay =>
+      int.tryParse(dotenv.env['ADS_INTERSTITIAL_FIRST_AFTER'] ?? '') ?? 5;
 
+  /// After the first interstitial **in that window**, show again every N generations (default 3).
+  static int get adsInterstitialEveryNAfterFirst =>
+      int.tryParse(dotenv.env['ADS_INTERSTITIAL_EVERY_N_AFTER_FIRST'] ?? '') ??
+      3;
+
+  /// Minimum seconds between interstitial impressions (avoids back-to-back if logic races).
   static int get adsInterstitialCooldownSeconds =>
       int.tryParse(dotenv.env['ADS_INTERSTITIAL_COOLDOWN_SECONDS'] ?? '') ??
-      120;
+      90;
 }

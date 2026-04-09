@@ -1,5 +1,7 @@
-import java.util.Properties
+import com.android.build.api.dsl.ApplicationExtension
 import java.io.FileInputStream
+import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
@@ -74,9 +76,7 @@ android {
 
     buildTypes {
         release {
-            signingConfigs.findByName("release")?.let {
-                signingConfig = it
-            }
+            signingConfigs.findByName("release")?.let { signingConfig = it }
             // Enable ProGuard/R8 code shrinking and obfuscation
             // Disabled for initial release - can be enabled later after adding Play Core dependency
             isMinifyEnabled = false
@@ -96,4 +96,27 @@ dependencies {
 
 flutter {
     source = "../.."
+}
+
+// Fail release builds if Play-style signing is missing; do not run this during debug configuration.
+afterEvaluate {
+    tasks.matching { task ->
+        when (task.name) {
+            "bundleRelease", "assembleRelease", "packageRelease" -> true
+            else -> false
+        }
+    }.configureEach {
+        doFirst {
+            val appExt = extensions.getByType(ApplicationExtension::class.java)
+            if (appExt.signingConfigs.findByName("release") == null) {
+                throw GradleException(
+                    "Release signing is not configured. Google Play requires a signed App Bundle.\n" +
+                        "1. Copy android/key.properties.template to android/key.properties\n" +
+                        "2. Place your keystore (e.g. android/upload-keystore.jks) and set storePassword, keyPassword, keyAlias, storeFile\n" +
+                        "3. Run: flutter build appbundle --release\n" +
+                        "See PLAY_STORE_RELEASE_GUIDE.md (section \"All uploaded bundles must be signed\")."
+                )
+            }
+        }
+    }
 }

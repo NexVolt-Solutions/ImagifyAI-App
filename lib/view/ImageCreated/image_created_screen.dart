@@ -6,17 +6,17 @@ import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/loading_overlay.dart';
-import 'package:imagifyai/Core/services/generation_limit_service.dart';
-import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/services/content_report_service.dart';
-import 'package:imagifyai/Core/utils/snackbar_util.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
 import 'package:imagifyai/view/ImageCreated/widgets/action_buttons_row.dart';
 import 'package:imagifyai/view/ImageCreated/widgets/creation_image_preview.dart';
 import 'package:imagifyai/view/ImageCreated/widgets/image_created_app_bar.dart';
 import 'package:imagifyai/view/ImageCreated/widgets/prompt_editor_card.dart';
+import 'package:imagifyai/view/ImageGenerate/widgets/daily_limit_dialog.dart';
+import 'package:imagifyai/view/ImageGenerate/widgets/rewarded_wallpaper_quota_flow.dart';
 import 'package:imagifyai/viewModel/image_created_view_model.dart';
+import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ImageCreatedScreen extends StatefulWidget {
@@ -63,6 +63,8 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
 
           // Track the initial wallpaper ID
           _lastWallpaperId = args.id;
+
+          context.read<ImageGenerateViewModel>().loadDailyUsage(context);
 
           // Only start polling if image is not ready yet
           if (args.imageUrl.isEmpty || args.imageUrl == 'null') {
@@ -166,8 +168,11 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
   }
 
   Future<void> _onTryAgainTapped(BuildContext context) async {
-    final can = await GenerationLimitService.canGenerate();
-    if (!mounted) return;
+    final genVm = context.read<ImageGenerateViewModel>();
+    await genVm.loadDailyUsage(context);
+    if (!context.mounted) return;
+
+    final u = genVm.dailyUsage;
     final viewModel = context.read<ImageCreatedViewModel>();
     final editedPrompt = _promptController.text.trim();
 
@@ -181,55 +186,61 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
       }
     }
 
-    if (can) {
+    if (u != null && u.isHardLimitReached) {
+      if (!context.mounted) return;
+      DailyLimitDialog.show(context, usage: u);
+      return;
+    }
+
+    if (u != null && u.remaining > 0) {
       await doRecreate();
       return;
     }
 
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(
-          'Daily limit reached',
-          style: context.appTextStyles?.imageGenerateSectionTitle,
-        ),
-        content: Text(
-          'You\'ve used your free generations for today. Watch a short ad for 1 more?',
-          style: context.appTextStyles?.imageGeneratePromptText,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: context.primaryColor),
-            ),
+    if (u != null && u.needsRewardedAdToContinue) {
+      if (!context.mounted) return;
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(
+            'Watch a short ad',
+            style: context.appTextStyles?.imageGenerateSectionTitle,
           ),
-          TextButton(
-            onPressed: () async {
-              final shown = await RewardedAdService.showRewardedAd(
-                onReward: () {
-                  if (dialogContext.mounted) Navigator.pop(dialogContext);
-                  doRecreate();
-                },
-              );
-              if (!dialogContext.mounted) return;
-              if (!shown) {
-                SnackbarUtil.showTopSnackBar(
-                  dialogContext,
-                  'Ad not ready. Try again in a moment.',
-                  isError: true,
+          content: Text(
+            'Unlock your next free generations, then try again.',
+            style: context.appTextStyles?.imageGeneratePromptText,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: context.primaryColor),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                await RewardedWallpaperQuotaFlow.runWatchAdUnlockSequence(
+                  context: context,
+                  dialogToDismissOnReward: dialogContext,
+                  onUnlocked: () async {
+                    if (!mounted) return;
+                    await doRecreate();
+                  },
                 );
-              }
-            },
-            child: Text(
-              'Watch ad',
-              style: TextStyle(color: context.primaryColor),
+              },
+              child: Text(
+                'Watch ad',
+                style: TextStyle(color: context.primaryColor),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+      return;
+    }
+
+    await doRecreate();
   }
 
   @override
@@ -303,27 +314,29 @@ class _ImageCreatedScreenState extends State<ImageCreatedScreen> {
                       Stack(
                         clipBehavior: Clip.none,
                         children: [
-                          Container(
-                            height: context.h(400),
-                            width: context.w(350),
-                            decoration: BoxDecoration(
-                              color: context.backgroundColor,
-                              borderRadius: BorderRadius.circular(
-                                context.radius(12),
+                          SizedBox(
+                            width: double.infinity,
+                            height: MediaQuery.sizeOf(context).height * 0.52,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: context.backgroundColor,
+                                borderRadius: BorderRadius.circular(
+                                  context.radius(12),
+                                ),
                               ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                context.radius(12),
-                              ),
-                              child: CreationImagePreview(
-                                imageUrl: imageUrl,
-                                viewModel: imageCreatedViewModel,
-                                elapsedTimeStream:
-                                    _elapsedTimeController?.stream,
-                                initialElapsed:
-                                    imageCreatedViewModel.elapsedPollingTime,
-                                isMounted: () => mounted,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  context.radius(12),
+                                ),
+                                child: CreationImagePreview(
+                                  imageUrl: imageUrl,
+                                  viewModel: imageCreatedViewModel,
+                                  elapsedTimeStream:
+                                      _elapsedTimeController?.stream,
+                                  initialElapsed:
+                                      imageCreatedViewModel.elapsedPollingTime,
+                                  isMounted: () => mounted,
+                                ),
                               ),
                             ),
                           ),

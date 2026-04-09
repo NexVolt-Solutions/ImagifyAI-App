@@ -9,6 +9,7 @@ import 'package:imagifyai/models/auth/verify_response.dart';
 import 'package:imagifyai/models/user/update_password_response.dart';
 import 'package:imagifyai/models/user/update_profile_picture_response.dart';
 import 'package:imagifyai/models/user/update_user_response.dart';
+import 'package:imagifyai/models/user/usage_response.dart';
 import 'package:imagifyai/models/user/user.dart';
 
 /// Domain contract for auth and user operations.
@@ -42,6 +43,8 @@ abstract class IAuthRepository {
     required String userId,
     bool forceRefresh = false,
   });
+
+  Future<UsageResponse> getDailyUsage({required String accessToken});
 
   Future<UpdateUserResponse> updateUser({
     String? firstName,

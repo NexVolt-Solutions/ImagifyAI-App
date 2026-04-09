@@ -239,7 +239,7 @@ class WallpaperRepository implements IWallpaperRepository {
   Future<Map<String, List<Wallpaper>>> fetchGroupedWallpapers({
     required String accessToken,
     int page = 1,
-    int limit = 10,
+    int limit = 20,
   }) async {
     if (accessToken.isEmpty) {
       throw ApiException('Access token is required', statusCode: 401);

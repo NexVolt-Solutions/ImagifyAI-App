@@ -6,18 +6,31 @@ import 'package:imagifyai/Core/services/generation_limit_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/utils/Routes/routes_name.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/user/usage_response.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/domain/repositories/auth_repository_interface.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/view/ImageGenerate/widgets/daily_limit_dialog.dart';
 import 'package:imagifyai/viewModel/home_view_model.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:provider/provider.dart';
 
 class ImageGenerateViewModel extends ChangeNotifier {
-  ImageGenerateViewModel({IWallpaperRepository? wallpaperRepository})
-    : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository();
+  ImageGenerateViewModel({
+    IWallpaperRepository? wallpaperRepository,
+    IAuthRepository? authRepository,
+  }) : _wallpaperRepository = wallpaperRepository ?? WallpaperRepository(),
+       _authRepository = authRepository ?? AuthRepository();
 
   final IWallpaperRepository _wallpaperRepository;
+  final IAuthRepository _authRepository;
+
+  /// Server wallpaper quota (`GET /wallpapers/usage`). Refresh on screen open and after rewarded ads.
+  UsageResponse? dailyUsage;
+  bool isLoadingUsage = false;
+  String? usageLoadError;
 
   int selectedIndex = -1;
   int selectedStyleIndex = -1;
@@ -224,6 +237,47 @@ class ImageGenerateViewModel extends ChangeNotifier {
     }
   }
 
+  /// Loads daily wallpaper usage from the API (call when Create screen opens).
+  Future<void> loadDailyUsage(BuildContext context) async {
+    final signInViewModel = context.read<SignInViewModel>();
+    await signInViewModel.ensureTokensLoaded();
+    await signInViewModel.ensureAccessTokenFresh();
+    if (!context.mounted) return;
+
+    var accessToken = signInViewModel.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      try {
+        accessToken = await TokenStorageService.getAccessToken();
+      } catch (_) {}
+    }
+
+    if (accessToken == null || accessToken.isEmpty) {
+      dailyUsage = null;
+      usageLoadError = null;
+      notifyListeners();
+      return;
+    }
+
+    isLoadingUsage = true;
+    usageLoadError = null;
+    notifyListeners();
+
+    try {
+      dailyUsage = await _authRepository.getDailyUsage(
+        accessToken: accessToken,
+      );
+    } on ApiException catch (e) {
+      usageLoadError = e.message;
+      dailyUsage = null;
+    } catch (_) {
+      usageLoadError = 'Could not load usage';
+      dailyUsage = null;
+    } finally {
+      isLoadingUsage = false;
+      if (context.mounted) notifyListeners();
+    }
+  }
+
   Future<void> getSuggestion(BuildContext context) async {
     final currentPrompt = promptController.text.trim();
 
@@ -323,6 +377,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
 
         _showMessage(context, 'Wallpaper created successfully', isError: false);
         await GenerationLimitService.recordGeneration();
+        if (context.mounted) await loadDailyUsage(context);
         if (!context.mounted) return;
         InAppReviewService.recordCompletedGenerationAndMaybeReview(context);
         if (context.mounted) {
@@ -348,6 +403,10 @@ class ImageGenerateViewModel extends ChangeNotifier {
         notifyListeners();
       }
     } on ApiException catch (e) {
+      if (e.statusCode == 429) {
+        await _handleDailyLimitOrRateLimit(context, e);
+        return;
+      }
       if (e.statusCode == 401 && e.message.toLowerCase().contains('token')) {
         final refreshed = await signInViewModel.refreshTokenSilently();
         if (!context.mounted) return;
@@ -374,6 +433,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 isError: false,
               );
               await GenerationLimitService.recordGeneration();
+              if (context.mounted) await loadDailyUsage(context);
               if (!context.mounted) return;
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,
@@ -405,6 +465,11 @@ class ImageGenerateViewModel extends ChangeNotifier {
               notifyListeners();
             }
             return;
+          } on ApiException catch (retryEx) {
+            if (retryEx.statusCode == 429) {
+              await _handleDailyLimitOrRateLimit(context, retryEx);
+              return;
+            }
           } catch (retryError) {
             // ignore
           }
@@ -444,6 +509,33 @@ class ImageGenerateViewModel extends ChangeNotifier {
         _stopProgressAnimation();
       }
       notifyListeners();
+    }
+  }
+
+  Future<void> _handleDailyLimitOrRateLimit(
+    BuildContext context,
+    ApiException e,
+  ) async {
+    _stopProgressAnimation();
+    _stopPolling();
+    isCreating = false;
+    notifyListeners();
+    if (!context.mounted) return;
+    if (isWatchAdUnlockQuotaMessage(e.message)) {
+      await loadDailyUsage(context);
+      if (!context.mounted) return;
+      _showMessage(context, e.message, isError: false);
+    } else if (isDailyWallpaperLimitMessage(e.message)) {
+      await loadDailyUsage(context);
+      if (!context.mounted) return;
+      await DailyLimitDialog.show(context, usage: dailyUsage);
+    } else if (isGenericRateLimitMessage(e.message)) {
+      _showMessage(
+        context,
+        'Too many requests. Please wait and try again.',
+      );
+    } else {
+      _showMessage(context, e.message);
     }
   }
 
@@ -530,6 +622,7 @@ class ImageGenerateViewModel extends ChangeNotifier {
                 isError: false,
               );
               await GenerationLimitService.recordGeneration();
+              if (context.mounted) await loadDailyUsage(context);
               if (!context.mounted) return;
               InAppReviewService.recordCompletedGenerationAndMaybeReview(
                 context,

@@ -1,20 +1,29 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_cached_network_image.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
+import 'package:imagifyai/Core/services/token_storage_service.dart';
 import 'package:imagifyai/Core/services/interstitial_ad_service.dart';
 import 'package:imagifyai/Core/services/in_app_review_service.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/Core/utils/snackbar_util.dart';
+import 'package:imagifyai/models/user/usage_response.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
+import 'package:imagifyai/domain/repositories/auth_repository.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository_interface.dart';
 import 'package:imagifyai/domain/repositories/wallpaper_repository.dart';
+import 'package:imagifyai/view/ImageGenerate/widgets/daily_limit_dialog.dart';
+import 'package:imagifyai/viewModel/home_view_model.dart';
+import 'package:imagifyai/viewModel/image_generate_view_model.dart';
 import 'package:imagifyai/viewModel/sign_in_view_model.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -40,26 +49,17 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
   bool imageLoadError = false;
   String? imageLoadErrorMessage;
-  int imageRetryCount = 0;
-  int imageRetryTimestamp = 0;
 
   void clearImageLoadError() {
     imageLoadError = false;
     imageLoadErrorMessage = null;
-    imageRetryCount = 0;
-    imageRetryTimestamp = 0;
     notifyListeners();
   }
 
   void setImageLoadError(String message) {
+    if (imageLoadError && imageLoadErrorMessage == message) return;
     imageLoadError = true;
     imageLoadErrorMessage = message;
-    notifyListeners();
-  }
-
-  void incrementImageRetry() {
-    imageRetryCount++;
-    imageRetryTimestamp = DateTime.now().millisecondsSinceEpoch;
     notifyListeners();
   }
 
@@ -71,15 +71,15 @@ class ImageCreatedViewModel extends ChangeNotifier {
     if (_lastInterstitialShownWallpaperId == wallpaperId) return;
     if (_interstitialShowInFlight) return;
 
-    final used = await GenerationLimitService.getGenerationsUsedToday();
+    final todayForPacing =
+        await GenerationLimitService.getGenerationsTodayForAdPacing();
     final shouldShow =
         await InterstitialAdService.shouldShowAfterGenerationBreak(
-          generationCount: used,
+          generationsTodayForPacing: todayForPacing,
         );
 
     if (!shouldShow) return;
 
-    // Short pause after success UI so the interstitial does not feel instant-jarring.
     await Future<void>.delayed(const Duration(milliseconds: 1200));
     if (!context.mounted) return;
 
@@ -94,8 +94,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
     }
   }
 
-  /// Call when this screen knows the image is already ready.
-  /// (If we don't poll, we still want interstitial impressions.)
   Future<void> maybeShowInterstitialWhenAlreadyReady(
     BuildContext context,
   ) async {
@@ -132,7 +130,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
       _currentStage = 'Complete!';
       _pollingStartTime = null;
       _pollingAttempts = 0;
-
     } else if (data != null) {
       // Image not ready yet, will start polling
       isPolling = true;
@@ -214,9 +211,6 @@ class ImageCreatedViewModel extends ChangeNotifier {
             createdAt: updatedWallpaper.createdAt,
           );
 
-          // IMPORTANT: generation count must be updated when the async image
-          // finishes. Otherwise interstitial pacing (which uses generationCount)
-          // will stay at 0 and interstitials will never show.
           if (_lastGenerationRecordedWallpaperId != updatedWallpaper.id) {
             _lastGenerationRecordedWallpaperId = updatedWallpaper.id;
             await GenerationLimitService.recordGeneration();
@@ -231,12 +225,18 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
           notifyListeners();
 
+          if (context.mounted) {
+            await context.read<HomeViewModel>().refreshHomeScreen(context);
+          }
+
           // Show interstitial automatically when the generation completes.
           // This ensures we get impressions even if user doesn't immediately download.
-          await _maybeShowInterstitialAfterGeneration(
-            context: context,
-            wallpaperId: wallpaper!.id,
-          );
+          if (context.mounted) {
+            await _maybeShowInterstitialAfterGeneration(
+              context: context,
+              wallpaperId: wallpaper!.id,
+            );
+          }
         } else {
           // Still generating, keep polling
           isPolling = true;
@@ -297,6 +297,25 @@ class ImageCreatedViewModel extends ChangeNotifier {
     return '${minutes}m ${remainingSeconds}s';
   }
 
+  Future<UsageResponse?> _fetchDailyUsageSnapshot(BuildContext context) async {
+    final signInViewModel = context.read<SignInViewModel>();
+    await signInViewModel.ensureTokensLoaded();
+    await signInViewModel.ensureAccessTokenFresh();
+    if (!context.mounted) return null;
+    var token = signInViewModel.accessToken;
+    if (token == null || token.isEmpty) {
+      try {
+        token = await TokenStorageService.getAccessToken();
+      } catch (_) {}
+    }
+    if (token == null || token.isEmpty) return null;
+    try {
+      return await AuthRepository().getDailyUsage(accessToken: token);
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> recreate(BuildContext context, {String? editedPrompt}) async {
     if (isLoading || wallpaper == null || wallpaper!.id.isEmpty) return;
 
@@ -347,6 +366,10 @@ class ImageCreatedViewModel extends ChangeNotifier {
       await GenerationLimitService.recordGeneration();
       _lastGenerationRecordedWallpaperId = recreatedWallpaper.id;
 
+      if (context.mounted) {
+        await context.read<ImageGenerateViewModel>().loadDailyUsage(context);
+      }
+
       // Reset polling state and start checking for the new image
       isPolling = true;
       _pollingStartTime =
@@ -364,6 +387,36 @@ class ImageCreatedViewModel extends ChangeNotifier {
 
       notifyListeners();
     } on ApiException catch (e) {
+      if (e.statusCode == 429) {
+        isLoading = false;
+        isPolling = false;
+        errorMessage = null;
+        notifyListeners();
+        if (!context.mounted) return;
+        if (isWatchAdUnlockQuotaMessage(e.message)) {
+          if (context.mounted) {
+            await context.read<ImageGenerateViewModel>().loadDailyUsage(context);
+          }
+          if (!context.mounted) return;
+          _showMessage(context, e.message, isError: false);
+        } else if (isDailyWallpaperLimitMessage(e.message)) {
+          final usage = await _fetchDailyUsageSnapshot(context);
+          if (!context.mounted) return;
+          await DailyLimitDialog.show(
+            context,
+            usage: usage,
+            popRouteAfterExplore: true,
+          );
+        } else if (isGenericRateLimitMessage(e.message)) {
+          _showMessage(
+            context,
+            'Too many requests. Please wait and try again.',
+          );
+        } else {
+          _showMessage(context, e.message);
+        }
+        return;
+      }
       errorMessage = e.message;
       isPolling = false;
       _showMessage(context, e.message);
@@ -627,7 +680,9 @@ class _DownloadShareDialog extends StatelessWidget {
                               context.radius(12),
                             ),
                             border: Border.all(
-                              color: context.primaryColor.withValues(alpha: 0.3),
+                              color: context.primaryColor.withValues(
+                                alpha: 0.3,
+                              ),
                               width: 1,
                             ),
                           ),
@@ -635,19 +690,20 @@ class _DownloadShareDialog extends StatelessWidget {
                             borderRadius: BorderRadius.circular(
                               context.radius(12),
                             ),
-                            child: Image.network(
-                              imageUrl,
-                              fit: BoxFit.cover,
-                              loadingBuilder:
-                                  (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Center(
-                                      child: AppLoadingIndicator.medium(
-                                        color: context.primaryColor,
-                                      ),
-                                    );
-                                  },
-                              errorBuilder: (context, error, stackTrace) {
+                            child: CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              httpHeaders: kWallpaperImageHeaders,
+                              fit: BoxFit.contain,
+                              width: double.infinity,
+                              height: double.infinity,
+                              filterQuality: FilterQuality.high,
+                              fadeInDuration: Duration.zero,
+                              placeholder: (_, __) => Center(
+                                child: AppLoadingIndicator.medium(
+                                  color: context.primaryColor,
+                                ),
+                              ),
+                              errorWidget: (context, _, __) {
                                 return Container(
                                   color: Colors.black,
                                   child: Center(
@@ -711,7 +767,9 @@ class _DownloadShareDialog extends StatelessWidget {
                             height: context.h(60),
                             width: context.w(60),
                             decoration: BoxDecoration(
-                              color: context.primaryColor.withValues(alpha: 0.2),
+                              color: context.primaryColor.withValues(
+                                alpha: 0.2,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(
@@ -743,7 +801,9 @@ class _DownloadShareDialog extends StatelessWidget {
                             height: context.h(60),
                             width: context.w(60),
                             decoration: BoxDecoration(
-                              color: context.primaryColor.withValues(alpha: 0.2),
+                              color: context.primaryColor.withValues(
+                                alpha: 0.2,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: IconButton(

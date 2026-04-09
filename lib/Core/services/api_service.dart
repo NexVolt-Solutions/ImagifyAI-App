@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:imagifyai/Core/Constants/api_constants.dart';
+import 'package:imagifyai/Core/services/server_clock.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -82,10 +83,7 @@ class ApiService {
       () async {
         final uri = _buildUri(path, query);
         final response = await _runGetWithRetry(() {
-          return _client.get(
-            uri,
-            headers: _withDefaultHeaders(headers),
-          );
+          return _client.get(uri, headers: _withDefaultHeaders(headers));
         });
         return response;
       },
@@ -96,10 +94,7 @@ class ApiService {
         updatedHeaders['Authorization'] = 'Bearer $newToken';
         final uri = _buildUri(path, query);
         return await _runWithTimeout(
-          () => _client.get(
-            uri,
-            headers: _withDefaultHeaders(updatedHeaders),
-          ),
+          () => _client.get(uri, headers: _withDefaultHeaders(updatedHeaders)),
         );
       },
     );
@@ -113,11 +108,10 @@ class ApiService {
   }) async {
     final uri = _buildUri(path, query);
     final response = await _runGetWithRetry(() {
-      return _client.get(
-        uri,
-        headers: _withDefaultHeaders(headers),
-      );
+      return _client.get(uri, headers: _withDefaultHeaders(headers));
     });
+
+    ServerClock.syncFromHttpResponse(response);
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return response.bodyBytes;
@@ -232,7 +226,9 @@ class ApiService {
         if (body != null) {
           request.body = jsonEncode(body);
         }
-        final streamedResponse = await _runWithTimeout(() => _client.send(request));
+        final streamedResponse = await _runWithTimeout(
+          () => _client.send(request),
+        );
         final response = await http.Response.fromStream(streamedResponse);
         return response;
       },
@@ -248,7 +244,9 @@ class ApiService {
         if (body != null) {
           request.body = jsonEncode(body);
         }
-        final streamedResponse = await _runWithTimeout(() => _client.send(request));
+        final streamedResponse = await _runWithTimeout(
+          () => _client.send(request),
+        );
         final response = await http.Response.fromStream(streamedResponse);
         return response;
       },
@@ -342,7 +340,9 @@ class ApiService {
     try {
       return _executeWithTokenRefresh(
         () async {
-          final streamedResponse = await _runWithTimeout(() => _client.send(request));
+          final streamedResponse = await _runWithTimeout(
+            () => _client.send(request),
+          );
           return await http.Response.fromStream(streamedResponse);
         },
         retryOnTokenExpiry: true,
@@ -431,7 +431,9 @@ class ApiService {
     try {
       return _executeWithTokenRefresh(
         () async {
-          final streamedResponse = await _runWithTimeout(() => _client.send(request));
+          final streamedResponse = await _runWithTimeout(
+            () => _client.send(request),
+          );
           return await http.Response.fromStream(streamedResponse);
         },
         retryOnTokenExpiry: true,
@@ -474,7 +476,8 @@ class ApiService {
     }
   }
 
-  /// Execute a request with automatic token refresh on 401 errors
+  /// On 401, if the outgoing request included `Authorization: Bearer …`, runs
+  /// [setTokenRefreshCallback] once and retries (unauthenticated calls skip this).
   Future<Map<String, dynamic>> _executeWithTokenRefresh(
     Future<http.Response> Function() requestFn, {
     required bool retryOnTokenExpiry,
@@ -484,11 +487,9 @@ class ApiService {
     try {
       final response = await requestFn();
 
-      // Only refresh when this request actually sent a Bearer token (skip e.g. login 401s).
       if (retryOnTokenExpiry &&
           response.statusCode == 401 &&
-          _headersHadBearer(originalHeaders) &&
-          _isTokenExpiredError(response)) {
+          _headersHadBearer(originalHeaders)) {
         if (_onTokenExpired != null) {
           final newToken = await _coordinatedTokenRefresh();
           if (newToken != null &&
@@ -535,54 +536,6 @@ class ApiService {
     }
   }
 
-  /// Check if the error response indicates token expiration (only used with Bearer requests).
-  bool _isTokenExpiredError(http.Response response) {
-    try {
-      // Many gateways return 401 with an empty body for expired JWTs.
-      if (response.body.isEmpty) return true;
-
-      final decoded = jsonDecode(response.body);
-      String errorMessage = '';
-
-      if (decoded is Map<String, dynamic>) {
-        // FastAPI-style `detail` (string or list of objects)
-        final detail = decoded['detail'];
-        if (detail is String) {
-          errorMessage = detail;
-        } else if (detail is List && detail.isNotEmpty) {
-          final first = detail.first;
-          if (first is Map) {
-            errorMessage =
-                first['msg']?.toString() ?? first['message']?.toString() ?? '';
-          }
-        }
-        if (errorMessage.isEmpty) {
-          errorMessage =
-              (decoded['msg'] ?? decoded['message'] ?? decoded['error'] ?? '')
-                  .toString();
-        }
-      } else {
-        errorMessage = decoded.toString();
-      }
-
-      final lower = errorMessage.toLowerCase();
-      if (lower.isEmpty) return true;
-
-      return lower.contains('token has expired') ||
-          lower.contains('token expired') ||
-          lower.contains('expired token') ||
-          lower.contains('invalid token') ||
-          lower.contains('jwt') ||
-          lower.contains('not authenticated') ||
-          lower.contains('could not validate') ||
-          lower.contains('credentials') ||
-          lower.contains('unauthorized') ||
-          lower.contains('signature');
-    } catch (_) {
-      return true;
-    }
-  }
-
   Uri _buildUri(String path, [Map<String, String>? query]) {
     return Uri.parse(
       '${ApiConstants.baseUrl}$path',
@@ -620,6 +573,7 @@ class ApiService {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
+    ServerClock.syncFromHttpResponse(response);
     final decoded = _decodeResponseBody(response);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return decoded;

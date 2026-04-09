@@ -3,18 +3,16 @@ import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:imagifyai/Core/Constants/env_constants.dart';
 import 'package:imagifyai/Core/services/generation_limit_service.dart';
+import 'package:imagifyai/Core/services/server_clock.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// AdMob Interstitial after natural breaks (e.g. image ready).
-/// Call sites should pass [everyN] and [cooldown] so pacing stays user-friendly.
-/// Ad unit ID from .env (ADMOB_INTERSTITIAL_AD_UNIT_ID). In debug, uses Google test ID so ads always load.
 class InterstitialAdService {
   static const String _lastShownMsKey = 'ads_interstitial_last_shown_ms';
   static const String _firstSessionCompletedKey =
       'ads_interstitial_first_session_completed';
   static bool get _enabled => EnvConstants.adsEnableInterstitial;
   static String get interstitialAdUnitId => kDebugMode
-      ? 'ca-app-pub-3940256099942544/1033173712' // Google test interstitial
+      ? 'ca-app-pub-3940256099942544/1033173712'
       : EnvConstants.admobInterstitialAdUnitId;
 
   static InterstitialAd? _interstitialAd;
@@ -25,10 +23,7 @@ class InterstitialAdService {
   static Future<void> _markInterstitialShownNow() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(
-        _lastShownMsKey,
-        DateTime.now().millisecondsSinceEpoch,
-      );
+      await prefs.setInt(_lastShownMsKey, await ServerClock.nowMs());
     } catch (_) {}
   }
 
@@ -40,9 +35,13 @@ class InterstitialAdService {
     } catch (_) {}
   }
 
-  static Future<void> _ensureLoaded({Duration timeout = const Duration(seconds: 8)}) async {
+  static Future<void> _ensureLoaded({
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    if (kIsWeb) return;
     if (!_enabled) return;
-    if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) return;
+    if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx'))
+      return;
     if (_interstitialAd != null) return;
 
     await loadInterstitialAd();
@@ -62,6 +61,7 @@ class InterstitialAdService {
 
   /// Load an interstitial so it's ready to show. Retries once on failure (code 0 or 3).
   static Future<void> loadInterstitialAd() async {
+    if (kIsWeb) return;
     if (!_enabled) return;
     if (_interstitialAd != null || _isLoading) return;
     if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) {
@@ -119,6 +119,7 @@ class InterstitialAdService {
   /// Show the interstitial. Call after a natural break (e.g. after user downloads an image).
   /// Returns true if ad was shown, false if not ready or ID not set.
   static Future<bool> showInterstitialAd() async {
+    if (kIsWeb) return false;
     if (!_enabled) return false;
     if (interstitialAdUnitId.isEmpty || interstitialAdUnitId.contains('xxxx')) {
       return false;
@@ -134,19 +135,32 @@ class InterstitialAdService {
     return true;
   }
 
+  /// [generationsTodayForPacing] = count in the **current rolling 24h window** **after**
+  /// [GenerationLimitService.recordGeneration] (see [GenerationLimitService.getGenerationsTodayForAdPacing]).
   static Future<bool> shouldShowAfterGenerationBreak({
-    required int generationCount,
-    int? everyN,
+    required int generationsTodayForPacing,
     Duration? cooldown,
   }) async {
+    if (kIsWeb) return false;
     if (!_enabled) return false;
-    final effectiveEveryN =
-        everyN ?? EnvConstants.adsInterstitialEveryNGenerations;
-    final effectiveCooldown = cooldown ??
+
+    final firstAfter = EnvConstants.adsInterstitialFirstAfterPerDay;
+    final everyN = EnvConstants.adsInterstitialEveryNAfterFirst;
+    final effectiveCooldown =
+        cooldown ??
         Duration(seconds: EnvConstants.adsInterstitialCooldownSeconds);
 
-    if (generationCount <= 0 || effectiveEveryN <= 0) return false;
-    if (generationCount % effectiveEveryN != 0) return false;
+    if (firstAfter <= 0 || everyN <= 0) return false;
+    if (generationsTodayForPacing < firstAfter) return false;
+
+    final bool atMilestone;
+    if (generationsTodayForPacing == firstAfter) {
+      atMilestone = true;
+    } else {
+      atMilestone = (generationsTodayForPacing - firstAfter) % everyN == 0;
+    }
+
+    if (!atMilestone) return false;
 
     // Growth-first: never show interstitial in user's first app session.
     try {
@@ -158,15 +172,10 @@ class InterstitialAdService {
       }
     } catch (_) {}
 
-    // Growth-first: no interstitial during first 2 successful generations.
-    final totalGenerations =
-        await GenerationLimitService.getTotalGenerationsAllTime();
-    if (totalGenerations < 2) return false;
-
     try {
       final prefs = await SharedPreferences.getInstance();
       final lastMs = prefs.getInt(_lastShownMsKey) ?? 0;
-      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final nowMs = await ServerClock.nowMs();
       return nowMs - lastMs >= effectiveCooldown.inMilliseconds;
     } catch (_) {
       return true;

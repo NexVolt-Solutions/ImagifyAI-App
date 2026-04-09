@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_cached_network_image.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 import 'package:imagifyai/models/user/user.dart';
@@ -74,29 +75,18 @@ class UserProfileHeader extends StatelessWidget {
     final hasUrl = url != null && url.isNotEmpty;
     if (hasUrl) {
       final imageUrl = _avatarUrlWithCacheNonce(url, profileImageCacheNonce);
+      final dim = context.h(50).round();
       return ClipOval(
-        child: Image.network(
-          imageUrl,
+        child: AppCachedNetworkImage(
+          key: ValueKey('$url-$profileImageCacheNonce'),
+          imageUrl: imageUrl,
           height: context.h(50),
           width: context.h(50),
           fit: BoxFit.cover,
-          key: ValueKey('$url-$profileImageCacheNonce'),
-          cacheWidth: context.h(50).toInt(),
-          cacheHeight: context.h(50).toInt(),
-          errorBuilder: (_, __, ___) => _buildPlaceholder(context),
-
-          loadingBuilder: (_, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              height: context.h(50),
-              width: context.h(50),
-              decoration: BoxDecoration(
-                color: context.subtitleColor.withValues(alpha: 0.3),
-                shape: BoxShape.circle,
-              ),
-              child: const Center(child: AppLoadingIndicator.small()),
-            );
-          },
+          memCacheWidth: dim,
+          memCacheHeight: dim,
+          useGradientPlaceholder: false,
+          errorWidget: (_, __, ___) => _buildPlaceholder(context),
         ),
       );
     }

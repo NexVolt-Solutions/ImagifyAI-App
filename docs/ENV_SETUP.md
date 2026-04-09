@@ -19,6 +19,12 @@ The app bundles **`assets/env/default.env`** so **debug/release builds work on a
    | `ADMOB_APP_ID` | AdMob app ID (e.g. `ca-app-pub-xxx~yyy`) – used for reference; Android uses `secrets.properties` |
    | `ADMOB_REWARDED_AD_UNIT_ID` | AdMob Rewarded ad unit ID |
    | `ADMOB_INTERSTITIAL_AD_UNIT_ID` | AdMob Interstitial ad unit ID |
+   | `ADS_ENABLE_INTERSTITIAL` | Set `true` to enable interstitials (client-side AdMob only) |
+   | `ADS_INTERSTITIAL_FIRST_AFTER` | Successful generations in the **rolling 24-hour window** before first interstitial (default **5**) |
+   | `ADS_INTERSTITIAL_EVERY_N_AFTER_FIRST` | After that **same window**, every N generations (default **3** → **5 → ad → 3 → ad → …**; window resets after 24h from its start) |
+   | `ADS_INTERSTITIAL_COOLDOWN_SECONDS` | Minimum seconds between impressions (default 90) |
+
+   The window uses **server time** estimated from API `Date` headers ([`ServerClock`]); device clock changes alone do not roll the window. Not enforced by the API (server still enforces real quotas).
 
 3. A root **`.env`** file is optional and **not** used by the app (it is still in `.gitignore` if you use it for other tooling).
 

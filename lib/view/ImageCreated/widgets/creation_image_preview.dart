@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_cached_network_image.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
@@ -30,34 +32,29 @@ class CreationImagePreview extends StatelessWidget {
     if (imageUrl.isEmpty || imageUrl == 'null') {
       return _buildNoImage(context);
     }
-    if (viewModel.imageLoadError && viewModel.imageRetryCount >= 3) {
+    if (viewModel.imageLoadError) {
       return _buildErrorState(context);
     }
     return _buildImage(context);
   }
 
   Widget _buildErrorState(BuildContext context) {
-    final is403 = viewModel.imageLoadErrorMessage?.contains('403') == true;
     return Container(
       color: context.backgroundColor,
       child: Center(
-        child: Container(
+        child: Padding(
           padding: context.padAll(15),
-          decoration: BoxDecoration(
-            color: context.backgroundColor.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(context.radius(8)),
-          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                is403 ? Icons.lock_outline : Icons.error_outline,
-                color: is403 ? Colors.orange : Colors.red,
-                size: 32,
+                Icons.broken_image_outlined,
+                size: 40,
+                color: context.primaryColor,
               ),
               SizedBox(height: context.h(10)),
               Text(
-                viewModel.imageLoadErrorMessage ?? 'Failed to load image',
+                viewModel.imageLoadErrorMessage ?? 'Could not load image',
                 style: context.appTextStyles?.imageCreatedError,
                 textAlign: TextAlign.center,
               ),
@@ -67,7 +64,7 @@ class CreationImagePreview extends StatelessWidget {
                 height: context.h(36),
                 width: context.w(120),
                 gradient: AppColors.gradient,
-                text: 'Try Again',
+                text: 'Try again',
               ),
             ],
           ),
@@ -77,63 +74,26 @@ class CreationImagePreview extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context) {
-    final retryUrl = viewModel.imageRetryCount > 0 && viewModel.imageRetryTimestamp > 0
-        ? '$imageUrl?retry=${viewModel.imageRetryCount}&t=${viewModel.imageRetryTimestamp}'
-        : imageUrl;
-    return Image.network(
-      retryUrl,
-      fit: BoxFit.fill,
-      key: ValueKey('${imageUrl}_retry_${viewModel.imageRetryCount}'),
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(
-          child: AppLoadingIndicator.medium(color: context.primaryColor),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        final errorMsg = _parseImageError(error.toString());
-        final isNetworkError = _isNetworkError(error.toString());
-
-        if (isNetworkError && viewModel.imageRetryCount < 3) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (isMounted?.call() ?? true) {
-              Future.delayed(const Duration(seconds: 2), () {
-                if (isMounted?.call() ?? true) {
-                  if (viewModel.imageRetryCount < 3) {
-                    viewModel.incrementImageRetry();
-                  }
-                }
-              });
-            }
-          });
-          return Container(
-            color: context.backgroundColor,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AppLoadingIndicator.medium(color: context.primaryColor),
-                  SizedBox(height: context.h(10)),
-                  Text(
-                    'Retrying... (${viewModel.imageRetryCount + 1}/3)',
-                    style: context.appTextStyles?.imageCreatedPollingSubtitle,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      httpHeaders: kWallpaperImageHeaders,
+      fit: BoxFit.contain,
+      alignment: Alignment.center,
+      width: double.infinity,
+      height: double.infinity,
+      filterQuality: FilterQuality.high,
+      fadeInDuration: Duration.zero,
+      placeholder: (_, __) => Center(
+        child: AppLoadingIndicator.medium(color: context.primaryColor),
+      ),
+      errorWidget: (context, url, error) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (isMounted?.call() ?? true) {
-            viewModel.setImageLoadError(errorMsg);
+            viewModel.setImageLoadError('Could not load image');
           }
         });
-        return Container(
-          color: context.backgroundColor,
-          child: Center(
-            child: AppLoadingIndicator.medium(color: context.primaryColor),
-          ),
+        return Center(
+          child: AppLoadingIndicator.medium(color: context.primaryColor),
         );
       },
     );
@@ -188,31 +148,5 @@ class CreationImagePreview extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static String _parseImageError(String errorStr) {
-    if (errorStr.contains('403') || errorStr.contains('Forbidden')) {
-      return 'Image access denied (403)\nS3 bucket permissions issue';
-    }
-    if (errorStr.contains('404')) return 'Image not found (404)';
-    if (errorStr.contains('timeout') || errorStr.contains('TimeoutException')) {
-      return 'Connection timeout\nPlease check your internet';
-    }
-    if (errorStr.contains('SocketException') ||
-        errorStr.contains('Connection reset') ||
-        errorStr.contains('Connection closed') ||
-        errorStr.contains('HttpException')) {
-      return 'Connection error\nPlease check your internet';
-    }
-    return 'Failed to load image';
-  }
-
-  static bool _isNetworkError(String errorStr) {
-    return errorStr.contains('timeout') ||
-        errorStr.contains('TimeoutException') ||
-        errorStr.contains('SocketException') ||
-        errorStr.contains('Connection reset') ||
-        errorStr.contains('Connection closed') ||
-        errorStr.contains('HttpException');
   }
 }

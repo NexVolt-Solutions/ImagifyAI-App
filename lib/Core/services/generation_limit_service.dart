@@ -1,50 +1,53 @@
-import 'package:imagifyai/Core/services/rewarded_ad_service.dart';
+import 'package:imagifyai/Core/services/server_clock.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Tracks daily generation limit and ad-earned credits.
-/// When user is at limit, they can watch a rewarded ad for +1 generation.
+/// Tracks **interstitial pacing** and total generations in a **rolling 24-hour window**
+/// (from the stored window start). Window time uses [ServerClock] (HTTP `Date`), not raw
+/// device clock.
+///
+/// **Wallpaper quota** (5 → rewarded → 3 → …) is enforced by the server; use
+/// [GET /wallpapers/usage] via [ImageGenerateViewModel.loadDailyUsage].
 class GenerationLimitService {
-  static const String _keyGenerationsUsedToday = 'generations_used_today';
-  static const String _keyLastLimitDate = 'generation_limit_date';
+  static const String _keyRollingWindowStartMs =
+      'generation_rolling_window_start_ms';
   static const String _keyTotalGenerationsAllTime = 'generations_total_all_time';
+  /// Successful generations in the current window for interstitial pacing.
+  static const String _keyAdPacingGensToday = 'ad_pacing_gens_today';
 
-  /// Free generations per day before requiring an ad or limit.
-  static const int dailyLimit = 10;
+  /// Length of the rolling window for ad pacing.
+  static const Duration rollingWindow = Duration(hours: 24);
 
-  static String _todayString() {
-    final now = DateTime.now();
-    return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-  }
-
-  /// Reset daily count if we're on a new day.
-  static Future<void> _ensureDateReset() async {
+  /// If server-aligned [nowMs] − window start ≥ [rollingWindow], resets pacing counter.
+  static Future<void> _ensureRollingWindowReset() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final last = prefs.getString(_keyLastLimitDate);
-      final today = _todayString();
-      if (last != today) {
-        await prefs.setString(_keyLastLimitDate, today);
-        await prefs.setInt(_keyGenerationsUsedToday, 0);
+      final nowMs = await ServerClock.nowMs();
+      final startMs = prefs.getInt(_keyRollingWindowStartMs);
+      final elapsedMs = startMs != null && nowMs >= startMs
+          ? nowMs - startMs
+          : 0;
+      final expired =
+          startMs == null ||
+          elapsedMs >= rollingWindow.inMilliseconds;
+      if (expired) {
+        await prefs.setInt(_keyRollingWindowStartMs, nowMs);
+        await prefs.setInt(_keyAdPacingGensToday, 0);
       }
     } catch (_) {}
   }
 
-  /// Whether the user can generate (under daily limit or has ad credits).
-  static Future<bool> canGenerate() async {
-    await _ensureDateReset();
-    final used = await _getGenerationsUsedToday();
-    if (used < dailyLimit) return true;
-    final adCredits = await RewardedAdService.getFreeGenerationsFromAds();
-    return adCredits > 0;
+  /// Count for interstitial pacing in the current rolling window (every successful create/recreate).
+  static Future<int> getGenerationsTodayForAdPacing() async {
+    await _ensureRollingWindowReset();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getInt(_keyAdPacingGensToday) ?? 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
-  /// Generations used today (after date reset).
-  static Future<int> getGenerationsUsedToday() async {
-    await _ensureDateReset();
-    return _getGenerationsUsedToday();
-  }
-
-  /// Total successful generations across all sessions/days.
+  /// Total successful generations across all time (not reset by rolling window).
   static Future<int> getTotalGenerationsAllTime() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -54,27 +57,13 @@ class GenerationLimitService {
     }
   }
 
-  static Future<int> _getGenerationsUsedToday() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      return prefs.getInt(_keyGenerationsUsedToday) ?? 0;
-    } catch (_) {
-      return 0;
-    }
-  }
-
-  /// Call when a generation (create or recreate) succeeds.
-  /// Uses daily allowance first, then consumes one ad credit if at limit.
+  /// Call when a generation (create or recreate) succeeds (interstitial pacing + totals).
   static Future<void> recordGeneration() async {
-    await _ensureDateReset();
+    await _ensureRollingWindowReset();
     try {
       final prefs = await SharedPreferences.getInstance();
-      int used = prefs.getInt(_keyGenerationsUsedToday) ?? 0;
-      if (used < dailyLimit) {
-        await prefs.setInt(_keyGenerationsUsedToday, used + 1);
-      } else {
-        await RewardedAdService.consumeOneFreeGeneration();
-      }
+      final pacing = prefs.getInt(_keyAdPacingGensToday) ?? 0;
+      await prefs.setInt(_keyAdPacingGensToday, pacing + 1);
       final total = prefs.getInt(_keyTotalGenerationsAllTime) ?? 0;
       await prefs.setInt(_keyTotalGenerationsAllTime, total + 1);
     } catch (_) {}

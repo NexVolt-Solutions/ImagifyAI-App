@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/models/wallpaper/wallpaper.dart';
@@ -29,7 +30,7 @@ class _WallpaperNetworkThumbnailState extends State<WallpaperNetworkThumbnail> {
     'User-Agent': 'ImagifyAI/1.0 (Flutter)',
   };
 
-  late final List<String> _urls;
+  late List<String> _urls;
   int _urlIndex = 0;
   Timer? _stuckTimer;
   bool _loadedSuccessfully = false;
@@ -125,24 +126,17 @@ class _WallpaperNetworkThumbnailState extends State<WallpaperNetworkThumbnail> {
     final cw = widget.cacheWidth.clamp(64, 4096);
     final ch = widget.cacheHeight.clamp(64, 4096);
 
-    return Image.network(
-      url,
+    return CachedNetworkImage(
+      imageUrl: url,
       key: ValueKey<String>('${widget.wallpaper.id}|$url'),
+      httpHeaders: _kImageHeaders,
       fit: BoxFit.cover,
-      cacheWidth: cw,
-      cacheHeight: ch,
+      memCacheWidth: cw,
+      memCacheHeight: ch,
       filterQuality: FilterQuality.low,
-      gaplessPlayback: true,
-      headers: _kImageHeaders,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) {
-          _loadedSuccessfully = true;
-          _stuckTimer?.cancel();
-          return child;
-        }
-        return _thumbnailLoading(context);
-      },
-      errorBuilder: (_, __, ___) {
+      fadeInDuration: const Duration(milliseconds: 300),
+      placeholder: (_, __) => _thumbnailLoading(context),
+      errorWidget: (_, __, ___) {
         final hasNext = _urlIndex < _urls.length - 1;
         if (hasNext) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -156,6 +150,19 @@ class _WallpaperNetworkThumbnailState extends State<WallpaperNetworkThumbnail> {
           return _thumbnailLoading(context);
         }
         return _emptyOrBroken(context);
+      },
+      imageBuilder: (context, imageProvider) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || _loadedSuccessfully) return;
+          _loadedSuccessfully = true;
+          _stuckTimer?.cancel();
+        });
+        return Image(
+          image: imageProvider,
+          fit: BoxFit.cover,
+          filterQuality: FilterQuality.low,
+          gaplessPlayback: true,
+        );
       },
     );
   }

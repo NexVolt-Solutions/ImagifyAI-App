@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
+import 'package:imagifyai/Core/CustomWidget/app_cached_network_image.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
 
 class ProfileImage extends StatelessWidget {
@@ -9,7 +9,7 @@ class ProfileImage extends StatelessWidget {
   final BoxFit? fit;
   final bool forceRefresh;
 
-  /// When > 0, appends `v` query param so [Image.network] refetches (same URL, new bytes).
+  /// When > 0, appends `v` query param so the image refetches (same URL, new bytes).
   final int cacheNonce;
   const ProfileImage({
     super.key,
@@ -62,15 +62,16 @@ class ProfileImage extends StatelessWidget {
 
     return ClipOval(
       child: isNetworkImage
-          ? Image.network(
-              imageUrl, // Use imageUrl which may include cache-busting
+          ? AppCachedNetworkImage(
+              key: ValueKey('$imagePath-$cacheNonce'),
+              imageUrl: imageUrl,
               height: height,
               width: width,
-              fit: fit,
-              key: ValueKey('$imagePath-$cacheNonce'),
-              cacheWidth: width?.toInt(),
-              cacheHeight: height?.toInt(),
-              errorBuilder: (context, error, stackTrace) {
+              fit: fit ?? BoxFit.cover,
+              memCacheWidth: width?.round() ?? 400,
+              memCacheHeight: height?.round(),
+              useGradientPlaceholder: false,
+              errorWidget: (context, _, __) {
                 return Container(
                   height: height,
                   width: width,
@@ -83,14 +84,6 @@ class ProfileImage extends StatelessWidget {
                     size: height != null ? height! * 0.6 : 24,
                     color: context.colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
-                );
-              },
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return SizedBox(
-                  height: height,
-                  width: width,
-                  child: Center(child: AppLoadingIndicator.medium()),
                 );
               },
             )

@@ -1,11 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:imagifyai/Core/services/analytics_service.dart';
 
-/// Sends analytics events to Firebase. Call after [Firebase.initializeApp()]:
-/// ```dart
-/// await Firebase.initializeApp();
-/// AnalyticsService.delegate = FirebaseAnalyticsDelegate();
-/// ```
 class FirebaseAnalyticsDelegate extends AppAnalyticsDelegate {
   FirebaseAnalyticsDelegate([FirebaseAnalytics? analytics])
     : _analytics = analytics ?? FirebaseAnalytics.instance;
@@ -14,13 +9,15 @@ class FirebaseAnalyticsDelegate extends AppAnalyticsDelegate {
 
   @override
   void logEvent(String name, [Map<String, Object?>? params]) {
-    _analytics.logEvent(
-      name: name,
-      parameters: params != null ? _toStringMap(params) : null,
-    );
+    final stringMap = params != null ? _toStringMap(params) : null;
+    if (stringMap != null && stringMap.isNotEmpty) {
+      _analytics.logEvent(name: name, parameters: stringMap);
+    } else {
+      // Omit parameters so web SDK does not log `null` for missing payload.
+      _analytics.logEvent(name: name);
+    }
   }
 
-  /// Firebase requires String values for parameters.
   static Map<String, String>? _toStringMap(Map<String, Object?> params) {
     final result = <String, String>{};
     for (final e in params.entries) {

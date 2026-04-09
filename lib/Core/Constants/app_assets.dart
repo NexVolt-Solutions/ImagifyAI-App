@@ -54,6 +54,10 @@ class AppAssets {
   static const String imageSolarPunk = "assets/images/solar_punk.jpeg";
   static const String imageGameArt = "assets/images/game_art.jpeg";
 
+  /// Full-screen generation loading overlay (Lottie).
+  static const String loadingAnimationLottie =
+      "assets/loading/loading animation.json";
+
   //bottomIcon
   static const String homeIcon = "assets/bottom_icon/homeIcon.png";
   static const String imageIcon = "assets/bottom_icon/starIcon.png";

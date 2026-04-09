@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_cached_network_image.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/full_screen_image_viewer.dart';
 import 'package:imagifyai/Core/services/api_service.dart';
@@ -277,28 +278,17 @@ class _CategoryDetailsScreenState extends State<CategoryDetailsScreen> {
                             ),
                           ),
                           clipBehavior: Clip.hardEdge,
-                          child: Image.network(
-                            imageUrl,
-                            fit: BoxFit.cover,
-                            cacheWidth: gridCacheW,
-                            cacheHeight: gridCacheH,
-                            filterQuality: FilterQuality.low,
-                            errorBuilder: (context, error, stackTrace) {
+                          child: AppCachedNetworkImage(
+                            imageUrl: imageUrl,
+                            useGradientPlaceholder: false,
+                            placeholderBackgroundColor: context.surfaceColor,
+                            errorWidget: (context, _, __) {
                               return Container(
                                 color: context.surfaceColor,
                                 child: Icon(
                                   Icons.image_not_supported,
                                   color: context.subtitleColor,
                                   size: 40,
-                                ),
-                              );
-                            },
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Container(
-                                color: context.surfaceColor,
-                                child: Center(
-                                  child: AppLoadingIndicator.medium(),
                                 ),
                               );
                             },

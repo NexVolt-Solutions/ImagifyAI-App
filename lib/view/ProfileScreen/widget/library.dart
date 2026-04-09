@@ -299,6 +299,7 @@ import 'package:imagifyai/Core/services/content_report_service.dart';
 import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/app_colors.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
+import 'package:imagifyai/Core/CustomWidget/app_cached_network_image.dart';
 import 'package:imagifyai/Core/CustomWidget/app_loading_indicator.dart';
 import 'package:imagifyai/Core/CustomWidget/custom_button.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
@@ -536,22 +537,30 @@ class _LibraryGridTile extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(context.radius(12)),
               child: imageUrl.isNotEmpty
-                  ? Image.network(
-                      imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: context.surfaceColor,
-                        child: Icon(
-                          Icons.image_not_supported,
-                          color: context.subtitleColor,
-                          size: 40,
-                        ),
-                      ),
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          color: context.surfaceColor,
-                          child: Center(child: AppLoadingIndicator.medium()),
+                  ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        final dpr = MediaQuery.devicePixelRatioOf(context);
+                        final mw = (constraints.maxWidth * dpr)
+                            .round()
+                            .clamp(64, 4096);
+                        final mh = (constraints.maxHeight * dpr)
+                            .round()
+                            .clamp(64, 4096);
+                        return AppCachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.cover,
+                          memCacheWidth: mw,
+                          memCacheHeight: mh,
+                          useGradientPlaceholder: false,
+                          placeholderBackgroundColor: context.surfaceColor,
+                          errorWidget: (_, __, ___) => Container(
+                            color: context.surfaceColor,
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: context.subtitleColor,
+                              size: 40,
+                            ),
+                          ),
                         );
                       },
                     )

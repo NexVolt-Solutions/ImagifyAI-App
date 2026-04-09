@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
 import 'package:http/http.dart' as http;
@@ -21,8 +22,8 @@ class FullScreenImageViewer extends StatefulWidget {
   /// URL still needs to load.
   final String? previewBackdropUrl;
 
-  /// Must match the list thumbnail [Image.network] cache sizes when possible so
-  /// the backdrop hits [ImageCache] instantly for same-URL opens.
+  /// Match list thumbnail decode sizes when possible so the backdrop can reuse
+  /// the same cached bytes for same-URL opens.
   final int? previewBackdropCacheWidth;
   final int? previewBackdropCacheHeight;
 
@@ -148,15 +149,26 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
     }
 
     final backdropUrl = _resolveBackdropUrl(main);
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final size = MediaQuery.sizeOf(context);
+    final mw = widget.previewBackdropCacheWidth ??
+        (size.width * dpr).round().clamp(64, 8192);
+    final mh = widget.previewBackdropCacheHeight ??
+        (size.height * dpr * 0.9).round().clamp(64, 8192);
 
-    return Image.network(
-      backdropUrl,
+    return CachedNetworkImage(
+      imageUrl: backdropUrl,
+      httpHeaders: _kImageHeaders,
       fit: BoxFit.contain,
       alignment: Alignment.center,
-      headers: _kImageHeaders,
-
-      gaplessPlayback: true,
-      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      memCacheWidth: mw,
+      memCacheHeight: mh,
+      fadeInDuration: const Duration(milliseconds: 300),
+      placeholder: (_, __) => ColoredBox(
+        color: Colors.grey[900]!,
+        child: const Center(child: AppLoadingIndicator.medium()),
+      ),
+      errorWidget: (_, __, ___) => const SizedBox.shrink(),
     );
   }
 

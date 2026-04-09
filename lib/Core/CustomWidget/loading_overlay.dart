@@ -1,9 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:imagifyai/Core/Constants/app_colors.dart';
+import 'package:imagifyai/Core/Constants/app_assets.dart';
 import 'package:imagifyai/Core/Constants/size_extension.dart';
 import 'package:imagifyai/Core/theme/theme_extensions.dart';
+import 'package:lottie/lottie.dart';
 
-/// Full-screen overlay showing creation progress (used by ImageGenerate and ImageCreated).
 class LoadingOverlay extends StatefulWidget {
   final double progress;
   final String currentStage;
@@ -57,90 +59,74 @@ class _LoadingOverlayState extends State<LoadingOverlay>
 
   @override
   Widget build(BuildContext context) {
-    final progressPercent = (widget.progress * 100).toInt().clamp(0, 100);
     return Container(
-      color: context.backgroundColor.withValues(alpha: 0.9),
+      color: context.backgroundColor.withValues(alpha: 0.92),
       child: Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: context.w(40)),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                width: context.w(200),
-                height: context.h(200),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: context.w(200),
-                      height: context.h(200),
-                      child: CircularProgressIndicator(
-                        value: 1.0,
-                        strokeWidth: context.w(20),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          context.textColor.withValues(alpha: 0.3),
-                        ),
-                        backgroundColor: Colors.transparent,
-                      ),
-                    ),
-                    SizedBox(
-                      width: context.w(200),
-                      height: context.h(200),
-                      child: ShaderMask(
-                        shaderCallback: (bounds) =>
-                            AppColors.gradient.createShader(bounds),
-                        blendMode: BlendMode.srcIn,
-                        child: CircularProgressIndicator(
-                          value: widget.progress,
-                          strokeWidth: context.w(20),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.transparent,
-                          ),
-                          backgroundColor: Colors.transparent,
-                          strokeCap: StrokeCap.round,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      '$progressPercent%',
-                      style: context.appTextStyles?.imageGenerateLoadingPercent,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: context.h(32)),
-              FadeTransition(
-                opacity: _fadeController,
-                child: Text(
-                  _displayedStage,
-                  style: context.appTextStyles?.imageGenerateLoadingStage,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              SizedBox(height: context.h(40)),
-              Row(
+          padding: EdgeInsets.symmetric(horizontal: context.w(28)),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final gap = context.h(16);
+              final rowReserve = context.h(12) + context.h(4) + context.h(14) + gap;
+              final maxLottieH = (constraints.maxHeight - rowReserve)
+                  .clamp(100.0, context.h(620));
+              final lottieW = math.min(context.w(560), constraints.maxWidth);
+              return Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildStageIndicator(context, 'Preparing', widget.progress >= 0.0),
-                  SizedBox(width: context.w(8)),
-                  _buildStageConnector(context, widget.progress >= 0.2),
-                  SizedBox(width: context.w(8)),
-                  _buildStageIndicator(context, 'Rendering', widget.progress >= 0.4),
-                  SizedBox(width: context.w(8)),
-                  _buildStageConnector(context, widget.progress >= 0.6),
-                  SizedBox(width: context.w(8)),
-                  _buildStageIndicator(context, 'Finalizing', widget.progress >= 0.8),
+                  SizedBox(
+                    width: lottieW,
+                    height: maxLottieH,
+                    child: Lottie.asset(
+                      AppAssets.loadingAnimationLottie,
+                      fit: BoxFit.contain,
+                      repeat: true,
+                      frameRate: FrameRate.max,
+                    ),
+                  ),
+                  SizedBox(height: gap),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildStageIndicator(
+                        context,
+                        'Preparing',
+                        widget.progress >= 0.0,
+                      ),
+                      SizedBox(width: context.w(8)),
+                      _buildStageConnector(context, widget.progress >= 0.2),
+                      SizedBox(width: context.w(8)),
+                      _buildStageIndicator(
+                        context,
+                        'Rendering',
+                        widget.progress >= 0.4,
+                      ),
+                      SizedBox(width: context.w(8)),
+                      _buildStageConnector(context, widget.progress >= 0.6),
+                      SizedBox(width: context.w(8)),
+                      _buildStageIndicator(
+                        context,
+                        'Finalizing',
+                        widget.progress >= 0.8,
+                      ),
+                    ],
+                  ),
                 ],
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  Widget _buildStageIndicator(BuildContext context, String label, bool isActive) {
+  Widget _buildStageIndicator(
+    BuildContext context,
+    String label,
+    bool isActive,
+  ) {
     return Column(
       children: [
         Container(

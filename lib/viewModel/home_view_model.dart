@@ -489,7 +489,7 @@ class HomeViewModel extends ChangeNotifier {
       final grouped = await _wallpaperRepository.fetchGroupedWallpapers(
         accessToken: accessToken,
         page: 1,
-        limit: 10,
+        limit: 20,
       );
       if (!context.mounted || loadSeq != _groupedWallpapersLoadSeq) return;
       groupedWallpapers = grouped;
@@ -511,6 +511,10 @@ class HomeViewModel extends ChangeNotifier {
       }
     }
   }
+
+  /// Re-fetch grouped wallpapers (e.g. after a wallpaper finishes generating).
+  Future<void> refreshHomeScreen(BuildContext context) =>
+      loadGroupedWallpapers(context, force: true);
 
   @override
   void dispose() {
