@@ -107,7 +107,8 @@ afterEvaluate {
         }
     }.configureEach {
         doFirst {
-            val appExt = extensions.getByType(ApplicationExtension::class.java)
+            // Task scope: use project.extensions — `extensions` here is the task's, not the app's.
+            val appExt = project.extensions.getByType(ApplicationExtension::class.java)
             if (appExt.signingConfigs.findByName("release") == null) {
                 throw GradleException(
                     "Release signing is not configured. Google Play requires a signed App Bundle.\n" +
